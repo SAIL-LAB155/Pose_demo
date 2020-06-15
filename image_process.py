@@ -16,4 +16,4 @@ if __name__ == '__main__':
         print("Processing pic {}".format(cnt))
         frame = cv2.imread(os.path.join(src_folder, img_name))
         kps, img, black_img, _, _ = IP.process_img(frame)
-        cv2.imwrite(os.path.join(dest_folder, img_name), black_img)
+        cv2.imwrite(os.path.join(dest_folder, img_name), img)
