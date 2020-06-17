@@ -52,7 +52,7 @@ class ObjectDetectionYolo(object):
             dets = dynamic_write_results(prediction, config.confidence,  config.num_classes, nms=True, nms_conf=config.nms_thresh)
 
             if isinstance(dets, int) or dets.shape[0] == 0:
-                return orig_img[0], None, None, None, None, None
+                return orig_img[0], None, None
 
             dets = dets.cpu()
             im_dim_list = torch.index_select(im_dim_list, 0, dets[:, 0].long())
@@ -71,7 +71,7 @@ class ObjectDetectionYolo(object):
 
         boxes_k = boxes[dets[:, 0] == 0]
         if isinstance(boxes_k, int) or boxes_k.shape[0] == 0:
-            return orig_img[0], None, None, None, None, None
+            return orig_img[0], None, None
 
         return orig_img[0], boxes_k, scores[dets[:, 0] == 0]
 
