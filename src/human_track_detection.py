@@ -8,6 +8,7 @@ import torch
 import cv2
 import copy
 from config import config
+from src.detector.crop_box import crop_bbox
 
 
 class ImgProcessor:
@@ -36,7 +37,8 @@ class ImgProcessor:
 
         img_black = cv2.imread('video/black.jpg')
         with torch.no_grad():
-            inps, orig_img, boxes, scores, pt1, pt2 = self.object_detector.process(frame)
+            orig_img, boxes, scores = self.object_detector.process(frame)
+            inps, orig_img, boxes, scores, pt1, pt2 = crop_bbox(orig_img, boxes, scores)
 
             if boxes is not None:
                 key_points, kps_scores = self.pose_estimator.process_img(inps, orig_img, boxes, scores, pt1, pt2)
