@@ -8,6 +8,7 @@ import torch
 import cv2
 import copy
 from config import config
+from utils.utils import gray3D
 from src.detector.crop_box import crop_bbox
 
 
@@ -33,12 +34,17 @@ class ImgProcessor:
                 new_kp.append(kps[bdp][coord])
         return {idx: new_kp}
 
-    def process_img(self, frame):
+    def process_img(self, frame, gray=False):
 
         img_black = cv2.imread('video/black.jpg')
         with torch.no_grad():
-            orig_img, boxes, scores = self.object_detector.process(frame)
-            inps, orig_img, boxes, scores, pt1, pt2 = crop_bbox(orig_img, boxes, scores)
+            if gray:
+                gray_img = gray3D(copy.deepcopy(frame))
+                orig_img, boxes, scores = self.object_detector.process(gray_img)
+                inps, orig_img, boxes, scores, pt1, pt2 = crop_bbox(frame, boxes, scores)
+            else:
+                orig_img, boxes, scores = self.object_detector.process(frame)
+                inps, orig_img, boxes, scores, pt1, pt2 = crop_bbox(frame, boxes, scores)
 
             if boxes is not None:
                 key_points, kps_scores = self.pose_estimator.process_img(inps, orig_img, boxes, scores, pt1, pt2)

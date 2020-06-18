@@ -154,6 +154,12 @@ def str2kpsScoredict(s):
     return d
 
 
+def gray3D(img):
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    # cv2.imshow("gray", gray)
+    return cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
+
+
 if __name__ == '__main__':
     ut = Utils()
     # res = ut.time_to_string("10.0000")
