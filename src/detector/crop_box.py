@@ -12,15 +12,18 @@ def crop_bbox(orig_img, boxes, scores):
         if boxes is None or boxes.nelement() == 0:
             return None, orig_img, boxes, scores, None, None
 
-        inps = torch.zeros(boxes.size(0), 3, config.input_height, config.input_width)
-        pt1 = torch.zeros(boxes.size(0), 2)
-        pt2 = torch.zeros(boxes.size(0), 2)
         inp = im_to_torch(cv2.cvtColor(orig_img, cv2.COLOR_BGR2RGB))
-        inps, pt1, pt2 = crop_from_dets(inp, boxes, inps, pt1, pt2)
-        return inps, orig_img, boxes, scores, pt1, pt2
+        # inp = orig_img
+        inps, pt1, pt2 = crop_from_dets(inp, boxes)
+        return inps, pt1, pt2
 
 
-def crop_from_dets(img, boxes, inps, pt1, pt2):
+def crop_from_dets(img, boxes):
+
+    inps = torch.zeros(boxes.size(0), 3, config.input_height, config.input_width)
+    pt1 = torch.zeros(boxes.size(0), 2)
+    pt2 = torch.zeros(boxes.size(0), 2)
+
     imght = img.size(1)
     imgwidth = img.size(2)
     tmp_img = img

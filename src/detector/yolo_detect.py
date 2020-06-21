@@ -71,13 +71,13 @@ class ObjectDetectionYolo(object):
 
         boxes_k = boxes[dets[:, 0] == 0]
         if isinstance(boxes_k, int) or boxes_k.shape[0] == 0:
-            return orig_img[0], None, None
+            return None, None
 
-        return orig_img[0], boxes_k, scores[dets[:, 0] == 0]
+        return boxes_k, scores[dets[:, 0] == 0]
 
     def process(self, frame):
         img, orig_img, im_dim_list = self.__video_process(frame)
-        orig_img, boxes, scores = self.__get_bbox(img, orig_img, im_dim_list)
+        boxes, scores = self.__get_bbox(img, orig_img, im_dim_list)
         # inps, orig_img, boxes, scores, pt1, pt2 = crop_bbox(orig_img, boxes, scores)
-        return orig_img, boxes, scores
+        return boxes, scores
 

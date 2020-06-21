@@ -40,17 +40,18 @@ class ImgProcessor:
         with torch.no_grad():
             if gray:
                 gray_img = gray3D(copy.deepcopy(frame))
-                orig_img, boxes, scores = self.object_detector.process(gray_img)
-                inps, orig_img, boxes, scores, pt1, pt2 = crop_bbox(frame, boxes, scores)
+                boxes, scores = self.object_detector.process(gray_img)
+                inps, pt1, pt2 = crop_bbox(frame, boxes, scores)
             else:
-                orig_img, boxes, scores = self.object_detector.process(frame)
-                inps, orig_img, boxes, scores, pt1, pt2 = crop_bbox(frame, boxes, scores)
+                boxes, scores = self.object_detector.process(frame)
+                inps, pt1, pt2 = crop_bbox(frame, boxes, scores)
 
             if boxes is not None:
-                key_points, kps_scores = self.pose_estimator.process_img(inps, orig_img, boxes, scores, pt1, pt2)
+                key_points, kps_scores = self.pose_estimator.process_img(inps, frame, boxes, scores, pt1, pt2)
 
                 if config.plot_bbox:
                     frame = self.BBV.visualize(boxes, frame)
+                    cv2.imshow("cropped", inps[0])
 
                 if key_points is not []:
                     id2ske, id2bbox, id2score = self.object_tracker.track(boxes, key_points, kps_scores)
