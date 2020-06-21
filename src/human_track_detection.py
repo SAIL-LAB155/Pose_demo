@@ -10,6 +10,7 @@ import copy
 from config import config
 from utils.utils import gray3D
 from src.detector.crop_box import crop_bbox
+from utils.img import torch_to_im
 
 
 class ImgProcessor:
@@ -51,7 +52,7 @@ class ImgProcessor:
 
                 if config.plot_bbox:
                     frame = self.BBV.visualize(boxes, frame)
-                    cv2.imshow("cropped", inps[0])
+                    # cv2.imshow("cropped", (torch_to_im(inps[0]) * 255))
 
                 if key_points is not []:
                     id2ske, id2bbox, id2score = self.object_tracker.track(boxes, key_points, kps_scores)
