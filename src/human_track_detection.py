@@ -52,7 +52,7 @@ class ImgProcessor:
 
                 if config.plot_bbox:
                     frame = self.BBV.visualize(boxes, frame)
-                    # cv2.imshow("cropped", (torch_to_im(inps[0]) * 255))
+                    cv2.imshow("cropped", (torch_to_im(inps[0]) * 255))
 
                 if key_points is not []:
                     id2ske, id2bbox, id2score = self.object_tracker.track(boxes, key_points, kps_scores)

@@ -7,10 +7,10 @@ import cv2
 def crop_bbox(orig_img, boxes, scores):
     with torch.no_grad():
         if orig_img is None:
-            return None, None, None, None, None, None, None
+            return None, None, None, None
 
         if boxes is None or boxes.nelement() == 0:
-            return None, orig_img, boxes, scores, None, None
+            return None, None, None
 
         inp = im_to_torch(cv2.cvtColor(orig_img, cv2.COLOR_BGR2RGB))
         # inp = orig_img
