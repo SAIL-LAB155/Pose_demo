@@ -82,6 +82,12 @@ def drawCircle(img, pt, sigma):
     return to_torch(img)
 
 
+def gray3D(img):
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    # cv2.imshow("gray", gray)
+    return cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
+
+
 def drawGaussian(img, pt, sigma):
     img = to_numpy(img)
     tmpSize = 3 * sigma

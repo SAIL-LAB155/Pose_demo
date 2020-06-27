@@ -154,10 +154,12 @@ def str2kpsScoredict(s):
     return d
 
 
-def gray3D(img):
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    # cv2.imshow("gray", gray)
-    return cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
+def process_kp(kps, idx):
+    new_kp = []
+    for bdp in range(len(kps)):
+        for coord in range(2):
+            new_kp.append(kps[bdp][coord])
+    return {idx: new_kp}
 
 
 if __name__ == '__main__':

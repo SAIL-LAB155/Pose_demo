@@ -8,9 +8,9 @@ import torch
 import cv2
 import copy
 from config import config
-from utils.utils import gray3D
+from utils.utils import process_kp
 from src.detector.crop_box import crop_bbox
-from utils.img import torch_to_im
+from utils.img import torch_to_im, gray3D
 
 
 class ImgProcessor:
@@ -27,13 +27,6 @@ class ImgProcessor:
 
     def init_sort(self):
         self.object_tracker.init_tracker()
-
-    def __process_kp(self, kps, idx):
-        new_kp = []
-        for bdp in range(len(kps)):
-            for coord in range(2):
-                new_kp.append(kps[bdp][coord])
-        return {idx: new_kp}
 
     def process_img(self, frame, gray=False):
 
@@ -68,7 +61,7 @@ class ImgProcessor:
 
                     if config.track_idx != "all":
                         try:
-                            kps = self.__process_kp(id2ske[config.track_idx], config.track_idx)
+                            kps = process_kp(id2ske[config.track_idx], config.track_idx)
                         except KeyError:
                             kps = {}
                     else:
