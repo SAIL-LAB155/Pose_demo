@@ -48,7 +48,7 @@ class ImgProcessor:
                 inps, pt1, pt2 = crop_bbox(frame, boxes, scores)
 
             if boxes is not None:
-                key_points, kps_scores = self.pose_estimator.process_img(inps, frame, boxes, scores, pt1, pt2)
+                key_points, kps_scores = self.pose_estimator.process_img(inps, boxes, scores, pt1, pt2)
 
                 if config.plot_bbox:
                     frame = self.BBV.visualize(boxes, frame)

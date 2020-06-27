@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from models.seresnet.layers.SE_module import SELayer
+from .SE_module import SELayer
 
 
 class SeBottleneck(nn.Module):

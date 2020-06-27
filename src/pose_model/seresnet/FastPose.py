@@ -3,7 +3,7 @@ import torch.nn as nn
 from torch.autograd import Variable
 
 from .layers.SE_Resnet import SEResnet
-from models.duc.DUC import DUC
+from ..duc.DUC import DUC
 from config.config import pose_cls, device
 from config import config
 
@@ -57,7 +57,6 @@ class InferenNet_fast(nn.Module):
             model = createModel(cfg=cfg).cuda()
         else:
             model = createModel(cfg=cfg)
-        print('Loading pose model from {}'.format(config.pose_weight))
         model.load_state_dict(torch.load(config.pose_weight, map_location=device))
 
         model.eval()
