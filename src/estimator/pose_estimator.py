@@ -17,10 +17,10 @@ class PoseEstimator(object):
         pose_dataset = Mscoco()
 
         if config.pose_backbone == "seresnet101":
-            from models.seresnet.FastPose import InferenNet_fast as createModel
+            from src.pose_model.seresnet.FastPose import InferenNet_fast as createModel
             self.pose_model = createModel(4 * 1 + 1, pose_dataset, cfg=config.pose_cfg)
         elif config.pose_backbone == "mobilenet":
-            from models.mobilenet.MobilePose import createModel
+            from src.pose_model.mobilenet.MobilePose import createModel
             self.pose_model = createModel(cfg=config.pose_cfg)
         else:
             raise ValueError("Not a backbone!")
