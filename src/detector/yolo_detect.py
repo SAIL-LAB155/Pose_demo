@@ -4,7 +4,7 @@ from src.yolo.preprocess import prep_frame
 from src.yolo.util import dynamic_write_results
 from src.yolo.darknet import Darknet
 from config.config import device
-from utils.cal_time import get_inference_time
+from ..utils.model_info import get_inference_time, print_model_param_nums, print_model_param_flops
 
 
 class ObjectDetectionYolo(object):
@@ -19,7 +19,9 @@ class ObjectDetectionYolo(object):
         if device != "cpu":
             self.det_model.cuda()
         inf_time = get_inference_time(self.det_model, height=config.input_size, width=config.input_size)
-        print("The average inference time of detection is {}s".format(inf_time))
+        flops = print_model_param_flops(self.det_model)
+        params = print_model_param_nums(self.det_model)
+        print("Detection: Inference time {}s, Params {}, FLOPs {}".format(inf_time, params, flops))
         self.det_model.eval()
 
         self.stopped = False

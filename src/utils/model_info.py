@@ -1,9 +1,8 @@
 # Code from https://github.com/simochen/model-tools.
 import numpy as np
-
+import time
 import torch
 import torchvision
-import torch.nn as nn
 from torch.autograd import Variable
 from config.config import device
 
@@ -16,7 +15,6 @@ def print_model_param_nums(model=None, multiply_adds=True):
 
 
 def print_model_param_flops(model=None, input_res=224, multiply_adds=True):
-
     prods = {}
     def save_hook(name):
         def hook_per(self, input, output):
@@ -114,3 +112,17 @@ def print_model_param_flops(model=None, input_res=224, multiply_adds=True):
     # print('  + Number of FLOPs: %.5fG' % (total_flops / 3 / 1e9))
     
     return total_flops / 3
+
+
+def get_inference_time(model, repeat=200, height=416, width=416):
+    model.eval()
+    start = time.time()
+    with torch.no_grad():
+        inp = torch.randn(1, 3, height, width)
+        if device != "cpu":
+            inp = inp.cuda()
+        for i in range(repeat):
+            output = model(inp)
+    avg_infer_time = (time.time() - start) / repeat
+
+    return round(avg_infer_time, 4)

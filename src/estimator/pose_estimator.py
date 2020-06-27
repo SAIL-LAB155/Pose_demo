@@ -2,12 +2,9 @@ from src.estimator.visualize import KeyPointVisualizer
 from src.estimator.nms import pose_nms
 from src.estimator.datatset import Mscoco
 from config import config
-import cv2
-from utils.cal_time import get_inference_time
+from ..utils.model_info import *
 import torch
-from utils.compute_flops import print_model_param_flops
-from config.config import plot_kps, device
-from utils.eval import getPrediction
+from ..utils.eval import getPrediction
 
 
 class PoseEstimator(object):
@@ -28,10 +25,10 @@ class PoseEstimator(object):
             self.pose_model.cuda()
             self.pose_model.eval()
         inf_time = get_inference_time(self.pose_model, height=config.input_height, width=config.input_width)
-        print("The average inference time of pose estimation is {}s".format(inf_time))
+        flops = print_model_param_flops(self.pose_model)
+        params = print_model_param_nums(self.pose_model)
+        print("Detection: Inference time {}s, Params {}, FLOPs {}".format(inf_time, params, flops))
         self.batch_size = config.pose_batch
-        # flops = print_model_param_flops(self.pose_model)
-        # print("The flops of current pose estimation model is {}".format(flops))
 
     def process_img(self, inps, boxes, scores, pt1, pt2):
         datalen = inps.size(0)
@@ -42,7 +39,7 @@ class PoseEstimator(object):
         hm = []
 
         for j in range(num_batches):
-            if device != "cpu":
+            if config.device != "cpu":
                 inps_j = inps[j * self.batch_size:min((j + 1) * self.batch_size, datalen)].cuda()
             else:
                 inps_j = inps[j * self.batch_size:min((j + 1) * self.batch_size, datalen)]
