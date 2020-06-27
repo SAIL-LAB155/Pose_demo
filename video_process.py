@@ -33,9 +33,9 @@ class VideoProcessor:
         cnt = 0
         while True:
             ret, frame = self.cap.read()
-            frame = cv2.resize(frame, frame_size)
             cnt += 1
             if ret:
+                frame = cv2.resize(frame, frame_size)
                 kps, img, black_img, boxes, kps_score = IP.process_img(frame)
                 if boxes is not None:
                     if write_box:

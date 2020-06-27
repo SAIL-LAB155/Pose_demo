@@ -31,7 +31,7 @@ class PoseEstimator(object):
             self.pose_model.cuda()
             self.pose_model.eval()
         inf_time = get_inference_time(self.pose_model, height=config.input_height, width=config.input_width)
-        print("The average inference time of detection is {}".format(inf_time))
+        print("The average inference time of detection is {}s".format(inf_time))
         self.batch_size = config.pose_batch
         # flops = print_model_param_flops(self.pose_model)
         # print("The flops of current pose estimation model is {}".format(flops))

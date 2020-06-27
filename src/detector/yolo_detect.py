@@ -19,7 +19,7 @@ class ObjectDetectionYolo(object):
         if device != "cpu":
             self.det_model.cuda()
         inf_time = get_inference_time(self.det_model, height=config.input_size, width=config.input_size)
-        print("The average inference time of detection is {}".format(inf_time))
+        print("The average inference time of detection is {}s".format(inf_time))
         self.det_model.eval()
 
         self.stopped = False
@@ -48,9 +48,8 @@ class ObjectDetectionYolo(object):
             # Human Detection
             if device != "cpu":
                 img = img.cuda()
-                prediction = self.det_model(img, CUDA=True)
-            else:
-                prediction = self.det_model(img, CUDA=False)
+
+            prediction = self.det_model(img)
             # NMS process
             dets = dynamic_write_results(prediction, config.confidence,  config.num_classes, nms=True, nms_conf=config.nms_thresh)
 
