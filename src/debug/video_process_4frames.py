@@ -86,6 +86,7 @@ class ImgProcessor:
 
 
 IP = ImgProcessor()
+frame_size = (1080, 720)
 
 
 class VideoProcessor:
@@ -117,6 +118,8 @@ class VideoProcessor:
 
             if ret1:
                 img = self.process_frame(frame1, frame2, frame3, frame4)
+                img = cv2.resize(img, frame_size)
+
                 if self.show_img:
                     cv2.imshow("res", img)
                     cv2.waitKey(2)
@@ -130,9 +133,4 @@ class VideoProcessor:
 
 
 if __name__ == '__main__':
-    # src_folder = "video/push_up"
-    # dest_fodler = src_folder + "kps"
-    # sub_folder = [os.path.join(src_folder, folder) for folder in os.listdir(src_folder)]
-    # sub_dest_folder = [os.path.join(dest_fodler, folder) for folder in os.listdir(src_folder)]
-
     VideoProcessor(video_1, video_2, video_3, video_4).process_video()

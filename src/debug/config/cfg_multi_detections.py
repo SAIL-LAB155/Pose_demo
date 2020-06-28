@@ -4,3 +4,5 @@ black_yolo_cfg = ""
 black_yolo_weights = ""
 rgb_yolo_cfg = ""
 rgb_yolo_weights = ""
+
+video_path = ""

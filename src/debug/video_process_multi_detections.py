@@ -7,13 +7,14 @@ from ..tracker.visualize import IDVisualizer
 import torch
 import cv2
 import copy
+import numpy as np
 from config import config
 from ..utils.img import gray3D
 from ..utils.utils import process_kp
 from ..detector.box_postprocess import crop_bbox, merge_box
 
 
-from .config.cfg_multi_detections import gray_yolo_cfg, gray_yolo_weights, black_yolo_cfg, black_yolo_weights
+from .config.cfg_multi_detections import gray_yolo_cfg, gray_yolo_weights, black_yolo_cfg, black_yolo_weights, video_path
 
 
 class ImgProcessor:
@@ -82,4 +83,38 @@ class ImgProcessor:
             else:
                 return {}, frame, img_black, boxes, {}
 
+
+IP = ImgProcessor()
+enhance_kernel = np.array([[0, -1, 0], [0, 5, 0], [0, -1, 0]])
+frame_size = (540, 360)
+
+
+class DrownDetector:
+    def __init__(self, vp):
+        self.cap = cv2.VideoCapture(vp)
+        self.fgbg = cv2.createBackgroundSubtractorMOG2(history=500, varThreshold=200, detectShadows=False)
+        self.height, self.width = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)), int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+
+    def process_video(self):
+        cnt = 0
+        while True:
+            ret, frame = self.cap.read()
+            # frame = cv2.resize(frame, frame_size)
+            cnt += 1
+            if ret:
+                fgmask = self.fgbg.apply(frame)
+                background = self.fgbg.getBackgroundImage()
+                diff = cv2.absdiff(frame, background)
+                enhanced = cv2.filter2D(diff, -1, enhance_kernel)
+                kps, img, black_img, boxes, kps_score = IP.process_img(frame, enhanced)
+                cv2.imshow("res", img)
+                cv2.imshow("res_black", black_img)
+                cv2.waitKey(1)
+            else:
+                self.cap.release()
+                break
+
+
+if __name__ == '__main__':
+    DrownDetector(video_path).process_video()
 

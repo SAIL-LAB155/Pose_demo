@@ -76,10 +76,13 @@ class HumanDetection:
                 return {}, frame, frame, boxes, {}
 
 
+IP = HumanDetection()
+frame_size = (540, 360)
+
+
 class VideoProcessor:
     def __init__(self, vp):
         self.cap = cv2.VideoCapture(vp)
-        self.HD = HumanDetection()
         self.height, self.width = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)), int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
 
     def process_video(self):
@@ -88,8 +91,8 @@ class VideoProcessor:
             ret, frame = self.cap.read()
             cnt += 1
             if ret:
-                # frame = cv2.resize(frame, frame_size)
-                kps, img, black_img, boxes, kps_score = self.HD.process_img(frame)
+                frame = cv2.resize(frame, frame_size)
+                kps, img, black_img, boxes, kps_score = IP.process_img(frame)
                 cv2.imshow("res", img)
                 cv2.waitKey(2)
 
