@@ -4,7 +4,7 @@ from config import config
 import cv2
 
 
-def crop_bbox(orig_img, boxes, scores):
+def crop_bbox(orig_img, boxes):
     with torch.no_grad():
         if orig_img is None:
             return None, None, None

@@ -8,8 +8,7 @@ from ..utils.eval import getPrediction
 
 
 class PoseEstimator(object):
-    def __init__(self):
-        self.skeleton = []
+    def __init__(self, pose_cfg, pose_weight):
         self.KPV = KeyPointVisualizer()
         pose_dataset = Mscoco()
 

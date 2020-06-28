@@ -8,10 +8,10 @@ from ..utils.model_info import get_inference_time, print_model_param_nums, print
 
 
 class ObjectDetectionYolo(object):
-    def __init__(self, batchSize=1):
-        self.det_model = Darknet(config.yolo_cfg)
+    def __init__(self, cfg, weight, batchSize=1):
+        self.det_model = Darknet(cfg)
         # self.det_model.load_state_dict(torch.load('models/yolo/yolov3-spp.weights', map_location="cuda:0")['model'])
-        self.det_model.load_weights(config.yolo_model)
+        self.det_model.load_weights(weight)
         self.det_model.net_info['height'] = config.input_size
         self.det_inp_dim = int(self.det_model.net_info['height'])
         assert self.det_inp_dim % 32 == 0
