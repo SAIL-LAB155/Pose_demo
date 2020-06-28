@@ -87,13 +87,12 @@ class HumanDetection:
 
 
 IP = HumanDetection()
-frame_size = (540, 360)
+frame_size = (720, 540)
 
 
 class VideoProcessor:
     def __init__(self, vp):
         self.cap = cv2.VideoCapture(vp)
-        self.height, self.width = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)), int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
 
     def process_video(self):
         cnt = 0
