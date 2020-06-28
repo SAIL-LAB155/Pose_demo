@@ -71,16 +71,15 @@ class ImgProcessor:
 
                     if config.track_idx != "all":
                         try:
-                            kps = process_kp(id2ske[config.track_idx], config.track_idx)
+                            id2ske = process_kp(id2ske[config.track_idx], config.track_idx)
                         except KeyError:
-                            kps = {}
-                    else:
-                        kps = id2ske
-                        kp_scores = id2score
+                            id2ske = {}
 
-                    return kps, frame, img_black, id2bbox, kp_scores
+                    return id2ske, frame, img_black, id2bbox, id2score
                 else:
                     id2bbox = self.object_tracker.track_box(boxes)
                     return {}, frame, img_black, id2bbox, {}
             else:
                 return {}, frame, img_black, boxes, {}
+
+

@@ -1,0 +1,6 @@
+yolo_cfg = ""
+yolo_weight = ""
+video_1 = ""
+video_2 = ""
+video_3 = ""
+video_4 = ""

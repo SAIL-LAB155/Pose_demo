@@ -9,7 +9,7 @@ import cv2
 import copy
 from config import config
 from ..utils.utils import process_kp
-from src.detector.crop_box import crop_bbox
+from src.detector.box_postprocess import crop_bbox
 from ..utils.img import torch_to_im, gray3D
 
 
