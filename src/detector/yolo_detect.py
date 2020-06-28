@@ -45,7 +45,7 @@ class ObjectDetectionYolo(object):
             im_dim_list = torch.FloatTensor(im_dim_list).repeat(1, 2)
         return img, orig_img, im_dim_list
 
-    def __get_bbox(self, img, orig_img, im_dim_list):
+    def __get_bbox(self, img, im_dim_list):
         with torch.no_grad():
             # Human Detection
             if device != "cpu":
@@ -81,7 +81,6 @@ class ObjectDetectionYolo(object):
 
     def process(self, frame):
         img, orig_img, im_dim_list = self.__video_process(frame)
-        boxes, scores = self.__get_bbox(img, orig_img, im_dim_list)
-        # inps, orig_img, boxes, scores, pt1, pt2 = crop_bbox(orig_img, boxes, scores)
+        boxes, scores = self.__get_bbox(img, im_dim_list)
         return boxes, scores
 
