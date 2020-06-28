@@ -1,10 +1,10 @@
 
 import torch.nn as nn
-from models.duc.DUC import DUC
-from models.shufflenet.shufflenet import shufflenet_v2_x1_0
-from config.config import train_body_part, DUCs
+from ..duc.DUC import DUC
+from .shufflenet import shufflenet_v2_x1_0
+from config.config import pose_cls, DUCs
 
-n_classes = len(train_body_part)
+n_classes = pose_cls
 
 
 def createModel(cfg=None):

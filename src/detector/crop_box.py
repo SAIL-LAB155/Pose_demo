@@ -1,5 +1,5 @@
 import torch
-from utils.img import cropBox, im_to_torch
+from ..utils.img import cropBox, im_to_torch
 from config import config
 import cv2
 
@@ -7,7 +7,7 @@ import cv2
 def crop_bbox(orig_img, boxes, scores):
     with torch.no_grad():
         if orig_img is None:
-            return None, None, None, None
+            return None, None, None
 
         if boxes is None or boxes.nelement() == 0:
             return None, None, None

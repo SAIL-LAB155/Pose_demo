@@ -1,8 +1,5 @@
 from src.estimator.opt import opt
-try:
-    from utils.img import transformBoxInvert, transformBoxInvert_batch, findPeak, processPeaks
-except ImportError:
-    from src.SPPE.src.utils.img import transformBoxInvert, transformBoxInvert_batch, findPeak, processPeaks
+from .img import transformBoxInvert, transformBoxInvert_batch, findPeak, processPeaks
 import torch
 
 

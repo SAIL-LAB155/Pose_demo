@@ -1,6 +1,6 @@
-from src.estimator.visualize import KeyPointVisualizer
-from src.estimator.nms import pose_nms
-from src.estimator.datatset import Mscoco
+from .visualize import KeyPointVisualizer
+from .nms import pose_nms
+from .datatset import Mscoco
 from config import config
 from ..utils.model_info import *
 import torch
@@ -27,7 +27,7 @@ class PoseEstimator(object):
         inf_time = get_inference_time(self.pose_model, height=config.input_height, width=config.input_width)
         flops = print_model_param_flops(self.pose_model)
         params = print_model_param_nums(self.pose_model)
-        print("Detection: Inference time {}s, Params {}, FLOPs {}".format(inf_time, params, flops))
+        print("Pose estimation: Inference time {}s, Params {}, FLOPs {}".format(inf_time, params, flops))
         self.batch_size = config.pose_batch
 
     def process_img(self, inps, boxes, scores, pt1, pt2):

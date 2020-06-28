@@ -1,9 +1,9 @@
-from src.estimator.pose_estimator import PoseEstimator
-from src.estimator.visualize import KeyPointVisualizer
-from src.detector.yolo_detect import ObjectDetectionYolo
-from src.detector.visualize import BBoxVisualizer
-from src.tracker.track import ObjectTracker
-from src.tracker.visualize import IDVisualizer
+from .estimator.pose_estimator import PoseEstimator
+from .estimator.visualize import KeyPointVisualizer
+from .detector.yolo_detect import ObjectDetectionYolo
+from .detector.visualize import BBoxVisualizer
+from .tracker.track import ObjectTracker
+from .tracker.visualize import IDVisualizer
 import torch
 import cv2
 import copy

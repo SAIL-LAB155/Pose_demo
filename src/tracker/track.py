@@ -1,4 +1,4 @@
-from src.tracker.sort import Sort
+from .sort import Sort
 import torch
 from utils.utils import Utils
 

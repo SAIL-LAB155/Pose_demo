@@ -7,14 +7,12 @@ from torch.autograd import Variable
 from config.config import device
 
 
-def print_model_param_nums(model=None, multiply_adds=True):
-    if model == None:
-        model = torchvision.models.alexnet()
+def print_model_param_nums(model, multiply_adds=True):
     total = sum([param.nelement() for param in model.parameters()])
-    print('  + Number of params: %.2fM' % (total / 1e6))
+    return total
 
 
-def print_model_param_flops(model=None, input_res=224, multiply_adds=True):
+def print_model_param_flops(model=None, input_height=224, input_width=224, multiply_adds=True):
     prods = {}
     def save_hook(name):
         def hook_per(self, input, output):
@@ -103,9 +101,9 @@ def print_model_param_flops(model=None, input_res=224, multiply_adds=True):
         model = torchvision.models.alexnet()
     foo(model)
     if device != "cpu":
-        input = Variable(torch.rand(3, 3, input_res, input_res).cuda(), requires_grad = True)
+        input = Variable(torch.rand(3, 3, input_width, input_height).cuda(), requires_grad = True)
     else:
-        input = Variable(torch.rand(3, 3, input_res, input_res), requires_grad = True)
+        input = Variable(torch.rand(3, 3, input_width, input_height), requires_grad = True)
     out = model(input)
 
     total_flops = (sum(list_conv) + sum(list_linear) + sum(list_bn) + sum(list_relu) + sum(list_pooling) + sum(list_upsample))
