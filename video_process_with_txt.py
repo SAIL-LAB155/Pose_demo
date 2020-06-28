@@ -30,9 +30,9 @@ class VideoProcessor:
         cnt = 0
         while True:
             ret, frame = self.cap.read()
-            frame = cv2.resize(frame, frame_size)
             cnt += 1
             if ret:
+                frame = cv2.resize(frame, frame_size)
                 id2bbox = str2boxdict(self.box_txt.pop(0))
                 id2kps = str2kpsdict(self.kps_txt.pop(0))
                 id2kpsScore = str2kpsScoredict(self.kps_score_txt.pop(0))
@@ -42,7 +42,7 @@ class VideoProcessor:
                     kps_tensor, score_tensor = self.KPV.kpsdic2tensor(id2kps, id2kpsScore)
                     frame = self.KPV.vis_ske(frame, kps_tensor, score_tensor)
                 cv2.imshow("res", frame)
-                cv2.waitKey(500)
+                cv2.waitKey(100)
             else:
                 self.cap.release()
                 cv2.destroyAllWindows()

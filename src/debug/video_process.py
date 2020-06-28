@@ -1,26 +1,36 @@
-from ..estimator.pose_estimator import PoseEstimator
-from ..estimator.visualize import KeyPointVisualizer
-from ..detector.yolo_detect import ObjectDetectionYolo
-from ..detector.visualize import BBoxVisualizer
-from ..tracker.track import ObjectTracker
-from ..tracker.visualize import IDVisualizer
 import torch
 import cv2
 import copy
 from config import config
-from ..utils.utils import process_kp
 from src.detector.box_postprocess import crop_bbox
-from ..utils.img import torch_to_im, gray3D
 
-
-from .config.cfg import yolo_weight, yolo_cfg, video_path
+try:
+    from ..estimator.pose_estimator import PoseEstimator
+    from ..estimator.visualize import KeyPointVisualizer
+    from ..detector.yolo_detect import ObjectDetectionYolo
+    from ..detector.visualize import BBoxVisualizer
+    from ..tracker.track import ObjectTracker
+    from ..tracker.visualize import IDVisualizer
+    from ..utils.utils import process_kp
+    from ..utils.img import torch_to_im, gray3D
+    from .config.cfg import yolo_weight, yolo_cfg, video_path, pose_weight, pose_cfg
+except:
+    from src.estimator.pose_estimator import PoseEstimator
+    from src.estimator.visualize import KeyPointVisualizer
+    from src.detector.yolo_detect import ObjectDetectionYolo
+    from src.detector.visualize import BBoxVisualizer
+    from src.tracker.track import ObjectTracker
+    from src.tracker.visualize import IDVisualizer
+    from src.utils.utils import process_kp
+    from src.utils.img import torch_to_im, gray3D
+    from src.debug.config.cfg import yolo_weight, yolo_cfg, video_path, pose_weight, pose_cfg
 
 
 class HumanDetection:
     def __init__(self, show_img=True):
         self.object_detector = ObjectDetectionYolo(cfg=yolo_cfg, weight=yolo_weight)
         self.object_tracker = ObjectTracker()
-        self.pose_estimator = PoseEstimator(pose_cfg=config.pose_cfg, pose_weight=config.pose_weight)
+        self.pose_estimator = PoseEstimator(pose_cfg=pose_cfg, pose_weight=pose_weight)
         self.BBV = BBoxVisualizer()
         self.KPV = KeyPointVisualizer()
         self.IDV = IDVisualizer(with_bbox=False)

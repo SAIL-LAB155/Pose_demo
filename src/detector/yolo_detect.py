@@ -56,7 +56,7 @@ class ObjectDetectionYolo(object):
             dets = dynamic_write_results(prediction, config.confidence,  config.num_classes, nms=True, nms_conf=config.nms_thresh)
 
             if isinstance(dets, int) or dets.shape[0] == 0:
-                return orig_img[0], None, None
+                return  None, None
 
             dets = dets.cpu()
             im_dim_list = torch.index_select(im_dim_list, 0, dets[:, 0].long())

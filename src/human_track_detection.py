@@ -9,15 +9,16 @@ import cv2
 import copy
 from config import config
 from .utils.utils import process_kp
-from src.detector.crop_box import crop_bbox
+from config.config import yolo_model, yolo_cfg, pose_weight, pose_cfg
+from src.detector.box_postprocess import crop_bbox
 from .utils.img import torch_to_im, gray3D
 
 
 class ImgProcessor:
     def __init__(self, show_img=True):
-        self.object_detector = ObjectDetectionYolo()
+        self.object_detector = ObjectDetectionYolo(cfg=yolo_cfg, weight=yolo_model)
         self.object_tracker = ObjectTracker()
-        self.pose_estimator = PoseEstimator()
+        self.pose_estimator = PoseEstimator(pose_cfg=pose_cfg, pose_weight=pose_weight)
         self.BBV = BBoxVisualizer()
         self.KPV = KeyPointVisualizer()
         self.IDV = IDVisualizer(with_bbox=False)
@@ -35,17 +36,17 @@ class ImgProcessor:
             if gray:
                 gray_img = gray3D(copy.deepcopy(frame))
                 boxes, scores = self.object_detector.process(gray_img)
-                inps, pt1, pt2 = crop_bbox(frame, boxes, scores)
+                inps, pt1, pt2 = crop_bbox(frame, boxes)
             else:
                 boxes, scores = self.object_detector.process(frame)
-                inps, pt1, pt2 = crop_bbox(frame, boxes, scores)
+                inps, pt1, pt2 = crop_bbox(frame, boxes)
 
             if boxes is not None:
                 key_points, kps_scores = self.pose_estimator.process_img(inps, boxes, scores, pt1, pt2)
 
                 if config.plot_bbox:
                     frame = self.BBV.visualize(boxes, frame)
-                    cv2.imshow("cropped", (torch_to_im(inps[0]) * 255))
+                    # cv2.imshow("cropped", (torch_to_im(inps[0]) * 255))
 
                 if key_points is not []:
                     id2ske, id2bbox, id2score = self.object_tracker.track(boxes, key_points, kps_scores)

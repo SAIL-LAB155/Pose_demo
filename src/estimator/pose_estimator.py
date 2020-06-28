@@ -14,7 +14,7 @@ class PoseEstimator(object):
 
         if config.pose_backbone == "seresnet101":
             from src.pose_model.seresnet.FastPose import InferenNet_fast as createModel
-            self.pose_model = createModel(4 * 1 + 1, pose_dataset, cfg=config.pose_cfg)
+            self.pose_model = createModel(4 * 1 + 1, pose_dataset, pose_weight, cfg=pose_cfg)
         elif config.pose_backbone == "mobilenet":
             from src.pose_model.mobilenet.MobilePose import createModel
             self.pose_model = createModel(cfg=config.pose_cfg)
