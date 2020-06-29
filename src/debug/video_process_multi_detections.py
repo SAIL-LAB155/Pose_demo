@@ -1,27 +1,39 @@
-from ..estimator.pose_estimator import PoseEstimator
-from ..estimator.visualize import KeyPointVisualizer
-from ..detector.yolo_detect import ObjectDetectionYolo
-from ..detector.visualize import BBoxVisualizer
-from ..tracker.track import ObjectTracker
-from ..tracker.visualize import IDVisualizer
 import torch
 import cv2
 import copy
 import numpy as np
 from config import config
-from ..utils.img import gray3D
-from ..utils.utils import process_kp
-from ..detector.box_postprocess import crop_bbox, merge_box
+from src.detector.box_postprocess import crop_bbox, merge_box
 
-
-from .config.cfg_multi_detections import gray_yolo_cfg, gray_yolo_weights, black_yolo_cfg, black_yolo_weights, video_path
+try:
+    from ..estimator.pose_estimator import PoseEstimator
+    from ..estimator.visualize import KeyPointVisualizer
+    from ..detector.yolo_detect import ObjectDetectionYolo
+    from ..detector.visualize import BBoxVisualizer
+    from ..tracker.track import ObjectTracker
+    from ..tracker.visualize import IDVisualizer
+    from ..utils.utils import process_kp
+    from ..utils.img import torch_to_im, gray3D
+    from .config.cfg_multi_detections import gray_yolo_cfg, gray_yolo_weights, black_yolo_cfg, black_yolo_weights, \
+        video_path, pose_cfg, pose_weight
+except:
+    from src.estimator.pose_estimator import PoseEstimator
+    from src.estimator.visualize import KeyPointVisualizer
+    from src.detector.yolo_detect import ObjectDetectionYolo
+    from src.detector.visualize import BBoxVisualizer
+    from src.tracker.track import ObjectTracker
+    from src.tracker.visualize import IDVisualizer
+    from src.utils.utils import process_kp
+    from src.utils.img import torch_to_im, gray3D
+    from src.debug.config.cfg_multi_detections import gray_yolo_cfg, gray_yolo_weights, black_yolo_cfg, \
+        black_yolo_weights, video_path, pose_cfg, pose_weight
 
 
 class ImgProcessor:
     def __init__(self, show_img=True):
         self.gray_detector = ObjectDetectionYolo(cfg=gray_yolo_cfg, weight=gray_yolo_weights)
         self.black_detector = ObjectDetectionYolo(cfg=black_yolo_cfg, weight=black_yolo_weights)
-        self.pose_estimator = PoseEstimator(pose_cfg=config.pose_cfg, pose_weight=config.pose_weight)
+        self.pose_estimator = PoseEstimator(pose_cfg=pose_cfg, pose_weight=pose_weight)
         self.object_tracker = ObjectTracker()
         self.BBV = BBoxVisualizer()
         self.KPV = KeyPointVisualizer()
@@ -35,12 +47,12 @@ class ImgProcessor:
 
     def process_img(self, frame, black_img):
 
-        img_black = cv2.imread('Video/black.jpg')
+        img_black = cv2.imread('video/black.jpg')
         img_black = cv2.resize(img_black, config.frame_size)
         with torch.no_grad():
             gray_img = gray3D(copy.deepcopy(frame))
-            orig_img, gray_boxes, gray_scores = self.gray_detector.process(gray_img)
-            orig_img, black_boxes, black_scores = self.black_detector.process(black_img)
+            gray_boxes, gray_scores = self.gray_detector.process(gray_img)
+            black_boxes, black_scores = self.black_detector.process(black_img)
 
             boxes, scores = merge_box(gray_boxes, black_boxes, gray_scores, black_scores)
             inps, pt1, pt2 = crop_bbox(frame, boxes)
@@ -99,7 +111,7 @@ class DrownDetector:
         cnt = 0
         while True:
             ret, frame = self.cap.read()
-            # frame = cv2.resize(frame, frame_size)
+            frame = cv2.resize(frame, frame_size)
             cnt += 1
             if ret:
                 fgmask = self.fgbg.apply(frame)
