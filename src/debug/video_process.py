@@ -9,7 +9,7 @@ try:
     from .estimator.visualize import KeyPointVisualizer
     from .detector.yolo_detect import ObjectDetectionYolo
     from .detector.visualize import BBoxVisualizer
-    from .tracker.track import ObjectTracker
+    from .tracker.track_old import ObjectTracker
     from .tracker.visualize import IDVisualizer
     from .utils.utils import process_kp
     from .utils.img import torch_to_im, gray3D
@@ -20,7 +20,7 @@ except:
     from src.estimator.visualize import KeyPointVisualizer
     from src.detector.yolo_detect import ObjectDetectionYolo
     from src.detector.visualize import BBoxVisualizer
-    from src.tracker.track import ObjectTracker
+    from src.tracker.track_old import ObjectTracker
     from src.tracker.visualize import IDVisualizer
     from src.utils.utils import process_kp
     from src.utils.img import torch_to_im, gray3D
@@ -88,7 +88,7 @@ class HumanDetection:
                 self.boxes, self.boxes_scores = self.object_detector.process(frame)
                 inps, pt1, pt2 = crop_bbox(frame, self.boxes)
 
-            if self.boxes_scores is not None:
+            if self.boxes is not None:
                 self.kps, self.kps_score = self.pose_estimator.process_img(inps, self.boxes, self.boxes_scores, pt1, pt2)
 
                 if self.kps is not []:
