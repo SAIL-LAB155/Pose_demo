@@ -1,7 +1,7 @@
 from .sort import Sort
 import torch
 
-Tensor = torch.cuda.FloatTensor
+tensor = torch.FloatTensor
 
 
 class ObjectTracker(object):
@@ -12,5 +12,6 @@ class ObjectTracker(object):
         self.tracker.init_KF()
 
     def track_bbox(self, box_res):
-        tracked_bbox = self.tracker.update(box_res.cpu()).tolist()
-        return tracked_bbox
+        tracked_bbox = self.tracker.update(box_res.cpu())
+        id2box = {int(box[4]): tensor(box[:4]) for box in tracked_bbox}
+        return id2box

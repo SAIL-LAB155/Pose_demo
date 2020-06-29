@@ -82,11 +82,11 @@ class HumanDetection:
         with torch.no_grad():
             if gray:
                 gray_img = gray3D(copy.deepcopy(frame))
-                self.boxes, self.boxes_scores = self.object_detector.process(gray_img)
-                inps, pt1, pt2 = crop_bbox(frame, self.boxes)
+                box_res = self.object_detector.process(gray_img)
             else:
-                self.boxes, self.boxes_scores = self.object_detector.process(frame)
-                inps, pt1, pt2 = crop_bbox(frame, self.boxes)
+                box_res = self.object_detector.process(frame)
+            self.boxes, self.boxes_scores = self.object_detector.cut_box_score(box_res)
+            inps, pt1, pt2 = crop_bbox(frame, self.boxes)
 
             if self.boxes is not None:
                 self.kps, self.kps_score = self.pose_estimator.process_img(inps, self.boxes, self.boxes_scores, pt1, pt2)

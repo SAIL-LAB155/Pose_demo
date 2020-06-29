@@ -57,7 +57,7 @@ class ObjectDetectionYolo(object):
             dets = dynamic_write_results(prediction, config.confidence,  config.num_classes, nms=True, nms_conf=config.nms_thresh)
 
             if isinstance(dets, int) or dets.shape[0] == 0:
-                return  None, None
+                return None
 
             dets = dets.cpu()
             self.im_dim_list = torch.index_select(self.im_dim_list, 0, dets[:, 0].long())
@@ -68,13 +68,13 @@ class ObjectDetectionYolo(object):
             dets[:, [2, 4]] -= (self.det_inp_dim - scaling_factor * self.im_dim_list[:, 1].view(-1, 1)) / 2
 
             dets[:, 1:5] /= scaling_factor
-        return dets[:,1:6]
+        return dets[:,1:]
 
     def process(self, frame):
         img, im_dim_list = self.__preprocess(frame)
         det_res = self.__detect(img, im_dim_list)
-        boxes, scores = self.cut_box_score(det_res)
-        return boxes, scores
+        # boxes, scores = self.cut_box_score(det_res)
+        return det_res
 
     def cut_box_score(self, results):
         for j in range(results.shape[0]):
