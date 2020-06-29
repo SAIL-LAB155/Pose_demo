@@ -24,10 +24,10 @@ class ObjectDetectionYolo(object):
         print("Detection: Inference time {}s, Params {}, FLOPs {}".format(inf_time, params, flops))
         self.det_model.eval()
 
-        self.stopped = False
+        self.im_dim_list = []
         self.batchSize = batchSize
 
-    def __video_process(self, frame):
+    def __preprocess(self, frame):
         img = []
         orig_img = []
         # im_name = []
@@ -43,9 +43,10 @@ class ObjectDetectionYolo(object):
             # Human Detection
             img = torch.cat(img)
             im_dim_list = torch.FloatTensor(im_dim_list).repeat(1, 2)
-        return img, orig_img, im_dim_list
+        return img, im_dim_list
 
-    def __get_bbox(self, img, im_dim_list):
+    def __detect(self, img, im_dim_list):
+        self.im_dim_list = im_dim_list
         with torch.no_grad():
             # Human Detection
             if device != "cpu":
@@ -59,28 +60,32 @@ class ObjectDetectionYolo(object):
                 return  None, None
 
             dets = dets.cpu()
-            im_dim_list = torch.index_select(im_dim_list, 0, dets[:, 0].long())
-            scaling_factor = torch.min(self.det_inp_dim / im_dim_list, 1)[0].view(-1, 1)
+            self.im_dim_list = torch.index_select(self.im_dim_list, 0, dets[:, 0].long())
+            scaling_factor = torch.min(self.det_inp_dim / self.im_dim_list, 1)[0].view(-1, 1)
 
             # coordinate transfer
-            dets[:, [1, 3]] -= (self.det_inp_dim - scaling_factor * im_dim_list[:, 0].view(-1, 1)) / 2
-            dets[:, [2, 4]] -= (self.det_inp_dim - scaling_factor * im_dim_list[:, 1].view(-1, 1)) / 2
+            dets[:, [1, 3]] -= (self.det_inp_dim - scaling_factor * self.im_dim_list[:, 0].view(-1, 1)) / 2
+            dets[:, [2, 4]] -= (self.det_inp_dim - scaling_factor * self.im_dim_list[:, 1].view(-1, 1)) / 2
 
             dets[:, 1:5] /= scaling_factor
-            for j in range(dets.shape[0]):
-                dets[j, [1, 3]] = torch.clamp(dets[j, [1, 3]], 0.0, im_dim_list[j, 0])
-                dets[j, [2, 4]] = torch.clamp(dets[j, [2, 4]], 0.0, im_dim_list[j, 1])
-            boxes = dets[:, 1:5]
-            scores = dets[:, 5:6]
-
-        boxes_k = boxes[dets[:, 0] == 0]
-        if isinstance(boxes_k, int) or boxes_k.shape[0] == 0:
-            return None, None
-
-        return boxes_k, scores[dets[:, 0] == 0]
+        return dets[:,1:6]
 
     def process(self, frame):
-        img, orig_img, im_dim_list = self.__video_process(frame)
-        boxes, scores = self.__get_bbox(img, im_dim_list)
+        img, im_dim_list = self.__preprocess(frame)
+        det_res = self.__detect(img, im_dim_list)
+        boxes, scores = self.cut_box_score(det_res)
+        return boxes, scores
+
+    def cut_box_score(self, results):
+        for j in range(results.shape[0]):
+            results[j, [0, 2]] = torch.clamp(results[j, [0, 2]], 0.0, self.im_dim_list[j, 0])
+            results[j, [1, 3]] = torch.clamp(results[j, [1, 3]], 0.0, self.im_dim_list[j, 1])
+        boxes = results[:, 0:4]
+        scores = results[:, 4:5]
+
+        # boxes_k = boxes[results[:, 0] == 0]
+        if isinstance(boxes, int) or boxes.shape[0] == 0:
+            return None, None
+
         return boxes, scores
 

@@ -3,7 +3,6 @@ import cv2
 import copy
 import numpy as np
 from config import config
-from collections import defaultdict
 
 try:
     from .estimator.pose_estimator import PoseEstimator
@@ -98,18 +97,11 @@ class HumanDetection:
 
                     if config.track_idx != "all":
                         try:
-                            id2ske = process_kp(self.id2ske[config.track_idx], config.track_idx)
+                            self.id2ske = process_kp(self.id2ske[config.track_idx], config.track_idx)
                         except KeyError:
-                            id2ske = {}
-                    else:
-                        id2ske = self.id2ske
+                            self.id2ske = {}
 
-                    return id2ske, self.id2bbox, self.id2score
-                else:
-                    id2bbox = self.object_tracker.track_box(self.boxes)
-                    return {}, id2bbox, {}
-            else:
-                return {}, [], {}
+        return self.id2ske, self.id2bbox, self.id2score
 
 
 IP = HumanDetection()
