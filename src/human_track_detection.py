@@ -2,7 +2,7 @@ from .estimator.pose_estimator import PoseEstimator
 from .estimator.visualize import KeyPointVisualizer
 from .detector.yolo_detect import ObjectDetectionYolo
 from .detector.visualize import BBoxVisualizer
-from .tracker.track import ObjectTracker
+from .tracker.track_old import ObjectTracker
 from .tracker.visualize import IDVisualizer
 import torch
 import cv2
