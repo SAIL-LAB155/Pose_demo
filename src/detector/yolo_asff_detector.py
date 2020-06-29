@@ -1,9 +1,9 @@
-from yolo_asff.utils.utils import *
-from yolo_asff.dataset.vocdataset import VOC_CLASSES
-from yolo_asff.dataset.cocodataset import COCO_CLASSES
-from yolo_asff.dataset.swimdataset import SWIM_CLASSES
-from yolo_asff.dataset.data_augment import ValTransform
-from yolo_asff.utils.vis_utils import vis
+from ..yolo_asff.utils.utils import *
+from ..yolo_asff.dataset.vocdataset import VOC_CLASSES
+from ..yolo_asff.dataset.cocodataset import COCO_CLASSES
+from ..yolo_asff.dataset.swimdataset import SWIM_CLASSES
+from ..yolo_asff.dataset.data_augment import ValTransform
+from ..yolo_asff.utils.vis_utils import vis
 
 import os
 import glob

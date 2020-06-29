@@ -1,14 +1,17 @@
-from utils.utils import cut_image
+from ..utils.img import cut_image
 import cv2
 import numpy as np
 import torch
-from utils.img import cropBox, im_to_torch
-from config import config
+from .box_postprocess import cropBox, im_to_torch
+try:
+    from config.config import water_top
+except:
+    from src.debug.config.cfg_only_detections import water_top
 
 
 class ImageProcessDetection:
     def __init__(self):
-        self.water_top = config.water_top
+        self.water_top = water_top
         self.rect = []
         self.frame = []
         self.enhanced = []
