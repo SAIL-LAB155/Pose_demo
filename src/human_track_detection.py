@@ -13,14 +13,14 @@ from src.tracker.visualize import IDVisualizer
 from src.utils.utils import process_kp
 from src.utils.img import torch_to_im, gray3D
 from src.detector.box_postprocess import crop_bbox
-from config.config import yolo_weight, yolo_cfg, video_path, pose_weight, pose_cfg
+from config.config import yolo_model, yolo_cfg, video_path, pose_weight, pose_cfg
 
 tensor = torch.FloatTensor
 
 
 class ImgProcessor:
     def __init__(self, show_img=True):
-        self.object_detector = ObjectDetectionYolo(cfg=yolo_cfg, weight=yolo_weight)
+        self.object_detector = ObjectDetectionYolo(cfg=yolo_cfg, weight=yolo_model)
         self.object_tracker = ObjectTracker()
         self.pose_estimator = PoseEstimator(pose_cfg=pose_cfg, pose_weight=pose_weight)
         self.BBV = BBoxVisualizer()

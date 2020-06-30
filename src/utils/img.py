@@ -12,6 +12,8 @@ import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
 
+from config.config import pose_cls
+
 
 def im_to_torch(img):
     img = np.transpose(img, (2, 0, 1))  # C*H*W
@@ -242,14 +244,14 @@ def transformBoxInvert_batch(pt, ul, br, inpH, inpW, resH, resW):
     lenW = lenH * (inpW / inpH)
 
     _pt = (pt * lenH[:, np.newaxis, np.newaxis]) / resH
-    _pt[:, :, 0] = _pt[:, :, 0] - ((lenW[:, np.newaxis].repeat(1, 17) - 1) /
-                                   2 - center[:, 0].unsqueeze(-1).repeat(1, 17)).clamp(min=0)
-    _pt[:, :, 1] = _pt[:, :, 1] - ((lenH[:, np.newaxis].repeat(1, 17) - 1) /
-                                   2 - center[:, 1].unsqueeze(-1).repeat(1, 17)).clamp(min=0)
+    _pt[:, :, 0] = _pt[:, :, 0] - ((lenW[:, np.newaxis].repeat(1, pose_cls) - 1) /
+                                   2 - center[:, 0].unsqueeze(-1).repeat(1, pose_cls)).clamp(min=0)
+    _pt[:, :, 1] = _pt[:, :, 1] - ((lenH[:, np.newaxis].repeat(1, pose_cls) - 1) /
+                                   2 - center[:, 1].unsqueeze(-1).repeat(1, pose_cls)).clamp(min=0)
 
     new_point = torch.zeros(pt.size())
-    new_point[:, :, 0] = _pt[:, :, 0] + ul[:, 0].unsqueeze(-1).repeat(1, 17)
-    new_point[:, :, 1] = _pt[:, :, 1] + ul[:, 1].unsqueeze(-1).repeat(1, 17)
+    new_point[:, :, 0] = _pt[:, :, 0] + ul[:, 0].unsqueeze(-1).repeat(1, pose_cls)
+    new_point[:, :, 1] = _pt[:, :, 1] + ul[:, 1].unsqueeze(-1).repeat(1, pose_cls)
     return new_point
 
 

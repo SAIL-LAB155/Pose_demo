@@ -73,8 +73,9 @@ class ObjectDetectionYolo(object):
     def process(self, frame):
         img, im_dim_list = self.__preprocess(frame)
         det_res = self.__detect(img, im_dim_list)
-        # boxes, scores = self.cut_box_score(det_res)
-        return det_res
+        boxes, scores = self.cut_box_score(det_res)
+        return boxes, scores
+        # return det_res
 
     def cut_box_score(self, results):
         for j in range(results.shape[0]):

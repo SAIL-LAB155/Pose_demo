@@ -2,9 +2,11 @@
 import torch.nn as nn
 from ..duc.DUC import DUC
 from .mobilenet import MobileNetV2
-from config.config import pose_cls, DUCs
+from config.config import pose_cls, DUC_idx
+from config.model_cfg import DUC_cfg, mobile_opt
 
 n_classes = pose_cls
+DUCs = DUC_cfg[DUC_idx]
 
 
 def createModel(cfg=None):
@@ -12,7 +14,8 @@ def createModel(cfg=None):
 
 
 class MobilePose(nn.Module):
-    def __init__(self, setting):
+    def __init__(self, cfg):
+        setting = mobile_opt[cfg]
         super(MobilePose, self).__init__()
         # print(setting)
         self.mobile = MobileNetV2(inverted_residual_setting=setting)
