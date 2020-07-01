@@ -116,9 +116,6 @@ class KeyPointVisualizer(object):
     def dict2ls(self, d):
         return [v for k, v in d.items()]
 
-    def dict2ls(self, dic):
-        return [v for k,v in dic.items()]
-
     def kpsdic2tensor(self, kps_dict, kpsScore_dict):
         ls_kp, ls_score = [], []
         for k, v in kps_dict.items():
