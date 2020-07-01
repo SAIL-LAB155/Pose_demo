@@ -44,7 +44,7 @@ class HumanDetection:
         self.frame = np.array([])
         self.id2ske = {}
         self.id2bbox = {}
-        self.id2score = {}
+        self.id2kpscore = {}
         self.show_img = show_img
 
     def init_sort(self):
@@ -63,9 +63,9 @@ class HumanDetection:
         if config.plot_bbox and self.boxes is not None:
             self.frame = self.BBV.visualize(self.boxes, self.frame)
             # cv2.imshow("cropped", (torch_to_im(inps[0]) * 255))
-        if config.plot_kps and self.kps is not []:
-            self.frame = self.KPV.vis_ske(self.frame, self.kps, self.kps_score)
-            img_black = self.KPV.vis_ske_black(self.frame, self.kps, self.kps_score)
+        if config.plot_kps and self.id2ske is not []:
+            self.frame = self.KPV.vis_ske(self.frame, self.id2ske, self.id2kpscore)
+            img_black = self.KPV.vis_ske_black(self.frame, self.id2ske, self.id2kpscore)
         if config.plot_id:
             self.frame = self.IDV.plot_bbox_id(self.id2bbox, self.frame)
             # frame = self.IDV.plot_skeleton_id(id2ske, copy.deepcopy(img))
@@ -88,9 +88,9 @@ class HumanDetection:
                 kps, kps_score = self.pose_estimator.process_img(inps, self.boxes, self.boxes_scores, pt1, pt2)
 
                 if kps is not []:
-                    self.id2ske, self.id2bbox, self.id2score = self.object_tracker.track(self.boxes, kps, kps_score)
+                    self.id2ske, self.id2bbox, self.id2kpscore = self.object_tracker.track(self.boxes, kps, kps_score)
 
-        return self.id2ske, self.id2bbox, self.id2score
+        return self.id2ske, self.id2bbox, self.id2kpscore
 
 
 IP = HumanDetection()
