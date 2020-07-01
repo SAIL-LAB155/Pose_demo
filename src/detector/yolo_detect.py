@@ -78,6 +78,9 @@ class ObjectDetectionYolo(object):
         # return det_res
 
     def cut_box_score(self, results):
+        if results is None:
+            return None, None
+
         for j in range(results.shape[0]):
             results[j, [0, 2]] = torch.clamp(results[j, [0, 2]], 0.0, self.im_dim_list[j, 0])
             results[j, [1, 3]] = torch.clamp(results[j, [1, 3]], 0.0, self.im_dim_list[j, 1])
