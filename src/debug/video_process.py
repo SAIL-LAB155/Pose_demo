@@ -40,8 +40,6 @@ class HumanDetection:
         self.IDV = IDVisualizer(with_bbox=False)
         self.boxes = tensor([])
         self.boxes_scores = tensor([])
-        self.kps = tensor([])
-        self.kps_score = tensor([])
         self.img_black = np.array([])
         self.frame = np.array([])
         self.id2ske = {}
@@ -55,8 +53,6 @@ class HumanDetection:
     def clear_res(self):
         self.boxes = tensor([])
         self.boxes_scores = tensor([])
-        self.kps = tensor([])
-        self.kps_score = tensor([])
         self.frame = np.array([])
         self.id2ske = {}
         self.id2bbox = {}
@@ -89,17 +85,10 @@ class HumanDetection:
             inps, pt1, pt2 = crop_bbox(frame, self.boxes)
 
             if self.boxes is not None:
-                self.kps, self.kps_score = self.pose_estimator.process_img(inps, self.boxes, self.boxes_scores, pt1, pt2)
+                kps, kps_score = self.pose_estimator.process_img(inps, self.boxes, self.boxes_scores, pt1, pt2)
 
-                if self.kps is not []:
-                    self.id2ske, self.id2bbox, self.id2score = self.object_tracker.track(self.boxes,
-                                                                                         self.kps, self.kps_score)
-
-                    if config.track_idx != "all":
-                        try:
-                            self.id2ske = process_kp(self.id2ske[config.track_idx], config.track_idx)
-                        except KeyError:
-                            self.id2ske = {}
+                if kps is not []:
+                    self.id2ske, self.id2bbox, self.id2score = self.object_tracker.track(self.boxes, kps, kps_score)
 
         return self.id2ske, self.id2bbox, self.id2score
 
