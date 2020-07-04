@@ -25,6 +25,8 @@ except:
     from src.detector.box_postprocess import crop_bbox
     from src.debug.config.cfg_4frame import yolo_weight, yolo_cfg, video_1, video_2, video_3, video_4, pose_cfg, pose_weight
 
+tensor = torch.FloatTensor
+
 
 class ImgProcessor:
     def __init__(self, show_img=True):
@@ -37,8 +39,12 @@ class ImgProcessor:
         self.BBV = BBoxVisualizer()
         self.KPV = KeyPointVisualizer()
         self.IDV = IDVisualizer(with_bbox=False)
-        self.img = []
-        self.img_black = []
+        self.boxes = tensor([])
+        self.boxes_scores = tensor([])
+        self.frame = np.array([])
+        self.id2bbox = {}
+        self.kps = {}
+        self.kps_score = {}
         self.show_img = show_img
 
     def init_sort(self):
@@ -47,46 +53,51 @@ class ImgProcessor:
         self.object_tracker3.init_tracker()
         self.object_tracker4.init_tracker()
 
-    def __process_kp(self, kps, idx):
-        new_kp = []
-        for bdp in range(len(kps)):
-            for coord in range(2):
-                new_kp.append(kps[bdp][coord])
-        return {idx: new_kp}
+    def clear_res(self):
+        self.boxes = tensor([])
+        self.boxes_scores = tensor([])
+        self.frame = np.array([])
+        self.id2bbox = {}
+        self.kps = {}
+        self.kps_score = {}
+
+    def visualize(self):
+        img_black = cv2.imread('video/black.jpg')
+        if config.plot_bbox and self.boxes is not None:
+            self.frame = self.BBV.visualize(self.boxes, self.frame, self.boxes_scores)
+            # cv2.imshow("cropped", (torch_to_im(inps[0]) * 255))
+        if config.plot_kps and self.kps is not []:
+            self.frame = self.KPV.vis_ske(self.frame, self.kps, self.kps_score)
+            img_black = self.KPV.vis_ske_black(self.frame, self.kps, self.kps_score)
+        if config.plot_id and self.id2bbox is not None:
+            self.frame = self.IDV.plot_bbox_id(self.id2bbox, self.frame)
+            # frame = self.IDV.plot_skeleton_id(id2ske, copy.deepcopy(img))
+        return self.frame, img_black
 
     def __process_single_img(self, fr, tracker):
-        img_black = cv2.imread('video/black.jpg')
-        kps, kpScore, id2bbox = {}, {}, {}
+        self.clear_res()
+        self.frame = fr
+        id2ske, id2kpscore = {}, {}
         with torch.no_grad():
 
-            boxes, scores = self.object_detector.process(fr)
-            inps, pt1, pt2 = crop_bbox(fr, boxes)
-            if boxes is not None:
-                key_points, kps_scores = self.pose_estimator.process_img(inps, boxes, scores, pt1, pt2)
-                # if config.plot_bbox:
-                fr = self.BBV.visualize(boxes, fr)
-                # if config.plot_kps:
-                if key_points is not []:
-                    fr = self.KPV.vis_ske(fr, key_points, kps_scores)
-                    img_black = self.KPV.vis_ske_black(fr, key_points, kps_scores)
-                    id2ske, id2bbox, id2score = tracker.track(boxes, key_points, kps_scores)
-                    if config.plot_id:
-                        fr = self.IDV.plot_bbox_id(id2bbox, fr)
-                    if config.track_idx != "all":
-                        try:
-                            kps = self.__process_kp(id2ske[config.track_idx], config.track_idx)
-                        except KeyError:
-                            kps = {}
+            with torch.no_grad():
+                box_res = self.object_detector.process(fr)
+                self.boxes, self.boxes_scores = self.object_detector.cut_box_score(box_res)
+
+                if self.boxes is not None:
+                    # self.id2bbox = self.boxes
+                    inps, pt1, pt2 = crop_bbox(fr, self.boxes)
+                    self.kps, self.kps_score = self.pose_estimator.process_img(inps, self.boxes, self.boxes_scores, pt1,
+                                                                               pt2)
+
+                    if self.kps is not []:
+                        id2ske, self.id2bbox, id2kpscore = tracker.track(self.boxes, self.kps,
+                                                                                     self.kps_score)
                     else:
-                        kps = id2ske
-                        kpScore = id2score
+                        self.id2bbox = tracker.track_box(self.boxes)
 
-                else:
-                    id2bbox = tracker.track_box(boxes)
-            else:
-                id2bbox = []
-
-        return fr, img_black, id2bbox, kps, kpScore
+        img, black_img = self.visualize()
+        return img, black_img, id2ske, self.id2bbox, id2kpscore
 
     def process_img(self, fr1, fr2, fr3, fr4):
         res1 = self.__process_single_img(fr1, self.object_tracker1)
