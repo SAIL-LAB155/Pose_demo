@@ -1,6 +1,6 @@
 #-*- coding: utf-8 -*-
 
-from src.human_track_detection import ImgProcessor
+from src.human_detection import HumanDetection as ImgProcessor
 import cv2
 from config.config import video_path, write_box, write_video, frame_size, write_kps
 from utils.utils import boxdict2str, kpsdict2str, kpsScoredict2str
@@ -36,7 +36,8 @@ class VideoProcessor:
             cnt += 1
             if ret:
                 frame = cv2.resize(frame, frame_size)
-                kps, img, black_img, boxes, kps_score = IP.process_img(frame)
+                kps, boxes, kps_score = IP.process_img(frame)
+                img, black_img = IP.visualize()
                 if boxes is not None:
                     if write_box:
                         box_str = ""

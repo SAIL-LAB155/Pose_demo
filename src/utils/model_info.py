@@ -112,7 +112,7 @@ def print_model_param_flops(model=None, input_height=224, input_width=224, multi
     return total_flops / 3
 
 
-def get_inference_time(model, repeat=200, height=416, width=416):
+def get_inference_time(model, repeat=10, height=416, width=416):
     model.eval()
     start = time.time()
     with torch.no_grad():

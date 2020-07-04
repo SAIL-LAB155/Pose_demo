@@ -1,6 +1,9 @@
 from src.estimator.opt import opt
 from .img import transformBoxInvert, transformBoxInvert_batch, findPeak, processPeaks
 import torch
+from config.config import pose_cls
+
+opt.nClasses = pose_cls
 
 
 class DataLogger(object):

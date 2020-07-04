@@ -104,13 +104,17 @@ class KeyPointVisualizer(object):
         return bg
 
     def vis_ske(self, frame, humans, scores):
+        if isinstance(humans, dict):
+            humans, scores = self.dict2ls(humans), self.dict2ls(scores)
         return self.__visualize(frame, humans, scores, "origin")
 
     def vis_ske_black(self, frame, humans, scores):
+        if isinstance(humans, dict):
+            humans, scores = self.dict2ls(humans), self.dict2ls(scores)
         return self.__visualize(frame, humans, scores, "black")
 
-    def dict2ls(self, dic):
-        return [v for k,v in dic.items()]
+    def dict2ls(self, d):
+        return [torch.FloatTensor(v) for k, v in d.items()]
 
     def kpsdic2tensor(self, kps_dict, kpsScore_dict):
         ls_kp, ls_score = [], []
