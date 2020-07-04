@@ -7,6 +7,9 @@ class BBoxVisualizer(object):
         self.score_color = (255, 255, 168)
 
     def visualize(self, bboxes, img, scores=None):
+        if bboxes is None:
+            return img
+
         if isinstance(bboxes, dict):
             bboxes = self.__dict2ls(bboxes)
 
@@ -27,7 +30,7 @@ class BBoxVisualizer(object):
         if scores is not None:
             if not isinstance(scores, list):
                 if len(scores.shape) > 1:
-                    scores = scores.squeeze()
+                    scores = scores.squeeze(1)
                 scores = scores.tolist()
 
         return scores

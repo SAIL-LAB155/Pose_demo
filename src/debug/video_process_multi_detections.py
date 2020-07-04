@@ -90,8 +90,10 @@ class ImgProcessor:
             self.boxes, self.boxes_scores = merge_box(gray_boxes, black_boxes, gray_scores, black_scores)
 
             if self.show_img:
-                gray_img = self.BBV.visualize(gray_boxes, gray_img)
-                black_img = self.BBV.visualize(black_boxes, black_img)
+                gray_img = self.BBV.visualize(gray_boxes, gray_img, gray_scores)
+                cv2.imshow("gray", gray_img)
+                black_img = self.BBV.visualize(black_boxes, black_img, black_scores)
+                cv2.imshow("black", black_img)
 
             if self.boxes is not None:
                 # self.id2bbox = self.boxes
