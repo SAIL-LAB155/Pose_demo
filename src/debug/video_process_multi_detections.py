@@ -21,7 +21,7 @@ except:
     from src.estimator.visualize import KeyPointVisualizer
     from src.detector.yolo_detect import ObjectDetectionYolo
     from src.detector.visualize import BBoxVisualizer
-    from src.tracker.track import ObjectTracker
+    from src.tracker.track_match import ObjectTracker
     from src.tracker.visualize import IDVisualizer
     from src.utils.utils import process_kp
     from src.utils.img import torch_to_im, gray3D

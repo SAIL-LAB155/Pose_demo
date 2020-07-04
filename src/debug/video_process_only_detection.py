@@ -67,7 +67,7 @@ class ImgProcessor:
 
             # boxes, scores = merge_box(gray_boxes, black_boxes, gray_scores, black_scores)
             if gray_res is not None:
-                tracked_object = self.object_tracker.track_bbox(gray_res)
+                tracked_object = self.object_tracker.track_box_with_high_conf(gray_res)
                 gray_img = self.IDV.plot_bbox_id(tracked_object, gray_img)
 
             # inps, pt1, pt2 = crop_bbox(frame, boxes)

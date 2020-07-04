@@ -114,7 +114,7 @@ class KeyPointVisualizer(object):
         return self.__visualize(frame, humans, scores, "black")
 
     def dict2ls(self, d):
-        return [v for k, v in d.items()]
+        return [torch.FloatTensor(v) for k, v in d.items()]
 
     def kpsdic2tensor(self, kps_dict, kpsScore_dict):
         ls_kp, ls_score = [], []

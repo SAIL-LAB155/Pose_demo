@@ -5,5 +5,5 @@ black_yolo_weights = "model/black/best_converted.weights"
 rgb_yolo_cfg = ""
 rgb_yolo_weights = ""
 
-video_path = "video/underwater/45_Trim.mp4"
+video_path = "video/underwater/multiple.mp4"
 water_top = 40

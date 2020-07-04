@@ -9,7 +9,7 @@ try:
     from .estimator.visualize import KeyPointVisualizer
     from .detector.yolo_detect import ObjectDetectionYolo
     from .detector.visualize import BBoxVisualizer
-    from .tracker.track_old import ObjectTracker
+    from .tracker.track import ObjectTracker
     from .tracker.visualize import IDVisualizer
     from .utils.utils import process_kp
     from .utils.img import torch_to_im, gray3D
@@ -20,7 +20,7 @@ except:
     from src.estimator.visualize import KeyPointVisualizer
     from src.detector.yolo_detect import ObjectDetectionYolo
     from src.detector.visualize import BBoxVisualizer
-    from src.tracker.track_old import ObjectTracker
+    from src.tracker.track_match import ObjectTracker
     from src.tracker.visualize import IDVisualizer
     from src.utils.utils import process_kp
     from src.utils.img import torch_to_im, gray3D
@@ -42,9 +42,9 @@ class HumanDetection:
         self.boxes_scores = tensor([])
         self.img_black = np.array([])
         self.frame = np.array([])
-        self.id2ske = {}
         self.id2bbox = {}
-        self.id2kpscore = {}
+        self.kps = {}
+        self.kps_score = {}
         self.show_img = show_img
 
     def init_sort(self):
@@ -54,19 +54,19 @@ class HumanDetection:
         self.boxes = tensor([])
         self.boxes_scores = tensor([])
         self.frame = np.array([])
-        self.id2ske = {}
         self.id2bbox = {}
-        self.id2score = {}
+        self.kps = {}
+        self.kps_score = {}
 
     def visualize(self):
         img_black = cv2.imread('video/black.jpg')
         if config.plot_bbox and self.boxes is not None:
             self.frame = self.BBV.visualize(self.boxes, self.frame)
             # cv2.imshow("cropped", (torch_to_im(inps[0]) * 255))
-        if config.plot_kps and self.id2ske is not []:
-            self.frame = self.KPV.vis_ske(self.frame, self.id2ske, self.id2kpscore)
-            img_black = self.KPV.vis_ske_black(self.frame, self.id2ske, self.id2kpscore)
-        if config.plot_id:
+        if config.plot_kps and self.kps is not []:
+            self.frame = self.KPV.vis_ske(self.frame, self.kps, self.kps_score)
+            img_black = self.KPV.vis_ske_black(self.frame, self.kps, self.kps_score)
+        if config.plot_id and self.id2bbox is not None:
             self.frame = self.IDV.plot_bbox_id(self.id2bbox, self.frame)
             # frame = self.IDV.plot_skeleton_id(id2ske, copy.deepcopy(img))
         return self.frame, img_black
@@ -74,6 +74,7 @@ class HumanDetection:
     def process_img(self, frame, gray=False):
         self.clear_res()
         self.frame = frame
+        id2ske, id2kpscore = {}, {}
 
         with torch.no_grad():
             if gray:
@@ -82,15 +83,18 @@ class HumanDetection:
             else:
                 box_res = self.object_detector.process(frame)
             self.boxes, self.boxes_scores = self.object_detector.cut_box_score(box_res)
-            inps, pt1, pt2 = crop_bbox(frame, self.boxes)
 
             if self.boxes is not None:
-                kps, kps_score = self.pose_estimator.process_img(inps, self.boxes, self.boxes_scores, pt1, pt2)
+                # self.id2bbox = self.boxes
+                inps, pt1, pt2 = crop_bbox(frame, self.boxes)
+                self.kps, self.kps_score = self.pose_estimator.process_img(inps, self.boxes, self.boxes_scores, pt1, pt2)
 
-                if kps is not []:
-                    self.id2ske, self.id2bbox, self.id2kpscore = self.object_tracker.track(self.boxes, kps, kps_score)
+                if self.kps is not []:
+                    id2ske, self.id2bbox, id2kpscore = self.object_tracker.track(self.boxes, self.kps, self.kps_score)
+                else:
+                    self.id2bbox = self.object_tracker.track_box(self.boxes)
 
-        return self.id2ske, self.id2bbox, self.id2kpscore
+        return id2ske, self.id2bbox, id2kpscore
 
 
 IP = HumanDetection()
