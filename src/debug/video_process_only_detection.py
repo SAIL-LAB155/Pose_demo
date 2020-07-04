@@ -41,10 +41,11 @@ class ImgProcessor:
     def process_img(self, frame, background):
         black_boxes, black_scores, gray_boxes, gray_scores = None, None, None, None
         diff = cv2.absdiff(frame, background)
+
         dip_img = copy.deepcopy(frame)
         dip_boxes = self.dip_detection.detect_rect(diff)
-        if len(dip_boxes) > 0:
-            dip_img = self.BBV.visualize(dip_boxes, dip_img)
+        # if len(dip_boxes) > 0:
+        #     dip_img = self.BBV.visualize(dip_boxes, dip_img)
         dip_results = [dip_img, dip_boxes]
 
         with torch.no_grad():
@@ -66,9 +67,9 @@ class ImgProcessor:
             gray_results = [gray_img, gray_boxes, gray_scores]
 
             # boxes, scores = merge_box(gray_boxes, black_boxes, gray_scores, black_scores)
-            if gray_res is not None:
-                tracked_object = self.object_tracker.track_box_with_high_conf(gray_res)
-                gray_img = self.IDV.plot_bbox_id(tracked_object, gray_img)
+            # if gray_res is not None:
+            #     tracked_object = self.object_tracker.track_box_with_high_conf(gray_res)
+            #     gray_img = self.IDV.plot_bbox_id(tracked_object, gray_img)
 
             # inps, pt1, pt2 = crop_bbox(frame, boxes)
         return gray_results, black_results, dip_results
@@ -93,10 +94,10 @@ class RegionDetector(object):
                 fgmask = self.fgbg.apply(frame)
                 background = self.fgbg.getBackgroundImage()
 
-                dip_res, black_res, gray_res = IP.process_img(frame, background)
+                gray_res, black_res, dip_res = IP.process_img(frame, background)
 
-                dip_img = cv2.resize(dip_res[0], frame_size)
-                cv2.imshow("dip_result", dip_img)
+                # dip_img = cv2.resize(dip_res[0], frame_size)
+                # cv2.imshow("dip_result", dip_img)
                 enhanced = cv2.resize(black_res[0], frame_size)
                 cv2.imshow("black_result", enhanced)
                 gray_img = cv2.resize(gray_res[0], frame_size)
