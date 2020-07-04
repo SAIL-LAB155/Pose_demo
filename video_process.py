@@ -1,6 +1,6 @@
 #-*- coding: utf-8 -*-
 
-from src.human_track_detection import ImgProcessor
+from src.human_detection import HumanDetection as ImgProcessor
 import cv2
 from config.config import video_path, write_box, write_video, frame_size, write_kps
 from utils.utils import boxdict2str, kpsdict2str, kpsScoredict2str
