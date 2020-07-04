@@ -29,6 +29,8 @@ except:
     from src.debug.config.cfg_multi_detections import gray_yolo_cfg, gray_yolo_weights, black_yolo_cfg, \
         black_yolo_weights, video_path, pose_cfg, pose_weight
 
+tensor = torch.FloatTensor
+
 
 class ImgProcessor:
     def __init__(self, show_img=True):
@@ -39,62 +41,70 @@ class ImgProcessor:
         self.BBV = BBoxVisualizer()
         self.KPV = KeyPointVisualizer()
         self.IDV = IDVisualizer(with_bbox=False)
-        self.img = []
-        self.img_black = []
+        self.boxes = tensor([])
+        self.boxes_scores = tensor([])
+        self.img_black = np.array([])
+        self.frame = np.array([])
+        self.id2bbox = {}
+        self.kps = {}
+        self.kps_score = {}
         self.show_img = show_img
 
     def init_sort(self):
         self.object_tracker.init_tracker()
 
-    def process_img(self, frame, black_img):
+    def clear_res(self):
+        self.boxes = tensor([])
+        self.boxes_scores = tensor([])
+        self.frame = np.array([])
+        self.id2bbox = {}
+        self.kps = {}
+        self.kps_score = {}
 
+    def visualize(self):
         img_black = cv2.imread('video/black.jpg')
-        img_black = cv2.resize(img_black, config.frame_size)
+        if config.plot_bbox and self.boxes is not None:
+            self.frame = self.BBV.visualize(self.boxes, self.frame)
+            # cv2.imshow("cropped", (torch_to_im(inps[0]) * 255))
+        if config.plot_kps and self.kps is not []:
+            self.frame = self.KPV.vis_ske(self.frame, self.kps, self.kps_score)
+            img_black = self.KPV.vis_ske_black(self.frame, self.kps, self.kps_score)
+        if config.plot_id and self.id2bbox is not None:
+            self.frame = self.IDV.plot_bbox_id(self.id2bbox, self.frame)
+            # frame = self.IDV.plot_skeleton_id(id2ske, copy.deepcopy(img))
+        return self.frame, img_black
+
+    def process_img(self, frame, black_img):
+        self.clear_res()
+        self.frame = frame
+        id2ske, id2kpscore = {}, {}
+
         with torch.no_grad():
             gray_img = gray3D(copy.deepcopy(frame))
-            gray_boxes, gray_scores = self.gray_detector.process(gray_img)
-            black_boxes, black_scores = self.black_detector.process(black_img)
+            gray_results = self.gray_detector.process(gray_img)
+            black_results = self.black_detector.process(black_img)
 
-            boxes, scores = merge_box(gray_boxes, black_boxes, gray_scores, black_scores)
-            inps, pt1, pt2 = crop_bbox(frame, boxes)
+            gray_boxes, gray_scores = self.gray_detector.cut_box_score(gray_results)
+            black_boxes, black_scores = self.black_detector.cut_box_score(black_results)
 
-            if boxes is not None:
-                key_points, kps_scores = self.pose_estimator.process_img(inps, boxes, scores, pt1, pt2)
+            self.boxes, self.boxes_scores = merge_box(gray_boxes, black_boxes, gray_scores, black_scores)
 
-                if config.plot_bbox:
-                    frame = self.BBV.visualize(boxes, frame)
-                    if gray_boxes is not None:
-                        gray_img = self.BBV.visualize(gray_boxes, gray_img)
-                    cv2.imshow("gray", gray_img)
+            if self.show_img:
+                gray_img = self.BBV.visualize(gray_boxes, gray_img)
+                black_img = self.BBV.visualize(black_boxes, black_img)
 
-                    if black_boxes is not None:
-                        black_img = self.BBV.visualize(black_boxes, black_img)
-                    cv2.imshow("black", black_img)
+            if self.boxes is not None:
+                # self.id2bbox = self.boxes
+                inps, pt1, pt2 = crop_bbox(frame, self.boxes)
+                self.kps, self.kps_score = self.pose_estimator.process_img(inps, self.boxes, self.boxes_scores, pt1,
+                                                                           pt2)
 
-                if key_points is not []:
-                    id2ske, id2bbox, id2score = self.object_tracker.track(boxes, key_points, kps_scores)
-
-                    if config.plot_kps:
-                        if key_points is not []:
-                            frame = self.KPV.vis_ske(frame, key_points, kps_scores)
-                            img_black = self.KPV.vis_ske_black(frame, key_points, kps_scores)
-
-                    if config.plot_id:
-                        frame = self.IDV.plot_bbox_id(id2bbox, copy.deepcopy(frame))
-                        # frame = self.IDV.plot_skeleton_id(id2ske, copy.deepcopy(img))
-
-                    if config.track_idx != "all":
-                        try:
-                            id2ske = process_kp(id2ske[config.track_idx], config.track_idx)
-                        except KeyError:
-                            id2ske = {}
-
-                    return id2ske, frame, img_black, id2bbox, id2score
+                if self.kps is not []:
+                    id2ske, self.id2bbox, id2kpscore = self.object_tracker.track(self.boxes, self.kps, self.kps_score)
                 else:
-                    id2bbox = self.object_tracker.track_box(boxes)
-                    return {}, frame, img_black, id2bbox, {}
-            else:
-                return {}, frame, img_black, boxes, {}
+                    self.id2bbox = self.object_tracker.track_box(self.boxes)
+
+        return id2ske, self.id2bbox, id2kpscore
 
 
 IP = ImgProcessor()
@@ -119,7 +129,8 @@ class DrownDetector:
                 background = self.fgbg.getBackgroundImage()
                 diff = cv2.absdiff(frame, background)
                 enhanced = cv2.filter2D(diff, -1, enhance_kernel)
-                kps, img, black_img, boxes, kps_score = IP.process_img(frame, enhanced)
+                kps, boxes, kps_score = IP.process_img(frame, enhanced)
+                img, black_img = IP.visualize()
                 cv2.imshow("res", img)
                 cv2.imshow("res_black", black_img)
                 cv2.waitKey(1)
