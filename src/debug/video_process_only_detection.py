@@ -23,6 +23,7 @@ except:
     from src.tracker.track import ObjectTracker
     from src.tracker.visualize import IDVisualizer
     from src.debug.config.cfg_only_detections import gray_yolo_cfg, gray_yolo_weights, black_yolo_cfg, black_yolo_weights, video_path
+    from src.analyser.area import RegionProcessor
 
 
 class ImgProcessor:
@@ -37,6 +38,7 @@ class ImgProcessor:
         self.img = []
         self.img_black = []
         self.show_img = show_img
+        self.RP = RegionProcessor(config.frame_size[0], config.frame_size[1], 10, 10)
 
     def process_img(self, frame, background):
         black_boxes, black_scores, gray_boxes, gray_scores = None, None, None, None
@@ -66,6 +68,10 @@ class ImgProcessor:
                 gray_img = self.BBV.visualize(gray_boxes, gray_img)
             gray_results = [gray_img, gray_boxes, gray_scores]
 
+            cnt_img, fr = self.RP.process_box(gray_results[1], frame)
+            cv2.imshow("cnt", cnt_img)
+            cv2.imshow("fr", fr)
+
             # boxes, scores = merge_box(gray_boxes, black_boxes, gray_scores, black_scores)
             # if gray_res is not None:
             #     tracked_object = self.object_tracker.track_box_with_high_conf(gray_res)
@@ -75,7 +81,7 @@ class ImgProcessor:
         return gray_results, black_results, dip_results
 
 
-frame_size = (540, 360)
+frame_size = config.frame_size
 IP = ImgProcessor()
 
 
