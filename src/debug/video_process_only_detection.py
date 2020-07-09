@@ -25,6 +25,8 @@ except:
     from src.debug.config.cfg_only_detections import gray_yolo_cfg, gray_yolo_weights, black_yolo_cfg, black_yolo_weights, video_path
     from src.analyser.area import RegionProcessor
 
+fourcc = cv2.VideoWriter_fourcc(*'XVID')
+
 
 class ImgProcessor:
     def __init__(self, show_img=True):
@@ -39,6 +41,7 @@ class ImgProcessor:
         self.img_black = []
         self.show_img = show_img
         self.RP = RegionProcessor(config.frame_size[0], config.frame_size[1], 10, 10)
+        self.out = cv2.VideoWriter("output.mp4", fourcc, 12, (1440, 540))
 
     def process_img(self, frame, background):
         black_boxes, black_scores, gray_boxes, gray_scores = None, None, None, None
@@ -69,8 +72,9 @@ class ImgProcessor:
             gray_results = [gray_img, gray_boxes, gray_scores]
 
             cnt_img, fr = self.RP.process_box(gray_results[1], frame)
-            cv2.imshow("cnt", cnt_img)
-            cv2.imshow("fr", fr)
+            res = np.concatenate((cnt_img, fr), axis=1)
+            cv2.imshow("result", res)
+            self.out.write(res)
 
             # boxes, scores = merge_box(gray_boxes, black_boxes, gray_scores, black_scores)
             # if gray_res is not None:

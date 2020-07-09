@@ -1,8 +1,8 @@
 
 
 disappear_max = 20
-exist_max = 500
-alarm_cnt = 400
+exist_max = 150
+alarm_cnt = 100
 
 
 class Region:
@@ -10,6 +10,7 @@ class Region:
         self.location = idx
         self.height, self.width = h, w
         self.center = (int((idx[0]+0.5)*w), int((idx[1]+0.5)*h))
+        self.top, self.bottom, self.left, self.right = int(idx[1]*h), int((idx[1]+1)*h), int(idx[0]*w), int((idx[0]+1)*w)
         self.exists = 0
         self.disappear = 0
 
@@ -35,7 +36,7 @@ class Region:
             if self.exists < exist_max:
                 self.exists += 1
         elif f == -1:
-            if self.exists > -1:
+            if self.exists > 0:
                 self.exists -= 1
 
     def update_disappear(self):

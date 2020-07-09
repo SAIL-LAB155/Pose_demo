@@ -82,6 +82,14 @@ class RegionProcessor:
         for i in self.keep_ls:
             self.REGIONS[i].update(0)
 
+    def trigger_alarm(self, img):
+        for idx, region in self.REGIONS.items():
+            if region.if_warning():
+                self.alarm_ls.append(idx)
+        if self.alarm_ls:
+            self.draw_alarm_sigal(img)
+            self.draw_warning_mask(img)
+
     def process_box(self, boxes, fr):
         self.clear()
         self.img = copy.deepcopy(fr)
@@ -90,19 +98,25 @@ class RegionProcessor:
         center_ls = self.center_region(boxes)
         self.region_process(occupy_ls, cover_ls, center_ls)
         self.update_region()
+        self.trigger_alarm(fr)
         im_black = cv2.imread("../black.jpg")
         im_black = cv2.resize(im_black, (720, 540))
-        cnt_im = self.draw_cnt_map(im_black)
-        fr = self.draw_origin(boxes, fr)
-        return cnt_im, fr
+        self.draw_cnt_map(im_black)
+        self.draw_origin(boxes, fr)
+        return im_black, fr
+
+    def draw_alarm_sigal(self, img):
+        cv2.putText(img, "HLEP!!!", (360, 270),cv2.FONT_HERSHEY_SIMPLEX, 3, (0, 0, 255), 3)
 
     def draw_cnt_map(self, img):
         for idx, region in self.REGIONS.items():
             cv2.putText(img, str(region.exists), region.center, cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 255), 1)
-        return img
 
-    def draw_warning_mask(self):
-        pass
+    def draw_warning_mask(self, img):
+        print(self.alarm_ls)
+        for idx in self.alarm_ls:
+            region = self.REGIONS[idx]
+            img = cv2.rectangle(img, (region.left, region.top), (region.right, region.bottom), (0, 0, 255), -1)
 
     def draw_boundary(self, img):
         for i in range(self.width_num - 1):
@@ -111,24 +125,20 @@ class RegionProcessor:
         for j in range(self.height_num - 1):
             cv2.line(img, ((j + 1) * self.w_interval, 0),
                      ((j+1) * self.w_interval, self.height), [0, 255, 255], 1)
-        return img
 
     def draw_box(self, boxes, img):
         for box in boxes:
             [x1, y1, x2, y2] = box
             img = cv2.rectangle(img, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 4)
-        return img
 
     def draw_center_point(self, boxes, img):
         for box in boxes:
             cv2.circle(img, cal_center_point(box), 4, (255, 255, 0), -1)
-        return img
 
     def draw_origin(self, boxes, img):
-        img = self.draw_box(boxes, img)
-        img = self.draw_center_point(boxes, img)
-        img = self.draw_boundary(img)
-        return img
+        self.draw_box(boxes, img)
+        self.draw_center_point(boxes, img)
+        self.draw_boundary(img)
 
 
 if __name__ == '__main__':
