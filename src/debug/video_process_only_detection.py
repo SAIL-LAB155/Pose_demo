@@ -46,7 +46,6 @@ class ImgProcessor:
     def process_img(self, frame, background):
         black_boxes, black_scores, gray_boxes, gray_scores = None, None, None, None
         diff = cv2.absdiff(frame, background)
-
         dip_img = copy.deepcopy(frame)
         dip_boxes = self.dip_detection.detect_rect(diff)
         # if len(dip_boxes) > 0:
@@ -68,13 +67,11 @@ class ImgProcessor:
             gray_res = self.gray_yolo.process(gray_img)
             if gray_res is not None:
                 gray_boxes, gray_scores = self.gray_yolo.cut_box_score(gray_res)
-                gray_img = self.BBV.visualize(gray_boxes, gray_img)
+                gray_img = self.BBV.visualize(gray_boxes, gray_img, gray_scores)
+
             gray_results = [gray_img, gray_boxes, gray_scores]
 
-            cnt_img, fr = self.RP.process_box(gray_results[1], frame)
-            res = np.concatenate((cnt_img, fr), axis=1)
-            cv2.imshow("result", res)
-            self.out.write(res)
+            cnt_img, fr = self.RP.process_box(gray_boxes, frame)
 
             # boxes, scores = merge_box(gray_boxes, black_boxes, gray_scores, black_scores)
             # if gray_res is not None:

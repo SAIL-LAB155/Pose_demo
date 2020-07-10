@@ -13,7 +13,6 @@ class Region:
         self.top, self.bottom, self.left, self.right = int(idx[1]*h), int((idx[1]+1)*h), int(idx[0]*w), int((idx[0]+1)*w)
         self.exists = 0
         self.disappear = 0
-        # self.half = 0
 
     def clear(self):
         self.exists = 0
@@ -39,9 +38,6 @@ class Region:
         elif f == -1:
             if self.exists > 0:
                 self.exists -= 1
-        # elif f == 0:
-        #     if self.half > 10:
-        #         self.exists += 1
 
     def update_disappear(self):
         if self.disappear < disappear_max:
@@ -51,3 +47,8 @@ class Region:
 
     def if_warning(self):
         return True if self.exists > alarm_cnt else False
+
+    def cnt_color(self):
+        if self.exists > alarm_cnt:
+            return 0, 0, 255
+        return 87, 250, 255
