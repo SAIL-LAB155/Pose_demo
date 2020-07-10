@@ -7,13 +7,18 @@ import copy
 
 
 class RegionProcessor:
-    def __init__(self, w, h, w_num, h_num):
+    def __init__(self, w, h, w_num, h_num, write=False):
         self.height, self.width = h, w
         self.height_num, self.width_num = h_num, w_num
         self.region_cnt = h_num * w_num
         self.h_interval, self.w_interval = int(h/h_num), int(w/w_num)
         self.region_idx = [(i, j) for i in range(h_num) for j in range(w_num)]
         self.REGIONS = {idx: Region(idx, self.h_interval, self.w_interval) for idx in self.region_idx}
+        self.if_write = write
+
+        if self.if_write:
+            fourcc = cv2.VideoWriter_fourcc(*'XVID')
+            self.out = cv2.VideoWriter("output2.mp4", fourcc, 15, (w*2, h))
 
         self.keep_ls = []
         self.update_ls = []
@@ -87,30 +92,37 @@ class RegionProcessor:
             if region.if_warning():
                 self.alarm_ls.append(idx)
         if self.alarm_ls:
-            self.draw_alarm_sigal(img)
+            self.draw_alarm_signal(img)
             self.draw_warning_mask(img)
 
     def process_box(self, boxes, fr):
         self.clear()
         self.img = copy.deepcopy(fr)
-        occupy_ls = self.occupy_region(boxes)
-        cover_ls = self.cover_region(boxes)
-        center_ls = self.center_region(boxes)
-        self.region_process(occupy_ls, cover_ls, center_ls)
+        if boxes is not None:
+            occupy_ls = self.occupy_region(boxes)
+            cover_ls = self.cover_region(boxes)
+            center_ls = self.center_region(boxes)
+            self.region_process(occupy_ls, cover_ls, center_ls)
+        else:
+            self.empty_ls = self.region_idx
         self.update_region()
         self.trigger_alarm(fr)
         im_black = cv2.imread("../black.jpg")
-        im_black = cv2.resize(im_black, (720, 540))
+        im_black = cv2.resize(im_black, (self.width, self.height))
         self.draw_cnt_map(im_black)
         self.draw_origin(boxes, fr)
+        res = np.concatenate((im_black, fr), axis=1)
+        cv2.imshow("result", res)
+        if self.if_write:
+            self.out.write(res)
         return im_black, fr
 
-    def draw_alarm_sigal(self, img):
-        cv2.putText(img, "HLEP!!!", (360, 270),cv2.FONT_HERSHEY_SIMPLEX, 3, (0, 0, 255), 3)
+    def draw_alarm_signal(self, img):
+        cv2.putText(img, "HELP!!!", (360, 270), cv2.FONT_HERSHEY_SIMPLEX, 3, (0, 0, 255), 3)
 
     def draw_cnt_map(self, img):
         for idx, region in self.REGIONS.items():
-            cv2.putText(img, str(region.exists), region.center, cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 255), 1)
+            cv2.putText(img, str(region.exists), region.center, cv2.FONT_HERSHEY_SIMPLEX, 0.8, region.cnt_color(), 1)
 
     def draw_warning_mask(self, img):
         print(self.alarm_ls)
@@ -127,13 +139,15 @@ class RegionProcessor:
                      ((j+1) * self.w_interval, self.height), [0, 255, 255], 1)
 
     def draw_box(self, boxes, img):
-        for box in boxes:
-            [x1, y1, x2, y2] = box
-            img = cv2.rectangle(img, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 4)
+        if boxes is not None:
+            for box in boxes:
+                [x1, y1, x2, y2] = box
+                img = cv2.rectangle(img, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 4)
 
     def draw_center_point(self, boxes, img):
-        for box in boxes:
-            cv2.circle(img, cal_center_point(box), 4, (255, 255, 0), -1)
+        if boxes is not None:
+            for box in boxes:
+                cv2.circle(img, cal_center_point(box), 4, (255, 255, 0), -1)
 
     def draw_origin(self, boxes, img):
         self.draw_box(boxes, img)
@@ -149,9 +163,9 @@ if __name__ == '__main__':
     im = cv2.resize(im, (540, 360))
     cnt_im = copy.deepcopy(im)
 
-    im = RP.draw_boundary(im)
-    im = RP.draw_box(boxes, im)
-    im = RP.draw_center_point(boxes, im)
+    RP.draw_boundary(im)
+    RP.draw_box(boxes, im)
+    RP.draw_center_point(boxes, im)
     centers = RP.center_region(boxes)
     covers = RP.cover_region(boxes)
     occupies = RP.occupy_region(boxes)

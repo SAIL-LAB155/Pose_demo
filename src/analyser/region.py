@@ -47,3 +47,8 @@ class Region:
 
     def if_warning(self):
         return True if self.exists > alarm_cnt else False
+
+    def cnt_color(self):
+        if self.exists > alarm_cnt:
+            return 0, 0, 255
+        return 87, 250, 255
