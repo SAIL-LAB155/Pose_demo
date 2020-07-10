@@ -12,6 +12,7 @@ class Region:
         self.center = (int((idx[0]+0.5)*w), int((idx[1]+0.5)*h))
         self.exists = 0
         self.disappear = 0
+        # self.half = 0
 
     def clear(self):
         self.exists = 0
@@ -37,6 +38,9 @@ class Region:
         elif f == -1:
             if self.exists > -1:
                 self.exists -= 1
+        # elif f == 0:
+        #     if self.half > 10:
+        #         self.exists += 1
 
     def update_disappear(self):
         if self.disappear < disappear_max:
