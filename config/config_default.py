@@ -1,11 +1,21 @@
 import torch
 
-video_path = "video/new_video/single_half.mp4"
+yolo_cfg = "config/yolo_cfg/yolov3.cfg"
+yolo_weight = 'weights/yolo/yolov3.weights'
+pose_weight = "weights/sppe/duc_se.pth"
+pose_cfg = None
+
+video_path = "video/video_sample/video4_Trim.mp4"
+
+'''
+---------------------------------------------------------------------------------------------------------------
+'''
+
 img_folder = "img/test"
 
 write_video = False
-write_box = True
-write_kps = True
+write_box = False
+write_kps = False
 
 device = "cuda:0"
 print("Using {}".format(device))
@@ -25,19 +35,12 @@ fast_inference = True
 pose_batch = 80
 
 
-frame_size = (720,540)
+frame_size = (720, 540)
 
 pose_backbone = "seresnet101"
-pose_weight = "weights/sppe/duc_se.pth"
-pose_cfg = None
 pose_cls = 17
 
 DUCs = [480, 240]
-
-
-yolo_cfg = "config/yolo_cfg/yolov3.cfg"
-yolo_model = 'weights/yolo/yolov3.weights'
-
 
 track_idx = "all"    # If all idx, track_idx = "all"
 track_plot_id = ["all"]   # If all idx, track_plot_id = ["all"]

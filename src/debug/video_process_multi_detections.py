@@ -3,29 +3,20 @@ import cv2
 import copy
 import numpy as np
 from config import config
+from src.estimator.pose_estimator import PoseEstimator
+from src.estimator.visualize import KeyPointVisualizer
+from src.detector.yolo_detect import ObjectDetectionYolo
+from src.detector.visualize import BBoxVisualizer
+from src.tracker.track_match import ObjectTracker
+from src.tracker.visualize import IDVisualizer
+from src.utils.utils import process_kp
+from src.utils.img import torch_to_im, gray3D
+from src.detector.box_postprocess import crop_bbox, merge_box
 
 try:
-    from .estimator.pose_estimator import PoseEstimator
-    from .estimator.visualize import KeyPointVisualizer
-    from .detector.yolo_detect import ObjectDetectionYolo
-    from .detector.visualize import BBoxVisualizer
-    from .tracker.track import ObjectTracker
-    from .tracker.visualize import IDVisualizer
-    from .utils.utils import process_kp
-    from .utils.img import torch_to_im, gray3D
-    from .detector.box_postprocess import crop_bbox, merge_box
     from config.config import gray_yolo_cfg, gray_yolo_weights, black_yolo_cfg, black_yolo_weights, \
         video_path, pose_cfg, pose_weight
 except:
-    from src.estimator.pose_estimator import PoseEstimator
-    from src.estimator.visualize import KeyPointVisualizer
-    from src.detector.yolo_detect import ObjectDetectionYolo
-    from src.detector.visualize import BBoxVisualizer
-    from src.tracker.track_match import ObjectTracker
-    from src.tracker.visualize import IDVisualizer
-    from src.utils.utils import process_kp
-    from src.utils.img import torch_to_im, gray3D
-    from src.detector.box_postprocess import crop_bbox, merge_box
     from src.debug.config.cfg_multi_detections import gray_yolo_cfg, gray_yolo_weights, black_yolo_cfg, \
         black_yolo_weights, video_path, pose_cfg, pose_weight
 

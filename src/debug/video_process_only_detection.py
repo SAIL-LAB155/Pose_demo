@@ -3,27 +3,20 @@ import numpy as np
 import cv2
 import copy
 from config import config
+from src.detector.yolo_detect import ObjectDetectionYolo
+from src.detector.image_process_detect import ImageProcessDetection
+# from src.detector.yolo_asff_detector import ObjectDetectionASFF
+from src.detector.visualize import BBoxVisualizer
+from src.utils.img import gray3D
+from src.detector.box_postprocess import crop_bbox, merge_box
+from src.tracker.track import ObjectTracker
+from src.tracker.visualize import IDVisualizer
+from src.analyser.area import RegionProcessor
 
 try:
-    from .detector.yolo_detect import ObjectDetectionYolo
-    from .detector.image_process_detect import ImageProcessDetection
-    # from .detector.yolo_asff_detector import ObjectDetectionASFF
-    from .detector.visualize import BBoxVisualizer
-    from .utils.img import gray3D
-    from .detector.box_postprocess import crop_bbox, merge_box
-    from .tracker.track import ObjectTracker
     from config.config import gray_yolo_cfg, gray_yolo_weights, black_yolo_cfg, black_yolo_weights, video_path
 except:
-    from src.detector.yolo_detect import ObjectDetectionYolo
-    from src.detector.image_process_detect import ImageProcessDetection
-    # from src.detector.yolo_asff_detector import ObjectDetectionASFF
-    from src.detector.visualize import BBoxVisualizer
-    from src.utils.img import gray3D
-    from src.detector.box_postprocess import crop_bbox, merge_box
-    from src.tracker.track import ObjectTracker
-    from src.tracker.visualize import IDVisualizer
     from src.debug.config.cfg_only_detections import gray_yolo_cfg, gray_yolo_weights, black_yolo_cfg, black_yolo_weights, video_path
-    from src.analyser.area import RegionProcessor
 
 fourcc = cv2.VideoWriter_fourcc(*'XVID')
 

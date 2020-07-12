@@ -2,27 +2,20 @@ import torch
 import cv2
 from config import config
 import numpy as np
+from src.estimator.pose_estimator import PoseEstimator
+from src.estimator.visualize import KeyPointVisualizer
+from src.detector.yolo_detect import ObjectDetectionYolo
+from src.detector.visualize import BBoxVisualizer
+from src.tracker.track_match import ObjectTracker
+from src.tracker.visualize import IDVisualizer
+from src.utils.utils import process_kp
+from src.utils.img import torch_to_im, gray3D, calibration
+from src.detector.box_postprocess import crop_bbox
 
 try:
-    from ..estimator.pose_estimator import PoseEstimator
-    from ..estimator.visualize import KeyPointVisualizer
-    from ..detector.yolo_detect import ObjectDetectionYolo
-    from ..detector.visualize import BBoxVisualizer
-    from ..tracker.track import ObjectTracker
-    from ..tracker.visualize import IDVisualizer
-    from ..utils.utils import process_kp
-    from ..utils.img import torch_to_im, gray3D, calibration
     from config.config import yolo_weight, yolo_cfg, video_1, video_2, video_3, video_4, pose_cfg, pose_weight
 except:
-    from src.estimator.pose_estimator import PoseEstimator
-    from src.estimator.visualize import KeyPointVisualizer
-    from src.detector.yolo_detect import ObjectDetectionYolo
-    from src.detector.visualize import BBoxVisualizer
-    from src.tracker.track_match import ObjectTracker
-    from src.tracker.visualize import IDVisualizer
-    from src.utils.utils import process_kp
-    from src.utils.img import torch_to_im, gray3D, calibration
-    from src.detector.box_postprocess import crop_bbox
+
     from src.debug.config.cfg_4frame import yolo_weight, yolo_cfg, video_1, video_2, video_3, video_4, pose_cfg, pose_weight
 
 tensor = torch.FloatTensor
