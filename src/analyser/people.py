@@ -2,7 +2,7 @@ from .box import Box
 from .keypoint import Keypoint
 
 
-class People:
+class Person:
     def __init__(self, idx, box, kps):
         self.id = idx
         self.BOX = Box()
@@ -10,10 +10,17 @@ class People:
         self.KPS = Keypoint()
         self.KPS.append(kps)
         self.pred = []
+        self.disappear = 0
+        self.img = []
 
-    def __len__(self):
-        return len(self.BOX.box), len(self.KPS.kps)
+    def box_len(self):
+        return len(self.BOX.box)
+
+    def kps_len(self):
+        return len(self.KPS.kps)
 
     def clear(self):
         self.BOX = Box()
         self.KPS = Keypoint()
+        self.disappear = 0
+

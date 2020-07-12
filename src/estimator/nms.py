@@ -81,6 +81,7 @@ def pose_nms(bboxes, bbox_scores, pose_preds, pose_scores):
     #final_result = pool.map(filter_result, zip(scores_pick, merge_ids, preds_pick, pick, bbox_scores_pick))
     #final_result = [item for item in final_result if item is not None]
 
+    final_id = []
     for j in range(len(pick)):
         ids = np.arange(pose_cls)
         max_score = torch.max(scores_pick[j, ids, 0])
@@ -105,9 +106,10 @@ def pose_nms(bboxes, bbox_scores, pose_preds, pose_scores):
         if (1.5 ** 2 * (xmax - xmin) * (ymax - ymin) < areaThres):
             continue
 
+        final_id.append(pick[j])
         final_result.append(merge_pose)
         final_score.append(merge_score)
-    return final_result, final_score
+    return final_result, final_score, final_id
 
 
 def p_merge_fast(ref_pose, cluster_preds, cluster_scores, ref_dist):

@@ -48,7 +48,7 @@ class PoseEstimator(object):
 
         preds_hm, preds_img, preds_scores = getPrediction(
             hm, pt1, pt2, config.input_height, config.input_width, config.output_height, config.output_width)
-        kps, kps_score = pose_nms(boxes, scores, preds_img, preds_scores)
+        kps, kps_score, kps_id = pose_nms(boxes, scores, preds_img, preds_scores)
 
-        return kps, kps_score
+        return kps, kps_score, kps_id
 
