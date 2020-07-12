@@ -22,8 +22,8 @@ except:
     from src.detector.visualize import BBoxVisualizer
     from src.tracker.track_match import ObjectTracker
     from src.tracker.visualize import IDVisualizer
-    from src.utils.utils import process_kp
-    from src.utils.img import torch_to_im, gray3D
+    from src.utils.utils import process_kp, cal_center_point
+    from src.utils.img import torch_to_im, gray3D, cut_image_with_box
     from src.detector.box_postprocess import crop_bbox
     from src.debug.config.cfg_with_CNN import yolo_weight, yolo_cfg, video_path, pose_weight, pose_cfg, CNN_class
     from src.CNNclassifier.inference import CNNInference
@@ -62,7 +62,7 @@ class HumanDetection:
         self.kps_score = {}
 
     def visualize(self):
-        img_black = cv2.imread('video/black.jpg')
+        self.img_black = cv2.imread('video/black.jpg')
         if config.plot_bbox and self.boxes is not None:
             self.frame = self.BBV.visualize(self.boxes, self.frame, self.boxes_scores)
             # cv2.imshow("cropped", (torch_to_im(inps[0]) * 255))
@@ -90,7 +90,7 @@ class HumanDetection:
             if self.boxes is not None:
                 # self.id2bbox = self.boxes
                 inps, pt1, pt2 = crop_bbox(frame, self.boxes)
-                self.kps, self.kps_score = self.pose_estimator.process_img(inps, self.boxes, self.boxes_scores, pt1, pt2)
+                self.kps, self.kps_score, _ = self.pose_estimator.process_img(inps, self.boxes, self.boxes_scores, pt1, pt2)
 
                 if self.kps is not []:
                     id2ske, self.id2bbox, id2kpscore = self.object_tracker.track(self.boxes, self.kps, self.kps_score)
@@ -99,11 +99,20 @@ class HumanDetection:
 
         return id2ske, self.id2bbox, id2kpscore
 
-    def classify(self):
+    def classify_whole(self):
         out = self.CNN_model.predict(self.img_black)
         idx = out[0].tolist().index(max(out[0].tolist()))
         pred = CNN_class[idx]
         print("The prediction is {}".format(pred))
+
+    def classify(self):
+        for box in self.id2bbox.values():
+            img = cut_image_with_box(self.img_black, left=int(box[0]), top=int(box[1]), right=int(box[2]), bottom=int(box[3]))
+            out = self.CNN_model.predict(img)
+            idx = out[0].tolist().index(max(out[0].tolist()))
+            pred = CNN_class[idx]
+            text_location = (int((box[0]+box[2])/2)), int((box[1])+50)
+            cv2.putText(self.frame, pred, text_location, cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 1)
 
 
 IP = HumanDetection()
@@ -123,7 +132,7 @@ class VideoProcessor:
                 frame = cv2.resize(frame, frame_size)
                 kps, boxes, kps_score = IP.process_img(frame)
                 img, img_black = IP.visualize()
-                IP.classify()
+                IP.classify_whole()
                 cv2.imshow("res", img)
                 cv2.waitKey(2)
 

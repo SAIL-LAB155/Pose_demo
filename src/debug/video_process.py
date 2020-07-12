@@ -61,7 +61,7 @@ class HumanDetection:
     def visualize(self):
         img_black = cv2.imread('video/black.jpg')
         if config.plot_bbox and self.boxes is not None:
-            self.frame = self.BBV.visualize(self.boxes, self.frame, self.boxes_scores)
+            self.frame = self.BBV.visualize(self.boxes, self.frame)
             # cv2.imshow("cropped", (torch_to_im(inps[0]) * 255))
         if config.plot_kps and self.kps is not []:
             self.frame = self.KPV.vis_ske(self.frame, self.kps, self.kps_score)
@@ -87,12 +87,21 @@ class HumanDetection:
             if self.boxes is not None:
                 # self.id2bbox = self.boxes
                 inps, pt1, pt2 = crop_bbox(frame, self.boxes)
-                self.kps, self.kps_score = self.pose_estimator.process_img(inps, self.boxes, self.boxes_scores, pt1, pt2)
+                self.kps, self.kps_score, kps_id = \
+                    self.pose_estimator.process_img(inps, self.boxes, self.boxes_scores, pt1, pt2)
 
-                if self.kps is not []:
+                if len(self.kps) > 0:
+                    # box_res = box_res[kps_id]
                     id2ske, self.id2bbox, id2kpscore = self.object_tracker.track(self.boxes, self.kps, self.kps_score)
                 else:
                     self.id2bbox = self.object_tracker.track_box(self.boxes)
+
+                # self.object_tracker.track(box_res[kps_id])
+                #
+                # if len(self.kps) > 0:
+                #     id2ske, self.id2bbox, id2kpscore = self.object_tracker.match(self.kps, self.kps_score)
+                # else:
+                #     self.id2bbox = self.object_tracker.track_box()
 
         return id2ske, self.id2bbox, id2kpscore
 

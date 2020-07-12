@@ -30,5 +30,6 @@ def image_normalize(img_name, size=224):
     image_tensor = torch.from_numpy(image_array).float()
     return image_tensor
 
+
 def cal_center_point(box):
     return int((box[2] - box[0]) / 2) + box[0], int((box[3] - box[1]) / 2) + box[1]
