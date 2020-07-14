@@ -104,7 +104,7 @@ class RegionDetector(object):
                 cv2.imshow("gray_result", gray_img)
 
                 cnt += 1
-                cv2.waitKey(10)
+                cv2.waitKey(0)
             else:
                 self.cap.release()
                 cv2.destroyAllWindows()

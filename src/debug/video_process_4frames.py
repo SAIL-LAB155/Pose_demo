@@ -79,12 +79,10 @@ class ImgProcessor:
             if self.boxes is not None:
                 # self.id2bbox = self.boxes
                 inps, pt1, pt2 = crop_bbox(fr, self.boxes)
-                self.kps, self.kps_score, _ = self.pose_estimator.process_img(inps, self.boxes, self.boxes_scores, pt1,
-                                                                           pt2)
+                self.kps, self.kps_score, _ = self.pose_estimator.process_img(inps, self.boxes, pt1, pt2)
 
                 if self.kps is not []:
-                    id2ske, self.id2bbox, id2kpscore = tracker.track(self.boxes, self.kps,
-                                                                                 self.kps_score)
+                    id2ske, self.id2bbox, id2kpscore = tracker.track(self.boxes, self.kps, self.kps_score)
                 else:
                     self.id2bbox = tracker.track_box(self.boxes)
 

@@ -7,7 +7,7 @@ from src.estimator.pose_estimator import PoseEstimator
 from src.estimator.visualize import KeyPointVisualizer
 from src.detector.yolo_detect import ObjectDetectionYolo
 from src.detector.visualize import BBoxVisualizer
-from src.tracker.track_match import ObjectTracker
+from src.tracker.track import ObjectTracker
 from src.tracker.visualize import IDVisualizer
 from src.utils.utils import process_kp
 from src.utils.img import torch_to_im, gray3D
@@ -59,7 +59,7 @@ class HumanDetection:
             img_black = self.KPV.vis_ske_black(self.frame, self.kps, self.kps_score)
         if config.plot_id and self.id2bbox is not None:
             self.frame = self.IDV.plot_bbox_id(self.id2bbox, self.frame)
-            # frame = self.IDV.plot_skeleton_id(id2ske, copy.deepcopy(img))
+            self.frame = self.IDV.plot_skeleton_id(self.kps, self.frame)
         return self.frame, img_black
 
     def process_img(self, frame, gray=False):
@@ -75,26 +75,29 @@ class HumanDetection:
                 box_res = self.object_detector.process(frame)
             self.boxes, self.boxes_scores = self.object_detector.cut_box_score(box_res)
 
-            if self.boxes is not None:
-                # self.id2bbox = self.boxes
-                inps, pt1, pt2 = crop_bbox(frame, self.boxes)
-                self.kps, self.kps_score, kps_id = \
-                    self.pose_estimator.process_img(inps, self.boxes, self.boxes_scores, pt1, pt2)
+            if box_res is not None:
+                self.id2bbox = self.object_tracker.track(box_res)
+                boxes = self.object_tracker.id_and_box(self.id2bbox)
 
-                if len(self.kps) > 0:
-                    # box_res = box_res[kps_id]
-                    id2ske, self.id2bbox, id2kpscore = self.object_tracker.track(self.boxes, self.kps, self.kps_score)
-                else:
-                    self.id2bbox = self.object_tracker.track_box(self.boxes)
+                inps, pt1, pt2 = crop_bbox(frame, boxes)
+                kps, kps_score, kps_id = self.pose_estimator.process_img(inps, boxes, pt1, pt2)
+
+                self.kps, self.kps_score = self.object_tracker.match_kps(kps_id, kps, kps_score)
+
+                # if len(self.kps) > 0:
+                #     # box_res = box_res[kps_id]
+                #     id2ske, self.id2bbox, id2kpscore = self.object_tracker.track(self.boxes, self.kps, self.kps_score)
+                # else:
+                #     self.id2bbox = self.object_tracker.track_box(self.boxes)
 
                 # self.object_tracker.track(box_res[kps_id])
-                #
+
                 # if len(self.kps) > 0:
                 #     id2ske, self.id2bbox, id2kpscore = self.object_tracker.match(self.kps, self.kps_score)
                 # else:
                 #     self.id2bbox = self.object_tracker.track_box()
 
-        return id2ske, self.id2bbox, id2kpscore
+        return self.kps, self.id2bbox, self.kps_score
 
 
 IP = HumanDetection()
