@@ -13,7 +13,7 @@ areaThres = 0#40 * 40.5
 alpha = 0.1
 
 
-def pose_nms(bboxes, bbox_scores, pose_preds, pose_scores):
+def pose_nms(bboxes, pose_preds, pose_scores):
     '''
     Parametric Pose NMS algorithm
     bboxes:         bbox locations list (n, 4)
@@ -28,7 +28,6 @@ def pose_nms(bboxes, bbox_scores, pose_preds, pose_scores):
     final_result = []
     final_score = []
 
-    ori_bbox_scores = bbox_scores.clone()
     ori_pose_preds = pose_preds.clone()
     ori_pose_scores = pose_scores.clone()
 
@@ -72,12 +71,10 @@ def pose_nms(bboxes, bbox_scores, pose_preds, pose_scores):
         pose_scores = np.delete(pose_scores, delete_ids, axis=0)
         human_ids = np.delete(human_ids, delete_ids)
         human_scores = np.delete(human_scores, delete_ids, axis=0)
-        bbox_scores = np.delete(bbox_scores, delete_ids, axis=0)
 
     assert len(merge_ids) == len(pick)
     preds_pick = ori_pose_preds[pick]
     scores_pick = ori_pose_scores[pick]
-    bbox_scores_pick = ori_bbox_scores[pick]
     #final_result = pool.map(filter_result, zip(scores_pick, merge_ids, preds_pick, pick, bbox_scores_pick))
     #final_result = [item for item in final_result if item is not None]
 
