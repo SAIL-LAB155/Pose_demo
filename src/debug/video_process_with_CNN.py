@@ -2,21 +2,21 @@ import torch
 import cv2
 import copy
 import numpy as np
-from config import config
 from src.estimator.pose_estimator import PoseEstimator
 from src.estimator.visualize import KeyPointVisualizer
 from src.detector.yolo_detect import ObjectDetectionYolo
 from src.detector.visualize import BBoxVisualizer
-from src.tracker.track_match import ObjectTracker
+from src.tracker.track import ObjectTracker
 from src.tracker.visualize import IDVisualizer
 from src.utils.img import torch_to_im, gray3D, cut_image_with_box
 from src.detector.box_postprocess import crop_bbox
 from src.CNNclassifier.inference import CNNInference
 
 try:
-    from config.config import yolo_weight, yolo_cfg, video_path, pose_weight, pose_cfg
-except:
     from src.debug.config.cfg_with_CNN import yolo_weight, yolo_cfg, video_path, pose_weight, pose_cfg, CNN_class
+except:
+    from config.config import yolo_weight, yolo_cfg, video_path, pose_weight, pose_cfg
+from config import config
 
 tensor = torch.FloatTensor
 
@@ -67,7 +67,6 @@ class HumanDetection:
     def process_img(self, frame, gray=False):
         self.clear_res()
         self.frame = frame
-        id2ske, id2kpscore = {}, {}
 
         with torch.no_grad():
             if gray:
@@ -77,17 +76,15 @@ class HumanDetection:
                 box_res = self.object_detector.process(frame)
             self.boxes, self.boxes_scores = self.object_detector.cut_box_score(box_res)
 
-            if self.boxes is not None:
-                # self.id2bbox = self.boxes
-                inps, pt1, pt2 = crop_bbox(frame, self.boxes)
-                self.kps, self.kps_score, _ = self.pose_estimator.process_img(inps, self.boxes, self.boxes_scores, pt1, pt2)
+            if box_res is not None:
+                self.id2bbox = self.object_tracker.track(box_res)
+                boxes = self.object_tracker.id_and_box(self.id2bbox)
 
-                if self.kps is not []:
-                    id2ske, self.id2bbox, id2kpscore = self.object_tracker.track(self.boxes, self.kps, self.kps_score)
-                else:
-                    self.id2bbox = self.object_tracker.track_box(self.boxes)
+                inps, pt1, pt2 = crop_bbox(frame, boxes)
+                kps, kps_score, kps_id = self.pose_estimator.process_img(inps, boxes, pt1, pt2)
+                self.kps, self.kps_score = self.object_tracker.match_kps(kps_id, kps, kps_score)
 
-        return id2ske, self.id2bbox, id2kpscore
+        return self.kps, self.id2bbox, self.kps_score
 
     def classify_whole(self):
         out = self.CNN_model.predict(self.img_black)

@@ -7,10 +7,10 @@ from src.estimator.pose_estimator import PoseEstimator
 from src.estimator.visualize import KeyPointVisualizer
 from src.detector.yolo_detect import ObjectDetectionYolo
 from src.detector.visualize import BBoxVisualizer
-from src.tracker.track_match import ObjectTracker
+from src.tracker.track import ObjectTracker
 from src.tracker.visualize import IDVisualizer
-from src.utils.utils import process_kp
 from src.utils.img import torch_to_im, gray3D
+from src.analyser.area import RegionProcessor
 from src.detector.box_postprocess import crop_bbox, merge_box
 
 try:
@@ -39,6 +39,7 @@ class ImgProcessor:
         self.id2bbox = {}
         self.kps = {}
         self.kps_score = {}
+        self.RP = RegionProcessor(config.frame_size[0], config.frame_size[1], 10, 10)
         self.show_img = show_img
 
     def init_sort(self):
@@ -62,13 +63,12 @@ class ImgProcessor:
             img_black = self.KPV.vis_ske_black(self.frame, self.kps, self.kps_score)
         if config.plot_id and self.id2bbox is not None:
             self.frame = self.IDV.plot_bbox_id(self.id2bbox, self.frame)
-            # frame = self.IDV.plot_skeleton_id(id2ske, copy.deepcopy(img))
+            self.frame = self.IDV.plot_skeleton_id(self.kps, self.frame)
         return self.frame, img_black
 
     def process_img(self, frame, black_img):
         self.clear_res()
         self.frame = frame
-        id2ske, id2kpscore = {}, {}
 
         with torch.no_grad():
             gray_img = gray3D(copy.deepcopy(frame))
@@ -86,23 +86,21 @@ class ImgProcessor:
                 black_img = self.BBV.visualize(black_boxes, black_img, black_scores)
                 cv2.imshow("black", black_img)
 
-            if self.boxes is not None:
-                # self.id2bbox = self.boxes
-                inps, pt1, pt2 = crop_bbox(frame, self.boxes)
-                self.kps, self.kps_score, _ = self.pose_estimator.process_img(inps, self.boxes, self.boxes_scores, pt1,
-                                                                           pt2)
+            if gray_results is not None:
+                res = self.RP.process_box(gray_boxes, copy.deepcopy(frame))
+                self.id2bbox = self.object_tracker.track(gray_results)
+                boxes = self.object_tracker.id_and_box(self.id2bbox)
 
-                if self.kps is not []:
-                    id2ske, self.id2bbox, id2kpscore = self.object_tracker.track(self.boxes, self.kps, self.kps_score)
-                else:
-                    self.id2bbox = self.object_tracker.track_box(self.boxes)
+                inps, pt1, pt2 = crop_bbox(frame, boxes)
+                kps, kps_score, kps_id = self.pose_estimator.process_img(inps, boxes, pt1, pt2)
+                self.kps, self.kps_score = self.object_tracker.match_kps(kps_id, kps, kps_score)
 
-        return id2ske, self.id2bbox, id2kpscore
+        return self.kps, self.id2bbox, self.kps_score
 
 
 IP = ImgProcessor()
 enhance_kernel = np.array([[0, -1, 0], [0, 5, 0], [0, -1, 0]])
-frame_size = (540, 360)
+frame_size = (720, 540)
 
 
 class DrownDetector:

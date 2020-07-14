@@ -64,7 +64,7 @@ class ImgProcessor:
 
             gray_results = [gray_img, gray_boxes, gray_scores]
 
-            cnt_img, fr = self.RP.process_box(gray_boxes, frame)
+            res = self.RP.process_box(gray_boxes, frame)
 
             # boxes, scores = merge_box(gray_boxes, black_boxes, gray_scores, black_scores)
             # if gray_res is not None:
@@ -104,7 +104,7 @@ class RegionDetector(object):
                 cv2.imshow("gray_result", gray_img)
 
                 cnt += 1
-                cv2.waitKey(0)
+                cv2.waitKey(2)
             else:
                 self.cap.release()
                 cv2.destroyAllWindows()

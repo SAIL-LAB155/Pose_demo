@@ -6,10 +6,9 @@ from src.estimator.pose_estimator import PoseEstimator
 from src.estimator.visualize import KeyPointVisualizer
 from src.detector.yolo_detect import ObjectDetectionYolo
 from src.detector.visualize import BBoxVisualizer
-from src.tracker.track_match import ObjectTracker
+from src.tracker.track import ObjectTracker
 from src.tracker.visualize import IDVisualizer
-from src.utils.utils import process_kp
-from src.utils.img import torch_to_im, gray3D, calibration
+from src.utils.img import calibration
 from src.detector.box_postprocess import crop_bbox
 
 try:
@@ -70,24 +69,21 @@ class ImgProcessor:
     def __process_single_img(self, fr, tracker):
         self.clear_res()
         self.frame = fr
-        id2ske, id2kpscore = {}, {}
         with torch.no_grad():
 
             box_res = self.object_detector.process(fr)
             self.boxes, self.boxes_scores = self.object_detector.cut_box_score(box_res)
 
-            if self.boxes is not None:
-                # self.id2bbox = self.boxes
-                inps, pt1, pt2 = crop_bbox(fr, self.boxes)
-                self.kps, self.kps_score, _ = self.pose_estimator.process_img(inps, self.boxes, pt1, pt2)
+            if box_res is not None:
+                self.id2bbox = tracker.track(box_res)
+                boxes = tracker.id_and_box(self.id2bbox)
 
-                if self.kps is not []:
-                    id2ske, self.id2bbox, id2kpscore = tracker.track(self.boxes, self.kps, self.kps_score)
-                else:
-                    self.id2bbox = tracker.track_box(self.boxes)
+                inps, pt1, pt2 = crop_bbox(fr, boxes)
+                kps, kps_score, kps_id = self.pose_estimator.process_img(inps, boxes, pt1, pt2)
+                self.kps, self.kps_score = tracker.match_kps(kps_id, kps, kps_score)
 
         img, black_img = self.visualize()
-        return img, black_img, id2ske, self.id2bbox, id2kpscore
+        return img, black_img, self.kps, self.id2bbox, self.kps_score
 
     def process_img(self, fr1, fr2, fr3, fr4):
         res1 = self.__process_single_img(fr1, self.object_tracker1)

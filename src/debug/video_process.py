@@ -65,7 +65,6 @@ class HumanDetection:
     def process_img(self, frame, gray=False):
         self.clear_res()
         self.frame = frame
-        id2ske, id2kpscore = {}, {}
 
         with torch.no_grad():
             if gray:
@@ -81,21 +80,7 @@ class HumanDetection:
 
                 inps, pt1, pt2 = crop_bbox(frame, boxes)
                 kps, kps_score, kps_id = self.pose_estimator.process_img(inps, boxes, pt1, pt2)
-
                 self.kps, self.kps_score = self.object_tracker.match_kps(kps_id, kps, kps_score)
-
-                # if len(self.kps) > 0:
-                #     # box_res = box_res[kps_id]
-                #     id2ske, self.id2bbox, id2kpscore = self.object_tracker.track(self.boxes, self.kps, self.kps_score)
-                # else:
-                #     self.id2bbox = self.object_tracker.track_box(self.boxes)
-
-                # self.object_tracker.track(box_res[kps_id])
-
-                # if len(self.kps) > 0:
-                #     id2ske, self.id2bbox, id2kpscore = self.object_tracker.match(self.kps, self.kps_score)
-                # else:
-                #     self.id2bbox = self.object_tracker.track_box()
 
         return self.kps, self.id2bbox, self.kps_score
 

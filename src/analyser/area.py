@@ -2,8 +2,9 @@ from .region import Region
 import numpy as np
 import math
 import cv2
-from src.utils.utils import cal_center_point
 import copy
+from src.utils.utils import cal_center_point
+from .area_vis import AreaVisualizer
 
 
 class RegionProcessor:
@@ -15,6 +16,7 @@ class RegionProcessor:
         self.region_idx = [(i, j) for i in range(h_num) for j in range(w_num)]
         self.REGIONS = {idx: Region(idx, self.h_interval, self.w_interval) for idx in self.region_idx}
         self.if_write = write
+        self.Visualize = AreaVisualizer(w, h, w_num, h_num)
 
         if self.if_write:
             fourcc = cv2.VideoWriter_fourcc(*'XVID')
@@ -107,15 +109,12 @@ class RegionProcessor:
             self.empty_ls = self.region_idx
         self.update_region()
         self.trigger_alarm(fr)
-        im_black = cv2.imread("../black.jpg")
-        im_black = cv2.resize(im_black, (self.width, self.height))
-        self.draw_cnt_map(im_black)
-        self.draw_origin(boxes, fr)
-        res = np.concatenate((im_black, fr), axis=1)
+
+        res = self.visualize(boxes, fr)
         cv2.imshow("result", res)
         if self.if_write:
             self.out.write(res)
-        return im_black, fr
+        return res
 
     def draw_alarm_signal(self, img):
         cv2.putText(img, "HELP!!!", (360, 270), cv2.FONT_HERSHEY_SIMPLEX, 3, (0, 0, 255), 3)
@@ -130,29 +129,17 @@ class RegionProcessor:
             region = self.REGIONS[idx]
             img = cv2.rectangle(img, (region.left, region.top), (region.right, region.bottom), (0, 0, 255), -1)
 
-    def draw_boundary(self, img):
-        for i in range(self.width_num - 1):
-            cv2.line(img, (0, (i+1) * self.h_interval),
-                     (self.width, (i+1) * self.h_interval), [0, 255, 255], 1)
-        for j in range(self.height_num - 1):
-            cv2.line(img, ((j + 1) * self.w_interval, 0),
-                     ((j+1) * self.w_interval, self.height), [0, 255, 255], 1)
+    def visualize(self, boxes, img):
+        im_black = cv2.imread("src/black.jpg")
+        im_black = cv2.resize(im_black, (self.width, self.height))
+        self.Visualize.draw_cnt_map(im_black, self.REGIONS)
 
-    def draw_box(self, boxes, img):
-        if boxes is not None:
-            for box in boxes:
-                [x1, y1, x2, y2] = box
-                img = cv2.rectangle(img, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 4)
-
-    def draw_center_point(self, boxes, img):
-        if boxes is not None:
-            for box in boxes:
-                cv2.circle(img, cal_center_point(box), 4, (255, 255, 0), -1)
-
-    def draw_origin(self, boxes, img):
-        self.draw_box(boxes, img)
-        self.draw_center_point(boxes, img)
-        self.draw_boundary(img)
+        self.Visualize.draw_box(boxes, img)
+        self.Visualize.draw_center_point(boxes, img)
+        self.Visualize.draw_boundary(img)
+        self.Visualize.draw_warning_mask(img, self.REGIONS, self.alarm_ls)
+        res = np.concatenate((im_black, img), axis=1)
+        return res
 
 
 if __name__ == '__main__':
