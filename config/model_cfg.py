@@ -70,7 +70,7 @@ mobile_opt = {"0": None,
 
 
 seresnet_cfg = {"0": None,
-                "1": "config/pose_cfg/seresnet_cfg.txt",
+                "cfg1": "config/pose_cfg/cfg.txt",
                 }
 
 

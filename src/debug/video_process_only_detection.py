@@ -31,6 +31,7 @@ class ImgProcessor:
         self.BBV = BBoxVisualizer()
         self.IDV = IDVisualizer(with_bbox=False)
         self.img = []
+        self.id2bbox = {}
         self.img_black = []
         self.show_img = show_img
         self.RP = RegionProcessor(config.frame_size[0], config.frame_size[1], 10, 10)
@@ -64,7 +65,10 @@ class ImgProcessor:
 
             gray_results = [gray_img, gray_boxes, gray_scores]
 
-            res = self.RP.process_box(gray_boxes, frame)
+            if gray_res is not None:
+                self.id2bbox = self.object_tracker.track(gray_res)
+                boxes = self.object_tracker.id_and_box(self.id2bbox)
+                res = self.RP.process_box(boxes, frame)
 
             # boxes, scores = merge_box(gray_boxes, black_boxes, gray_scores, black_scores)
             # if gray_res is not None:

@@ -23,6 +23,7 @@ class Region:
             pass
         elif flag == 1:
             self.update_exist(flag)
+            self.disappear = 0
         elif flag == 2:
             self.update_exist(flag)
         elif flag == -1:

@@ -63,6 +63,7 @@ class HumanDetection:
     def process_img(self, frame, gray=False):
         self.clear_res()
         self.frame = frame
+        cv2.imwrite("img/origin.jpg", self.frame)
 
         with torch.no_grad():
             if gray:

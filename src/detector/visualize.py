@@ -17,7 +17,7 @@ class BBoxVisualizer(object):
 
         for idx, bbox in enumerate(bboxes):
             [x1, y1, x2, y2] = bbox
-            img = cv2.rectangle(img, (int(x1), int(y1)), (int(x2), int(y2)), self.box_color, 4)
+            img = cv2.rectangle(img, (int(x1), int(y1)), (int(x2), int(y2)), self.box_color, 6)
             if scores is not None:
                 cv2.putText(img, "{}".format(round(scores[idx], 2)), (int((x1+x2)/2), int((y1+y2)/2)),
                             cv2.FONT_HERSHEY_PLAIN, 2, self.score_color, 2)

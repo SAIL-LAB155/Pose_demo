@@ -50,7 +50,7 @@ class HumanDetection:
         self.kps_score = {}
 
     def visualize(self):
-        img_black = cv2.imread('video/black.jpg')
+        img_black = cv2.imread('src/black.jpg')
         if config.plot_bbox and self.boxes is not None:
             self.frame = self.BBV.visualize(self.boxes, self.frame)
             # cv2.imshow("cropped", (torch_to_im(inps[0]) * 255))
