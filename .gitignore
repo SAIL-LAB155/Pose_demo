@@ -48,3 +48,6 @@ config/config.py
 src/debug/model
 src/debug/video
 *output*
+img
+app_class
+video_process_with_txt_jump.py

@@ -13,6 +13,7 @@ class Region:
         self.top, self.bottom, self.left, self.right = int(idx[1]*h), int((idx[1]+1)*h), int(idx[0]*w), int((idx[0]+1)*w)
         self.exists = 0
         self.disappear = 0
+        self.disappearing = True
 
     def clear(self):
         self.exists = 0

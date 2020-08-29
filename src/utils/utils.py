@@ -31,5 +31,27 @@ def image_normalize(img_name, size=224):
     return image_tensor
 
 
+def cut_image_box(img, box):
+    x1, y1, x2, y2 = int(box[0]), int(box[1]), int(box[2]), int(box[3])
+    x1 = 0 if x1 < 0 else x1
+    y1 = 0 if y1 < 0 else y1
+    x2 = img.shape[1] if x2 > img.shape[1] else x2
+    y2 = img.shape[0] if y2 > img.shape[0] else y2
+    img = np.asarray(img[y1: y2, x1: x2])
+    return img
+
+
 def cal_center_point(box):
     return int((box[2] - box[0]) / 2) + box[0], int((box[3] - box[1]) / 2) + box[1]
+
+
+def paste_box(frame, black, boxes):
+    for box in boxes:
+        x1, y1, x2, y2 = int(box[0]), int(box[1]), int(box[2]), int(box[3])
+        x1 = 0 if x1 < 0 else x1
+        y1 = 0 if y1 < 0 else y1
+        x2 = frame.shape[1] if x2 > frame.shape[1] else x2
+        y2 = frame.shape[0] if y2 > frame.shape[0] else y2
+        img = np.asarray(frame[y1: y2, x1: x2])
+        black[y1:y2, x1:x2, :] = img
+    return black

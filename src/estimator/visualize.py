@@ -3,14 +3,15 @@ import cv2
 from PIL import Image
 import numpy as np
 from config.config import pose_cls
+from src.utils.plot import colors
 
-RED = (0, 0, 255)
-GREEN = (0, 255, 0)
-BLUE = (255, 0, 0)
-CYAN = (255, 255, 0)
-YELLOW = (0, 255, 255)
-ORANGE = (0, 165, 255)
-PURPLE = (255, 0, 255)
+RED = colors["red"]
+GREEN = colors["green"]
+BLUE = colors["blue"]
+CYAN = colors["cyan"]
+YELLOW = colors["yellow"]
+ORANGE = colors["orange"]
+PURPLE = colors["purple"]
 
 if pose_cls == 13:
     coco_l_pair = [

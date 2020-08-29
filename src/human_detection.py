@@ -26,7 +26,7 @@ class HumanDetection:
         self.pose_estimator = PoseEstimator(pose_cfg=pose_cfg, pose_weight=pose_weight)
         self.BBV = BBoxVisualizer()
         self.KPV = KeyPointVisualizer()
-        self.IDV = IDVisualizer(with_bbox=False)
+        self.IDV = IDVisualizer(with_bbox=True)
         self.boxes = tensor([])
         self.boxes_scores = tensor([])
         self.img_black = np.array([])
@@ -49,21 +49,26 @@ class HumanDetection:
 
     def visualize(self):
         img_black = cv2.imread('video/black.jpg')
-        if config.plot_bbox and self.boxes is not None:
-            self.frame = self.BBV.visualize(self.boxes, self.frame, self.boxes_scores)
+        # if config.plot_bbox and self.boxes is not None:
+            # self.frame = self.BBV.visualize(self.boxes, self.frame, self.boxes_scores)
+            # self.frame = self.BBV.visualize(self.boxes, self.frame)
             # cv2.imshow("cropped", (torch_to_im(inps[0]) * 255))
         if config.plot_kps and self.kps is not []:
             self.frame = self.KPV.vis_ske(self.frame, self.kps, self.kps_score)
             img_black = self.KPV.vis_ske_black(self.frame, self.kps, self.kps_score)
         if config.plot_id and self.id2bbox is not None:
             self.frame = self.IDV.plot_bbox_id(self.id2bbox, self.frame)
+            self.frame = self.IDV.plot_bbox_id(self.object_tracker.get_pred(), self.frame, color=("yellow", "orange"),
+                                               id_pos="down")
             # frame = self.IDV.plot_skeleton_id(id2ske, copy.deepcopy(img))
+        iou_map = self.object_tracker.plot_iou_map()
+        # cv2.imshow("iou", cv2.resize(iou_map, (720, 540)))
+        self.frame = np.concatenate((self.frame, cv2.resize(iou_map, (720, 540))), axis=1)
         return self.frame, img_black
 
     def process_img(self, frame, gray=False):
         self.clear_res()
         self.frame = frame
-        cv2.imwrite("img/origin.jpg", self.frame)
 
         with torch.no_grad():
             if gray:

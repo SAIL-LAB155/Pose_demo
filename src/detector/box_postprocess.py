@@ -2,6 +2,7 @@ import torch
 from ..utils.img import cropBox, im_to_torch
 from config import config
 import cv2
+from src.yolo.bbox import bbox_iou
 
 
 def crop_bbox(orig_img, boxes):
@@ -58,6 +59,65 @@ def crop_from_dets(img, boxes):
     return inps, pt1, pt2
 
 
-def merge_box(gray_box, black_box, gray_scores, black_scores):
-    return gray_box, gray_scores
+def filter_box(boxes, scores, res, thresh=0.3):
+    keep_ls = []
+    for idx, (b, s, r) in enumerate(zip(boxes, scores, res)):
+        if s > thresh and right_distance(b[0], b[2]) and right_distance(b[1], b[3]):
+            keep_ls.append(idx)
+    return boxes[keep_ls], scores[keep_ls], res[keep_ls]
+
+
+def right_distance(a, b):
+    if abs(a-b) > 10:
+        return True
+    return False
+
+
+def cal_area(box):
+    area = (box[2]-box[0])*(box[3]-box[1])
+    # print(area)
+    return area
+
+
+def nms(dets, conf=0.6):
+    if len(dets) < 2:
+        return dets
+
+    max_detections = []
+    while dets.size(0):
+        # Get detection with highest confidence and save as max detection
+        max_detections.append(dets[0].unsqueeze(0))
+        # Stop if we're at the last detection
+        if len(dets) == 1:
+            break
+        # Get the IOUs for all boxes with lower confidence
+        ious = bbox_iou(max_detections[-1], dets[1:])
+        # Remove detections with IoU >= NMS threshold
+        dets = dets[1:][ious < conf]
+
+    return torch.cat(max_detections)
+
+
+class BoxEnsemble:
+    def __init__(self, height=config.frame_size[1], width=config.frame_size[0]):
+        self.pre_boxes = []
+        self.max_box = 1
+        self.black_max_thresh = height * width * 0.4
+
+    def ensemble_box(self, black_res, gray_res):
+        black_keep = self.keep_small(black_res[:, :4], self.black_max_thresh)
+        # gray_keep = self.analyse_area(gray_res[:,:4], "b")
+        # merged_res = torch.cat((black_res[black_keep], gray_res[gray_keep]), dim=0)
+        merged_res = torch.cat((black_res[black_keep], gray_res), dim=0)
+        merged_res = nms(merged_res)
+        return merged_res
+
+    def keep_small(self, boxes, thresh):
+        keep_idx = []
+        if len(boxes) > 0:
+            for idx, box in enumerate(boxes):
+                if cal_area(box) < thresh:
+                    keep_idx.append(idx)
+        return keep_idx
+
 
