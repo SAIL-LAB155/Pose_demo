@@ -1,5 +1,7 @@
 from .sort import Sort
 import torch
+import cv2
+from src.utils.plot import colors, thicks, sizes
 
 tensor = torch.FloatTensor
 
@@ -39,18 +41,28 @@ class ObjectTracker(object):
             id2kpScore[self.ids[kp_id]] = kps_score[idx]
         return id2kps, id2kpScore
 
-    def match(self, kps, kps_score):
-        id2box, id2kps, id2kpScore = {}, {}, {}
-        for item in self.tracked_box:
-            mark1, mark2 = item[0].tolist(), item[1].tolist()
-            for j in range(len(self.box)):
-                if self.box[j][0].tolist() == mark1 and self.box[j][1].tolist() == mark2:
-                    idx = item[4]
-                    id2box[idx] = item[:4]
-                    id2kps[idx] = kps[j]
-                    id2kpScore = kps_score[j]
-        return id2kps, id2box, id2kpScore
-    #
-    # def track_box(self):
-    #     return {int(box[4]): tensor(box[:4]) for box in self.tracked_box}
+    def get_pred(self):
+        return self.tracker.id2pred
 
+    def plot_iou_map(self, h_interval=30, w_interval=80):
+        img = cv2.imread('src/black.jpg')
+        iou_matrix = self.tracker.mat
+        match_pairs = [(pair[0], pair[1]) for pair in self.tracker.match_indices]
+        if len(iou_matrix) > 0:
+            for h_idx, h_item in enumerate(iou_matrix):
+                if h_idx == 0:
+                    color = colors["purple"]
+                    cv2.line(img, (0, 25), (img.shape[1], 25), color, thicks["line"])
+
+                for w_idx, item in enumerate(h_item):
+                    if w_idx == 0 or h_idx == 0:
+                        color = colors["purple"]
+                        if h_idx == 0:
+                            cv2.line(img, (100, 0), (100, img.shape[0]), color, thicks["line"])
+                    elif (w_idx-1, h_idx-1) in match_pairs:
+                        color = colors["red"]
+                    else:
+                        color = colors["yellow"]
+                    cv2.putText(img, item, (10+w_interval*w_idx, 20+h_interval*h_idx), cv2.FONT_HERSHEY_PLAIN,
+                                sizes["word"], color, thicks["word"])
+        return img

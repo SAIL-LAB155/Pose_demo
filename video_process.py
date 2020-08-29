@@ -19,7 +19,7 @@ class VideoProcessor:
         self.cap = cv2.VideoCapture(video_path)
         self.height, self.width = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)), int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         if write_video:
-            self.out = cv2.VideoWriter(video_path[:-4] + "_processed.avi", fourcc, 15, frame_size)
+            self.out = cv2.VideoWriter(video_path[:-4] + "_processed.avi", fourcc, 12, (frame_size[0]*2, frame_size[1]))
         if write_box:
             box_file = "/".join(video_path.split("/")[:-1]) + "/" + video_path.split("/")[-1][:-4] + "_box.txt"
             self.box_txt = open(box_file, "w")
@@ -80,9 +80,6 @@ class VideoProcessor:
                 if write_video:
                     self.out.release()
                 break
-
-    def locate(self, kps):
-        return kps
 
 
 if __name__ == '__main__':
