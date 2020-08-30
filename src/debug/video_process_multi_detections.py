@@ -40,7 +40,7 @@ class ImgProcessor:
         self.pose_estimator = PoseEstimator(pose_cfg=pose_cfg, pose_weight=pose_weight)
         self.KPV = KeyPointVisualizer()
         self.BBV = BBoxVisualizer()
-        self.IDV = IDVisualizer(with_bbox=False)
+        self.IDV = IDVisualizer()
         self.img = []
         self.id2bbox = {}
         self.img_black = []
@@ -52,10 +52,12 @@ class ImgProcessor:
         self.kps_score = {}
 
     def process_img(self, frame, background):
-        rgb_kps, dip_img, track_pred = copy.deepcopy(frame), copy.deepcopy(frame), copy.deepcopy(frame)
+        rgb_kps, dip_img, track_pred, rd_box = \
+            copy.deepcopy(frame), copy.deepcopy(frame), copy.deepcopy(frame), copy.deepcopy(frame)
         img_black = cv2.imread("src/black.jpg")
         img_black = cv2.resize(img_black, config.frame_size)
-        iou_img, black_kps, img_cnt = copy.deepcopy(img_black), copy.deepcopy(img_black), copy.deepcopy(img_black)
+        iou_img, black_kps, img_size_ls, img_box_ratio, rd_cnt = copy.deepcopy(img_black), \
+            copy.deepcopy(img_black), copy.deepcopy(img_black), copy.deepcopy(img_black), copy.deepcopy(img_black)
 
         black_boxes, black_scores, gray_boxes, gray_scores = empty_tensor, empty_tensor, empty_tensor, empty_tensor
         diff = cv2.absdiff(frame, background)
@@ -86,24 +88,25 @@ class ImgProcessor:
 
             merged_res = self.BE.ensemble_box(black_res, gray_res)
 
-            if len(merged_res) > 0:
+            # if len(merged_res) > 0:
                 # merged_boxes, merged_scores = self.gray_yolo.cut_box_score(merged_res)
-                self.id2bbox = self.object_tracker.track(merged_res)
-                boxes = self.object_tracker.id_and_box(self.id2bbox)
-                self.IDV.plot_bbox_id(self.id2bbox, frame)
-                img_black = paste_box(rgb_kps, img_black, boxes)
-                self.HP.update(self.id2bbox)
-            else:
-                boxes = empty_tensor4
+            self.id2bbox = self.object_tracker.track(merged_res)
+            boxes = self.object_tracker.id_and_box(self.id2bbox)
+            self.IDV.plot_bbox_id(self.id2bbox, rd_box)
+            self.IDV.plot_bbox_id(self.id2bbox, track_pred, color=("red", "purple"), with_bbox=True)
+            self.IDV.plot_bbox_id(self.object_tracker.get_pred(), track_pred, color=("yellow", "orange"), id_pos="down",
+                                  with_bbox=True)
+            # else:
+            #     boxes = empty_tensor4
 
             iou_img = self.object_tracker.plot_iou_map(iou_img)
-            img_black = paste_box(rgb_kps, img_black, boxes)
+            img_box_ratio = paste_box(rgb_kps, img_box_ratio, boxes)
             self.HP.update(self.id2bbox)
 
-            rd_map = self.RP.process_box(boxes, frame)
+            self.RP.process_box(boxes, rd_box, rd_cnt)
             warning_idx = self.RP.get_alarmed_box_id(self.id2bbox)
             danger_idx = self.HP.box_size_warning(warning_idx)
-            box_map = self.HP.vis_box_size(img_black, img_cnt)
+            self.HP.vis_box_size(img_box_ratio, img_size_ls)
 
             if danger_idx:
                 danger_id2box = {k:v for k,v in self.id2bbox.items() if k in danger_idx}
@@ -115,6 +118,7 @@ class ImgProcessor:
                         self.kps, self.kps_score = self.object_tracker.match_kps(kps_id, kps, kps_score)
                         self.HP.update_kps(self.kps)
                         rgb_kps = self.KPV.vis_ske(rgb_kps, kps, kps_score)
+                        rgb_kps = self.IDV.plot_bbox_id(danger_id2box, rgb_kps)
                         rgb_kps = self.IDV.plot_skeleton_id(self.kps, rgb_kps)
                         rgb_kps = self.BBV.visualize(danger_box, rgb_kps)
                         black_kps = self.KPV.vis_ske_black(black_kps, kps, kps_score)
@@ -126,20 +130,24 @@ class ImgProcessor:
                                 self.HP.update_RNN(idx, RNN_res)
                                 self.RNN_model.vis_RNN_res(n, idx, self.HP.get_RNN_preds(idx), black_kps)
 
-            iou_img = cv2.resize(iou_img, frame_size)
             detection_map = np.concatenate((enhanced, gray_img), axis=1)
-            yolo_cnt_map = np.concatenate((detection_map, rd_map), axis=0)
-            yolo_map = np.concatenate((yolo_cnt_map, box_map), axis=1)
-            kps_img = np.concatenate((iou_img, rgb_kps, black_kps), axis=1)
-            res = np.concatenate((yolo_map, kps_img), axis=0)
+            tracking_map = np.concatenate((track_pred, iou_img), axis=1)
+            row_1st_map = np.concatenate((detection_map, tracking_map), axis=1)
+            box_map = np.concatenate((img_box_ratio, img_size_ls), axis=1)
+            rd_map = np.concatenate((rd_cnt, rd_box), axis=1)
+            row_2nd_map = np.concatenate((rd_map, box_map), axis=1)
+            kps_map = np.concatenate((rgb_kps, black_kps), axis=1)
+            cache_map = np.concatenate((frame, img_black), axis=1)
+            row_3rd_map = np.concatenate((kps_map, cache_map), axis=1)
+            res_map = np.concatenate((row_1st_map, row_2nd_map, row_3rd_map), axis=0)
 
-        return gray_results, black_results, dip_results, res
+        return gray_results, black_results, dip_results, res_map
 
 
 IP = ImgProcessor()
 enhance_kernel = np.array([[0, -1, 0], [0, 5, 0], [0, -1, 0]])
 frame_size = (720, 540)
-store_size = (frame_size[0]*3, frame_size[1]*3)
+store_size = (frame_size[0]*4, frame_size[1]*3)
 write_video = True
 
 

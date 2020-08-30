@@ -30,7 +30,7 @@ class ImgProcessor:
         self.object_tracker4 = ObjectTracker()
         self.BBV = BBoxVisualizer()
         self.KPV = KeyPointVisualizer()
-        self.IDV = IDVisualizer(with_bbox=False)
+        self.IDV = IDVisualizer()
         self.boxes = tensor([])
         self.boxes_scores = tensor([])
         self.frame = np.array([])

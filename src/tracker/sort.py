@@ -162,7 +162,7 @@ class Sort(object):
 
   def draw_iou_mat(self, interval=8):
     if len(self.iou_matrix) < 1:
-      return ["Not detected"]
+      return [["N/A"]]
     iou = self.iou_matrix.T
     matrix = [["t\d".rjust(interval, " ")]]
     dets_ls = [str(idx).rjust(interval, " ") for idx in range(len(iou[0]))]

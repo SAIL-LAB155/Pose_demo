@@ -93,22 +93,18 @@ class RegionProcessor:
             self.draw_alarm_signal(img)
             self.draw_warning_mask(img)
 
-    def process_box(self, boxes, fr):
+    def process_box(self, boxes, rd_block, rd_cnt):
         self.clear()
-        self.img = copy.deepcopy(fr)
+        self.img = copy.deepcopy(rd_block)
         if len(boxes) > 0:
             center_ls, cover_ls, occupy_ls = self.region_classify(boxes)
             self.region_process(occupy_ls, cover_ls, center_ls)
         else:
             self.empty_ls = self.region_idx
         self.update_region()
-        self.trigger_alarm(fr)
+        self.trigger_alarm(rd_block)
 
-        res = self.visualize(boxes, fr)
-        # cv2.imshow("result", res)
-        if self.if_write:
-            self.out.write(res)
-        return res
+        self.visualize(boxes, rd_block, rd_cnt)
 
     def get_alarmed_box_id(self, id2bbox):
         warning_ls = []
@@ -134,9 +130,7 @@ class RegionProcessor:
             region = self.REGIONS[idx]
             img = cv2.rectangle(img, (region.left, region.top), (region.right, region.bottom), (0, 255, 255), -1)
 
-    def visualize(self, boxes, img):
-        im_black = cv2.imread("src/black.jpg")
-        im_black = cv2.resize(im_black, (self.width, self.height))
+    def visualize(self, boxes, img, im_black):
         self.Visualize.draw_cnt_map(im_black, self.REGIONS)
 
         if boxes is not None:
@@ -144,8 +138,6 @@ class RegionProcessor:
             self.Visualize.draw_center_point(boxes, img)
         self.Visualize.draw_boundary(img)
         self.Visualize.draw_warning_mask(img, self.REGIONS, self.alarm_ls)
-        res = np.concatenate((im_black, img), axis=1)
-        return res
 
 
 if __name__ == '__main__':

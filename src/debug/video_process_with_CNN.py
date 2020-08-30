@@ -28,7 +28,7 @@ class HumanDetection:
         self.pose_estimator = PoseEstimator(pose_cfg=pose_cfg, pose_weight=pose_weight)
         self.BBV = BBoxVisualizer()
         self.KPV = KeyPointVisualizer()
-        self.IDV = IDVisualizer(with_bbox=False)
+        self.IDV = IDVisualizer()
         self.boxes = tensor([])
         self.boxes_scores = tensor([])
         self.img_black = np.array([])

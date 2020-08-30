@@ -7,10 +7,11 @@ from config.config import track_plot_id
 
 
 class IDVisualizer(object):
-    def __init__(self, with_bbox=True):
-        self.with_bbox = with_bbox
+    def __init__(self):
+        pass
+        # self.with_bbox = with_bbox
 
-    def plot_bbox_id(self, id2bbox, img, color=("blue", "red"), id_pos="up"):
+    def plot_bbox_id(self, id2bbox, img, color=("blue", "red"), id_pos="up",with_bbox=False):
         for idx, box in id2bbox.items():
             if "all" not in track_plot_id:
                 if idx not in track_plot_id:
@@ -22,7 +23,7 @@ class IDVisualizer(object):
             else:
                 cv2.putText(img, "id{}".format(idx), (int((x1 + x2)/2), int(y2)), cv2.FONT_HERSHEY_PLAIN, sizes["id"],
                             colors[color[0]], thicks["id"])
-            if self.with_bbox:
+            if with_bbox:
                 img = cv2.rectangle(img, (int(x1), int(y1)), (int(x2), int(y2)), colors[color[1]], thicks["box"])
         return img
 

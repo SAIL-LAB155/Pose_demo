@@ -15,7 +15,7 @@ RNN_class = ["stand", "drown"]
 RNN_weight = "model/RNN/TCN_struct1_2020-07-08-20-02-32.pth"
 TCN_single = True
 
-video_path = "video/region/0619_39.mp4"
+video_path = "video/region/0622_1.mp4"
 
 black_box_threshold = 0.3
 gray_box_threshold = 0.2

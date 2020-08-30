@@ -35,7 +35,7 @@ class ImgProcessor:
         self.object_tracker = ObjectTracker()
         self.dip_detection = ImageProcessDetection()
         self.BBV = BBoxVisualizer()
-        self.IDV = IDVisualizer(with_bbox=False)
+        self.IDV = IDVisualizer()
         self.img = []
         self.id2bbox = {}
         self.img_black = []
