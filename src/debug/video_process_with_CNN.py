@@ -45,24 +45,22 @@ class HumanDetection:
     def clear_res(self):
         self.boxes = tensor([])
         self.boxes_scores = tensor([])
-        self.img_black = np.array([])
         self.frame = np.array([])
         self.id2bbox = {}
         self.kps = {}
         self.kps_score = {}
 
     def visualize(self):
-        self.img_black = cv2.imread('video/black.jpg')
+        img_black = cv2.imread('src/black.jpg')
         if config.plot_bbox and self.boxes is not None:
-            self.frame = self.BBV.visualize(self.boxes, self.frame, self.boxes_scores)
-            # cv2.imshow("cropped", (torch_to_im(inps[0]) * 255))
+            self.BBV.visualize(self.boxes, self.frame)
         if config.plot_kps and self.kps is not []:
             self.frame = self.KPV.vis_ske(self.frame, self.kps, self.kps_score)
-            self.img_black = self.KPV.vis_ske_black(self.frame, self.kps, self.kps_score)
+            img_black = self.KPV.vis_ske_black(self.frame, self.kps, self.kps_score)
         if config.plot_id and self.id2bbox is not None:
-            self.frame = self.IDV.plot_bbox_id(self.id2bbox, self.frame)
-            # frame = self.IDV.plot_skeleton_id(id2ske, copy.deepcopy(img))
-        return self.frame, self.img_black
+            self.IDV.plot_bbox_id(self.id2bbox, self.frame)
+            self.IDV.plot_skeleton_id(self.kps, self.frame)
+        return self.frame, img_black
 
     def process_img(self, frame, gray=False):
         self.clear_res()
@@ -86,20 +84,21 @@ class HumanDetection:
 
         return self.kps, self.id2bbox, self.kps_score
 
-    def classify_whole(self):
-        out = self.CNN_model.predict(self.img_black)
+    def classify_whole(self, img):
+        out = self.CNN_model.predict(img)
         idx = out[0].tolist().index(max(out[0].tolist()))
         pred = CNN_class[idx]
         print("The prediction is {}".format(pred))
 
-    def classify(self):
-        for box in self.id2bbox.values():
-            img = cut_image_with_box(self.img_black, left=int(box[0]), top=int(box[1]), right=int(box[2]), bottom=int(box[3]))
+    def classify(self, src_img, id2bbox):
+        for box in id2bbox.values():
+            img = cut_image_with_box(src_img, left=int(box[0]), top=int(box[1]), right=int(box[2]), bottom=int(box[3]))
             out = self.CNN_model.predict(img)
             idx = out[0].tolist().index(max(out[0].tolist()))
             pred = CNN_class[idx]
             text_location = (int((box[0]+box[2])/2)), int((box[1])+50)
             cv2.putText(self.frame, pred, text_location, cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 1)
+        return self.frame
 
 
 IP = HumanDetection()
@@ -119,10 +118,11 @@ class VideoProcessor:
                 frame = cv2.resize(frame, frame_size)
                 kps, boxes, kps_score = IP.process_img(frame)
                 img, img_black = IP.visualize()
-                IP.classify_whole()
+                IP.classify_whole(img_black)
                 cv2.imshow("res", img)
+                img_each = IP.classify(IP.frame, boxes)
+                cv2.imshow("each", img_each)
                 cv2.waitKey(2)
-
             else:
                 self.cap.release()
                 break
