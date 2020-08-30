@@ -11,8 +11,7 @@ from src.detector.yolo_detect import ObjectDetectionYolo
 from src.detector.visualize import BBoxVisualizer
 from src.tracker.track import ObjectTracker
 from src.tracker.visualize import IDVisualizer
-from src.utils.utils import process_kp
-from src.utils.img import torch_to_im, gray3D
+from src.utils.img import gray3D
 from src.detector.box_postprocess import crop_bbox
 from config.config import yolo_weight, yolo_cfg, video_path, pose_weight, pose_cfg
 
@@ -48,7 +47,8 @@ class HumanDetection:
         self.kps_score = {}
 
     def visualize(self):
-        img_black = cv2.imread('video/black.jpg')
+        img_black = cv2.imread('src/black.jpg')
+        iou_img = copy.deepcopy(img_black)
         # if config.plot_bbox and self.boxes is not None:
             # self.frame = self.BBV.visualize(self.boxes, self.frame, self.boxes_scores)
             # self.frame = self.BBV.visualize(self.boxes, self.frame)
@@ -61,7 +61,7 @@ class HumanDetection:
             self.frame = self.IDV.plot_bbox_id(self.object_tracker.get_pred(), self.frame, color=("yellow", "orange"),
                                                id_pos="down")
             # frame = self.IDV.plot_skeleton_id(id2ske, copy.deepcopy(img))
-        iou_map = self.object_tracker.plot_iou_map()
+        iou_map = self.object_tracker.plot_iou_map(iou_img)
         # cv2.imshow("iou", cv2.resize(iou_map, (720, 540)))
         self.frame = np.concatenate((self.frame, cv2.resize(iou_map, (720, 540))), axis=1)
         return self.frame, img_black

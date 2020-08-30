@@ -79,7 +79,7 @@ def cal_area(box):
     return area
 
 
-def nms(dets, conf=0.6):
+def nms(dets, conf=0.5):
     if len(dets) < 2:
         return dets
 

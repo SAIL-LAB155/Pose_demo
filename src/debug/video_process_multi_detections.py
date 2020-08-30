@@ -10,7 +10,7 @@ from src.detector.visualize import BBoxVisualizer
 from src.estimator.pose_estimator import PoseEstimator
 from src.estimator.visualize import KeyPointVisualizer
 from src.utils.img import gray3D
-from src.detector.box_postprocess import crop_bbox, filter_box
+from src.detector.box_postprocess import crop_bbox, filter_box, BoxEnsemble
 from src.tracker.track import ObjectTracker
 from src.tracker.visualize import IDVisualizer
 from src.analyser.area import RegionProcessor
@@ -26,6 +26,8 @@ except:
         black_yolo_weights, video_path, black_box_threshold, gray_box_threshold, pose_cfg, pose_weight
 
 fourcc = cv2.VideoWriter_fourcc(*'XVID')
+empty_tensor = torch.empty([0,7])
+empty_tensor4 = torch.empty([0,4])
 
 
 class ImgProcessor:
@@ -45,17 +47,19 @@ class ImgProcessor:
         self.show_img = show_img
         self.RP = RegionProcessor(config.frame_size[0], config.frame_size[1], 10, 10)
         self.HP = HumanProcessor(config.frame_size[0], config.frame_size[1])
+        self.BE = BoxEnsemble()
         self.kps = {}
         self.kps_score = {}
 
     def process_img(self, frame, background):
-        black_boxes, black_scores, gray_boxes, gray_scores = None, None, None, None
-        # rgb_kps = copy.deepcopy(frame)
+        rgb_kps, dip_img = copy.deepcopy(frame), copy.deepcopy(frame)
+        img_black = cv2.imread("src/black.jpg")
+        img_black = cv2.resize(img_black, config.frame_size)
+        iou_img, black_kps, img_cnt = copy.deepcopy(img_black), copy.deepcopy(img_black), copy.deepcopy(img_black)
+
+        black_boxes, black_scores, gray_boxes, gray_scores = empty_tensor, empty_tensor, empty_tensor, empty_tensor
         diff = cv2.absdiff(frame, background)
-        dip_img = copy.deepcopy(frame)
         dip_boxes = self.dip_detection.detect_rect(diff)
-        # if len(dip_boxes) > 0:
-        #     dip_img = self.BBV.visualize(dip_boxes, dip_img)
         dip_results = [dip_img, dip_boxes]
 
         with torch.no_grad():
@@ -78,33 +82,30 @@ class ImgProcessor:
                 gray_img = self.BBV.visualize(gray_boxes, gray_img, gray_scores)
                 gray_boxes, gray_scores, gray_res = \
                     filter_box(gray_boxes, gray_scores, gray_res, gray_box_threshold)
-
             gray_results = [gray_img, gray_boxes, gray_scores]
 
-            img_black = cv2.imread("src/black.jpg")
-            img_black = cv2.resize(img_black, config.frame_size)
-            tmp = copy.deepcopy(img_black)
-            black_kps = copy.deepcopy(img_black)
+            merged_res = self.BE.ensemble_box(black_res, gray_res)
 
-            if gray_res is not None:
-                self.id2bbox = self.object_tracker.track(gray_res)
+            if len(merged_res) > 0:
+                # merged_boxes, merged_scores = self.gray_yolo.cut_box_score(merged_res)
+                self.id2bbox = self.object_tracker.track(merged_res)
                 boxes = self.object_tracker.id_and_box(self.id2bbox)
-                frame = self.IDV.plot_bbox_id(self.id2bbox, frame)
+                self.IDV.plot_bbox_id(self.id2bbox, frame)
+                img_black = paste_box(rgb_kps, img_black, boxes)
+                self.HP.update(self.id2bbox)
             else:
-                boxes = None
+                boxes = empty_tensor4
 
-            rgb_kps = copy.deepcopy(frame)
+            iou_img = self.object_tracker.plot_iou_map(iou_img)
             img_black = paste_box(rgb_kps, img_black, boxes)
             self.HP.update(self.id2bbox)
 
             rd_map = self.RP.process_box(boxes, frame)
             warning_idx = self.RP.get_alarmed_box_id(self.id2bbox)
             danger_idx = self.HP.box_size_warning(warning_idx)
-            box_map = self.HP.vis_box_size(img_black)
+            box_map = self.HP.vis_box_size(img_black, img_cnt)
 
             if danger_idx:
-                # danger_box = [v.numpy() for k, v in self.id2bbox.items() if k in danger_idx]
-                # danger_box = torch.FloatTensor(danger_box)
                 danger_id2box = {k:v for k,v in self.id2bbox.items() if k in danger_idx}
                 danger_box = self.object_tracker.id_and_box(danger_id2box)
                 inps, pt1, pt2 = crop_bbox(rgb_kps, danger_box)
@@ -124,14 +125,12 @@ class ImgProcessor:
                                 RNN_res = self.RNN_model.predict_action(self.HP.obtain_kps(idx))
                                 self.HP.update_RNN(idx, RNN_res)
                                 self.RNN_model.vis_RNN_res(n, idx, self.HP.get_RNN_preds(idx), black_kps)
-                                # print("Prediction of idx {}： {}".format(idx, RNN_res))
 
-            cv2.putText(tmp, "TBC...", (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 3, (0, 0, 255), 3)
-            # cv2.putText(tmp, "for rent..", (200, 200), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 2)
+            iou_img = cv2.resize(iou_img, frame_size)
             detection_map = np.concatenate((enhanced, gray_img), axis=1)
             yolo_cnt_map = np.concatenate((detection_map, rd_map), axis=0)
             yolo_map = np.concatenate((yolo_cnt_map, box_map), axis=1)
-            kps_img = np.concatenate((tmp, rgb_kps, black_kps), axis=1)
+            kps_img = np.concatenate((iou_img, rgb_kps, black_kps), axis=1)
             res = np.concatenate((yolo_map, kps_img), axis=0)
 
         return gray_results, black_results, dip_results, res
@@ -140,6 +139,8 @@ class ImgProcessor:
 IP = ImgProcessor()
 enhance_kernel = np.array([[0, -1, 0], [0, 5, 0], [0, -1, 0]])
 frame_size = (720, 540)
+store_size = (frame_size[0]*3, frame_size[1]*3)
+write_video = True
 
 
 class DrownDetector:
@@ -147,6 +148,8 @@ class DrownDetector:
         self.cap = cv2.VideoCapture(vp)
         self.fgbg = cv2.createBackgroundSubtractorMOG2(history=500, varThreshold=200, detectShadows=False)
         self.height, self.width = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)), int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        if write_video:
+            self.out_video = cv2.VideoWriter("output.mp4", cv2.VideoWriter_fourcc(*'XVID'), 15, store_size)
 
     def process_video(self):
         cnt = 0
@@ -158,6 +161,8 @@ class DrownDetector:
                 background = self.fgbg.getBackgroundImage()
                 diff = cv2.absdiff(frame, background)
                 gray_res, black_res, dip_res, res_map = IP.process_img(frame, background)
+                if write_video:
+                    self.out_video.write(res_map)
                 cv2.imshow("res", cv2.resize(res_map, (1440, 840)))
                 # out.write(res)
                 cnt += 1

@@ -41,17 +41,19 @@ class ImgProcessor:
         self.img_black = []
         self.show_img = show_img
         self.RP = RegionProcessor(config.frame_size[0], config.frame_size[1], 10, 10)
-        self.HP = HumanProcessor()
+        self.HP = HumanProcessor(config.frame_size[0], config.frame_size[1])
         self.BE = BoxEnsemble()
 
     def process_img(self, frame, background):
         black_boxes, black_scores, gray_boxes, gray_scores = empty_tensor, empty_tensor, empty_tensor, empty_tensor
-        frame_tmp = copy.deepcopy(frame)
+        img_black = cv2.imread("src/black.jpg")
+        img_black = cv2.resize(img_black, config.frame_size)
+        img_cnt = copy.deepcopy(img_black)
+        rgb_kps = copy.deepcopy(frame)
+
         diff = cv2.absdiff(frame, background)
         dip_img = copy.deepcopy(frame)
         dip_boxes = self.dip_detection.detect_rect(diff)
-        # if len(dip_boxes) > 0:
-        #     dip_img = self.BBV.visualize(dip_boxes, dip_img)
         dip_results = [dip_img, dip_boxes]
 
         with torch.no_grad():
@@ -77,11 +79,8 @@ class ImgProcessor:
 
             gray_results = [gray_img, gray_boxes, gray_scores]
 
-            img_black = cv2.imread("src/black.jpg")
-            img_black = cv2.resize(img_black, config.frame_size)
-
             merged_res = self.BE.ensemble_box(black_res, gray_res)
-            merged_img = copy.deepcopy(frame_tmp)
+            merged_img = copy.deepcopy(rgb_kps)
 
             if len(merged_res) > 0:
                 merged_boxes, merged_scores = self.gray_yolo.cut_box_score(merged_res)
@@ -89,7 +88,7 @@ class ImgProcessor:
                 self.id2bbox = self.object_tracker.track(merged_res)
                 boxes = self.object_tracker.id_and_box(self.id2bbox)
                 self.IDV.plot_bbox_id(self.id2bbox, frame)
-                img_black = paste_box(frame_tmp, img_black, boxes)
+                img_black = paste_box(rgb_kps, img_black, boxes)
                 self.HP.update(self.id2bbox)
             else:
                 boxes = empty_tensor4
@@ -101,7 +100,7 @@ class ImgProcessor:
 
             # danger_box = [v for k, v in self.id2bbox.items() if k in danger_idx]
 
-            box_map = self.HP.vis_box_size(img_black)
+            box_map = self.HP.vis_box_size(img_black, img_cnt)
             yolo_map = np.concatenate((enhanced, gray_img), axis=1)
             yolo_cnt_map = np.concatenate((yolo_map, rd_map), axis=0)
             res = np.concatenate((yolo_cnt_map, box_map), axis=1)

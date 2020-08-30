@@ -20,7 +20,7 @@ class BBoxVisualizer(object):
             img = cv2.rectangle(img, (int(x1), int(y1)), (int(x2), int(y2)), colors[color[0]], thicks["box"])
             if scores is not None:
                 cv2.putText(img, "{}".format(round(scores[idx], 2)), (int((x1+x2)/2), int((y1+y2)/2)),
-                            cv2.FONT_HERSHEY_PLAIN, sizes["word"], colors[color[1]], thicks["word"])
+                            cv2.FONT_HERSHEY_PLAIN, sizes["id"], colors[color[1]], thicks["word"])
         return img
 
     def __dict2ls(self, id2box):
