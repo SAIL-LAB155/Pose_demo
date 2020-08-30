@@ -2,10 +2,11 @@ from .people import Person
 import cv2
 from config.config import frame_size
 import numpy as np
+from src.utils.kp_process import KPSProcessor
 
 
 class HumanProcessor:
-    def __init__(self):
+    def __init__(self, width, height):
         self.stored_id = []
         self.PEOPLE = {}
         self.curr_id = []
@@ -13,6 +14,8 @@ class HumanProcessor:
         self.curr_box_res = {}
         self.RD_warning = []
         self.RD_box_warning = []
+        self.KPS_idx = []
+        self.KPSP = KPSProcessor(height, width)
 
     def clear(self):
         self.curr_id = []
@@ -20,6 +23,7 @@ class HumanProcessor:
         self.curr_box_res = {}
         self.RD_warning = []
         self.RD_box_warning = []
+        self.KPS_idx = []
 
     def update_box(self, id2box):
         self.clear()
@@ -31,11 +35,12 @@ class HumanProcessor:
             else:
                 self.PEOPLE[k].BOX.append(v)
             self.curr_box_res[k] = self.PEOPLE[k].BOX.cal_size_ratio()
+            self.PEOPLE[k].update_disappear(1)
 
     def update_untracked(self):
         self.untracked_id = [x for x in self.stored_id if x not in self.curr_id]
         for x in self.untracked_id:
-            self.PEOPLE[x].disappear += 1
+            self.PEOPLE[x].update_disappear(0)
 
     def update(self, id2box):
         self.update_box(id2box)
@@ -74,3 +79,21 @@ class HumanProcessor:
         # cv2.imshow("box size", img_black)
         im_box = cv2.resize(im_box, frame_size)
         return np.concatenate((img_cnt, im_box), axis=0)
+
+    def update_kps(self, id2ske):
+        for k, v in id2ske.items():
+            coord = self.KPSP.process_kp(v)
+            self.PEOPLE[k].KPS.append(coord)
+            self.KPS_idx.append(k)
+
+    def obtain_kps(self, idx):
+        return self.PEOPLE[idx].KPS.kps
+
+    def if_enough_kps(self, idx):
+        return self.PEOPLE[idx].KPS.enough
+
+    def update_RNN(self, idx, pred):
+        self.PEOPLE[idx].update_RNN_pred(pred)
+
+    def get_RNN_preds(self, idx):
+        return self.PEOPLE[idx].RNN_preds
