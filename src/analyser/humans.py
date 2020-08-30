@@ -56,7 +56,7 @@ class HumanProcessor:
         cv2.putText(im, "id{}".format(idx), (20 + 140*num, 40), cv2.FONT_ITALIC, 0.8, (0, 255, 255), 3)
         for i, item in enumerate(self.PEOPLE[idx].BOX.ratios.tolist()[::-1]):
             cv2.putText(im, "f{}: {}".format(i, round(item, 2)), (20 + 140*num, + 100+ 40*i), cv2.FONT_HERSHEY_SIMPLEX,
-                        0.8,  colors[self.PEOPLE[idx].BOX.text_color(item)], sizes["table"])
+                        thicks["list"],  colors[self.PEOPLE[idx].BOX.text_color(item)], sizes["list"])
 
     def vis_box_size(self, im_box, im_cnt):
         curr = sorted(self.curr_id)

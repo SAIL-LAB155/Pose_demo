@@ -61,6 +61,7 @@ class ImgProcessor:
 
         black_boxes, black_scores, gray_boxes, gray_scores = empty_tensor, empty_tensor, empty_tensor, empty_tensor
         diff = cv2.absdiff(frame, background)
+
         dip_boxes = self.dip_detection.detect_rect(diff)
         dip_results = [dip_img, dip_boxes]
 
@@ -88,18 +89,14 @@ class ImgProcessor:
 
             merged_res = self.BE.ensemble_box(black_res, gray_res)
 
-            # if len(merged_res) > 0:
-                # merged_boxes, merged_scores = self.gray_yolo.cut_box_score(merged_res)
             self.id2bbox = self.object_tracker.track(merged_res)
             boxes = self.object_tracker.id_and_box(self.id2bbox)
             self.IDV.plot_bbox_id(self.id2bbox, rd_box)
             self.IDV.plot_bbox_id(self.id2bbox, track_pred, color=("red", "purple"), with_bbox=True)
             self.IDV.plot_bbox_id(self.object_tracker.get_pred(), track_pred, color=("yellow", "orange"), id_pos="down",
                                   with_bbox=True)
-            # else:
-            #     boxes = empty_tensor4
 
-            iou_img = self.object_tracker.plot_iou_map(iou_img)
+            self.object_tracker.plot_iou_map(iou_img)
             img_box_ratio = paste_box(rgb_kps, img_box_ratio, boxes)
             self.HP.update(self.id2bbox)
 
@@ -118,9 +115,8 @@ class ImgProcessor:
                         self.kps, self.kps_score = self.object_tracker.match_kps(kps_id, kps, kps_score)
                         self.HP.update_kps(self.kps)
                         rgb_kps = self.KPV.vis_ske(rgb_kps, kps, kps_score)
-                        rgb_kps = self.IDV.plot_bbox_id(danger_id2box, rgb_kps)
+                        rgb_kps = self.IDV.plot_bbox_id(danger_id2box, rgb_kps, with_bbox=True)
                         rgb_kps = self.IDV.plot_skeleton_id(self.kps, rgb_kps)
-                        rgb_kps = self.BBV.visualize(danger_box, rgb_kps)
                         black_kps = self.KPV.vis_ske_black(black_kps, kps, kps_score)
                         black_kps = self.IDV.plot_skeleton_id(self.kps, black_kps)
 
