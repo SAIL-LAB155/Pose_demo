@@ -1,4 +1,4 @@
-from src.human_track_detection import ImgProcessor
+from src.human_detection import ImgProcessor
 import cv2
 import os
 from config.config import img_folder

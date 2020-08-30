@@ -6,6 +6,7 @@ from .layers.SE_Resnet import SEResnet
 from ..duc.DUC import DUC
 from config.config import pose_cls, device
 from config import config
+from config.model_cfg import seresnet_cfg
 
 
 class FastPose(nn.Module):
@@ -27,7 +28,7 @@ class FastPose(nn.Module):
         self.duc1 = DUC(512, 1024, upscale_factor=2)
         self.duc2 = DUC(256, 512, upscale_factor=2)
 
-        if "duc" in config.pose_weight:
+        if "duc_se.pth" in config.pose_weight:
             self.conv_out = nn.Conv2d(self.DIM, 33, kernel_size=3, stride=1, padding=1)
         else:
             self.conv_out = nn.Conv2d(
@@ -47,6 +48,8 @@ class FastPose(nn.Module):
 
 
 def createModel(cfg=None):
+    if cfg is not None:
+        cfg = seresnet_cfg[cfg]
     return FastPose(cfg)
 
 

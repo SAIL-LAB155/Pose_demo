@@ -70,7 +70,7 @@ mobile_opt = {"0": None,
 
 
 seresnet_cfg = {"0": None,
-                "1": "config/pose_cfg/seresnet_cfg.txt",
+                "cfg1": "config/pose_cfg/cfg.txt",
                 }
 
 
@@ -83,4 +83,16 @@ DUC_cfg = {0: [640, 320],
             1: [480, 240],
             2: [320, 160]
            }
+
+TCN_structure = {1:[[6, 6, 6, 6], 5, 2],
+                 # [channel_size, kernel_size, dilation]
+                 2: [[3, 4, 5, 6], 5, 4],
+                 3: [[6, 6, 6, 6], 7, 2],
+                 4: [[12, 12, 12, 12], 7, 2],
+                 5: [[8, 16, 8, 16], 7, 2],
+                 6: [[6, 6, 6, 6], 7, 4],
+                 7: [[6, 6, 6, 6], 7, 8],
+                 8: [[6, 6, 6, 6], 7, 1]
+                 }
+
 

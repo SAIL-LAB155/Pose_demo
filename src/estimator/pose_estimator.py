@@ -18,6 +18,7 @@ class PoseEstimator(object):
         elif config.pose_backbone == "mobilenet":
             from src.pose_model.mobilenet.MobilePose import createModel
             self.pose_model = createModel(cfg=config.pose_cfg)
+            self.pose_model.load_state_dict(torch.load(pose_weight, map_location=device))
         else:
             raise ValueError("Not a backbone!")
         if config.device != "cpu":

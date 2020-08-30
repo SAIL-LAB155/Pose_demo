@@ -3,12 +3,13 @@ from config import config
 from src.yolo.preprocess import prep_frame
 from src.yolo.util import dynamic_write_results
 from src.yolo.darknet import Darknet
-from config.config import device
-from ..utils.model_info import get_inference_time, print_model_param_nums, print_model_param_flops
+from config.config import device, frame_size
+
+empty_tensor = torch.empty([0,7])
 
 
 class ObjectDetectionYolo(object):
-    def __init__(self, cfg, weight, batchSize=1):
+    def __init__(self, cfg, weight, batchSize=1, img_height=frame_size[1], img_width=frame_size[0]):
         self.det_model = Darknet(cfg)
         # self.det_model.load_state_dict(torch.load('models/yolo/yolov3-spp.weights', map_location="cuda:0")['model'])
         self.det_model.load_weights(weight)
@@ -18,11 +19,12 @@ class ObjectDetectionYolo(object):
         assert self.det_inp_dim > 32
         if device != "cpu":
             self.det_model.cuda()
-        inf_time = get_inference_time(self.det_model, height=config.input_size, width=config.input_size)
-        flops = print_model_param_flops(self.det_model, input_width=config.input_size, input_height=config.input_size)
-        params = print_model_param_nums(self.det_model)
-        print("Detection: Inference time {}s, Params {}, FLOPs {}".format(inf_time, params, flops))
+        # inf_time = get_inference_time(self.det_model, height=config.input_size, width=config.input_size)
+        # flops = print_model_param_flops(self.det_model, input_width=config.input_size, input_height=config.input_size)
+        # params = print_model_param_nums(self.det_model)
+        # print("Detection: Inference time {}s, Params {}, FLOPs {}".format(inf_time, params, flops))
         self.det_model.eval()
+        self.height, self.width = img_height, img_width
 
         self.im_dim_list = []
         self.batchSize = batchSize
@@ -57,7 +59,7 @@ class ObjectDetectionYolo(object):
             dets = dynamic_write_results(prediction, config.confidence,  config.num_classes, nms=True, nms_conf=config.nms_thresh)
 
             if isinstance(dets, int) or dets.shape[0] == 0:
-                return None
+                return empty_tensor
 
             dets = dets.cpu()
             self.im_dim_list = torch.index_select(self.im_dim_list, 0, dets[:, 0].long())
@@ -78,12 +80,12 @@ class ObjectDetectionYolo(object):
         return det_res
 
     def cut_box_score(self, results):
-        if results is None:
-            return None, None
+        if len(results) == 0:
+            return empty_tensor, empty_tensor
 
         for j in range(results.shape[0]):
-            results[j, [0, 2]] = torch.clamp(results[j, [0, 2]], 0.0, self.im_dim_list[j, 0])
-            results[j, [1, 3]] = torch.clamp(results[j, [1, 3]], 0.0, self.im_dim_list[j, 1])
+            results[j, [0, 2]] = torch.clamp(results[j, [0, 2]], 0.0, self.width)
+            results[j, [1, 3]] = torch.clamp(results[j, [1, 3]], 0.0, self.height)
         boxes = results[:, 0:4]
         scores = results[:, 4:5]
 
