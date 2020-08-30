@@ -39,7 +39,7 @@ class Box:
         return h, w
 
     def text_color(self, r):
-        return (100, 255, 255) if r > box_ratio_thresh else (255, 0, 255)
+        return "violet" if r > box_ratio_thresh else "yellow"
 
     def curr_center(self):
         return cal_center_point(self.curr_box)

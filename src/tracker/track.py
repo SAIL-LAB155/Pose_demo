@@ -44,8 +44,7 @@ class ObjectTracker(object):
     def get_pred(self):
         return self.tracker.id2pred
 
-    def plot_iou_map(self, h_interval=30, w_interval=80):
-        img = cv2.imread('src/black.jpg')
+    def plot_iou_map(self, img, h_interval=40, w_interval=80):
         iou_matrix = self.tracker.mat
         match_pairs = [(pair[0], pair[1]) for pair in self.tracker.match_indices]
         if len(iou_matrix) > 0:
@@ -58,11 +57,11 @@ class ObjectTracker(object):
                     if w_idx == 0 or h_idx == 0:
                         color = colors["purple"]
                         if h_idx == 0:
-                            cv2.line(img, (100, 0), (100, img.shape[0]), color, thicks["line"])
+                            cv2.line(img, (80, 0), (80, img.shape[0]), color, thicks["line"])
                     elif (w_idx-1, h_idx-1) in match_pairs:
                         color = colors["red"]
                     else:
                         color = colors["yellow"]
-                    cv2.putText(img, item, (10+w_interval*w_idx, 20+h_interval*h_idx), cv2.FONT_HERSHEY_PLAIN,
-                                sizes["word"], color, thicks["word"])
+                    cv2.putText(img, item, (-60+w_interval*w_idx, 20+h_interval*h_idx), cv2.FONT_HERSHEY_PLAIN,
+                                sizes["table"], color, thicks["table"])
         return img

@@ -7,7 +7,7 @@ dist/
 *.png
 torch.egg-info/
 */**/__pycache__
-torch/version.py
+torch/version.py 
 docs/src/**/*
 test/data/legacy_modules.t7
 test/data/gpu_tensors.pt

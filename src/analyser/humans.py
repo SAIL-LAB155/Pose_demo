@@ -3,6 +3,7 @@ import cv2
 from config.config import frame_size
 import numpy as np
 from src.utils.kp_process import KPSProcessor
+from src.utils.plot import colors, sizes, thicks
 
 
 class HumanProcessor:
@@ -52,33 +53,37 @@ class HumanProcessor:
         self.RD_box_warning = [idx for idx in warning_ls if not self.PEOPLE[idx].BOX.get_size_ratio_info()]
         return self.RD_box_warning
 
-    def vis_box_size(self, im_box):
-        img_cnt = cv2.imread("src/black.jpg")
-        img_cnt = cv2.resize(img_cnt, frame_size)
+    def vis_size_ls(self, im, idx, num):
+        cv2.putText(im, "id{}".format(idx), (20 + 140*num, 40), cv2.FONT_ITALIC, 0.8, (0, 255, 255), 3)
+        for i, item in enumerate(self.PEOPLE[idx].BOX.ratios.tolist()[::-1]):
+            cv2.putText(im, "f{}: {}".format(i, round(item, 2)), (20 + 140*num, + 100+ 40*i), cv2.FONT_HERSHEY_SIMPLEX,
+                        0.8,  colors[self.PEOPLE[idx].BOX.text_color(item)], 2)
+
+    def vis_box_size(self, im_box, im_cnt):
         curr = sorted(self.curr_id)
         for num, idx in enumerate(curr):
-            self.PEOPLE[idx].BOX.vis_size(img_cnt, idx, num)
+            # self.PEOPLE[idx].BOX.vis_size(img_cnt, idx, num)
+            self.vis_size_ls(im_cnt, idx, num)
             h, w = self.PEOPLE[idx].BOX.cal_curr_hw()
             cv2.putText(im_box, "{}".format(round((h/w).tolist(), 4)), self.PEOPLE[idx].BOX.curr_center(),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 0), 2)
+                        cv2.FONT_HERSHEY_SIMPLEX, sizes["word"], colors["cyan"], thicks["word"])
 
             tl, br = self.PEOPLE[idx].BOX.curr_box_location()
             if idx in self.RD_box_warning:
                 cv2.putText(im_box, "id{}: Not standing".format(idx), self.PEOPLE[idx].BOX.curr_top(),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 255), 2)
-                cv2.rectangle(im_box, tl, br, (255, 0, 255), 4)
+                        cv2.FONT_HERSHEY_SIMPLEX, sizes["word"], (255, 0, 255), thicks["word"])
+                cv2.rectangle(im_box, tl, br, colors["violet"], thicks["box"])
             elif idx in self.RD_warning:
                 cv2.putText(im_box, "id{}: Standing".format(idx), self.PEOPLE[idx].BOX.curr_top(),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.8, (100, 255, 255), 2)
-                cv2.rectangle(im_box, tl, br, (100, 255, 255), 4)
+                            cv2.FONT_HERSHEY_SIMPLEX, sizes["word"], (100, 255, 255), thicks["word"])
+                cv2.rectangle(im_box, tl, br, colors["yellow"], thicks["box"])
             else:
                 cv2.putText(im_box, "id{}".format(idx), self.PEOPLE[idx].BOX.curr_top(),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2)
-                cv2.rectangle(im_box, tl, br, (255, 255, 255), 4)
+                            cv2.FONT_HERSHEY_SIMPLEX, sizes["word"], (255, 255, 255), thicks["word"])
+                cv2.rectangle(im_box, tl, br, colors["white"], thicks["box"])
 
-        # cv2.imshow("box size", img_black)
         im_box = cv2.resize(im_box, frame_size)
-        return np.concatenate((img_cnt, im_box), axis=0)
+        return np.concatenate((im_cnt, im_box), axis=0)
 
     def update_kps(self, id2ske):
         for k, v in id2ske.items():
