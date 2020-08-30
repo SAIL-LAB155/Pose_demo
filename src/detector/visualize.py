@@ -8,7 +8,7 @@ class BBoxVisualizer(object):
 
     def visualize(self, bboxes, img, scores=None, color=("red", "yellow")):
         if bboxes is None:
-            return img
+            return
 
         if isinstance(bboxes, dict):
             bboxes = self.__dict2ls(bboxes)
@@ -21,7 +21,6 @@ class BBoxVisualizer(object):
             if scores is not None:
                 cv2.putText(img, "{}".format(round(scores[idx], 2)), (int((x1+x2)/2), int((y1+y2)/2)),
                             cv2.FONT_HERSHEY_PLAIN, sizes["id"], colors[color[1]], thicks["word"])
-        return img
 
     def __dict2ls(self, id2box):
         return [v for k, v in id2box.items()]
