@@ -113,10 +113,10 @@ class ImgProcessor:
                     if self.kps is not []:
                         self.kps, self.kps_score = self.object_tracker.match_kps(kps_id, kps, kps_score)
                         self.HP.update_kps(self.kps)
-                        rgb_kps = self.KPV.vis_ske(rgb_kps, kps, kps_score)
+                        self.KPV.vis_ske(rgb_kps, kps, kps_score)
                         self.IDV.plot_bbox_id(danger_id2box, rgb_kps, with_bbox=True)
                         self.IDV.plot_skeleton_id(self.kps, rgb_kps)
-                        black_kps = self.KPV.vis_ske_black(black_kps, kps, kps_score)
+                        self.KPV.vis_ske_black(black_kps, kps, kps_score)
                         self.IDV.plot_skeleton_id(self.kps, black_kps)
 
                         for n, idx in enumerate(self.kps.keys()):

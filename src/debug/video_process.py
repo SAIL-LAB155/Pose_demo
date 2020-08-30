@@ -54,8 +54,8 @@ class HumanDetection:
         if config.plot_bbox and self.boxes is not None:
             self.BBV.visualize(self.boxes, self.frame)
         if config.plot_kps and self.kps is not []:
-            self.frame = self.KPV.vis_ske(self.frame, self.kps, self.kps_score)
-            img_black = self.KPV.vis_ske_black(self.frame, self.kps, self.kps_score)
+            self.KPV.vis_ske(self.frame, self.kps, self.kps_score)
+            self.KPV.vis_ske_black(img_black, self.kps, self.kps_score)
         if config.plot_id and self.id2bbox is not None:
             self.IDV.plot_bbox_id(self.id2bbox, self.frame)
             self.IDV.plot_skeleton_id(self.kps, self.frame)
