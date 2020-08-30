@@ -10,6 +10,7 @@ colors = {
     "black": (0, 0, 0),
     "sky_blue": (240, 210, 192),
     "violet": (100, 255, 255),
+    "gold": (87, 250, 255),
     }
 
 sizes = {
@@ -17,6 +18,7 @@ sizes = {
     "word": 1,
     "point": 4,
     "table": 2,
+    "alarm": 2
 }
 
 thicks = {
@@ -25,6 +27,7 @@ thicks = {
     "box": 4,
     "kps": 2,
     "line": 1,
-    "table": 3
+    "table": 3,
+    "alarm": 1.5
 }
 

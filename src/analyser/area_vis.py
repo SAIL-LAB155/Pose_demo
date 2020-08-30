@@ -8,7 +8,6 @@ class AreaVisualizer:
         self.height, self.width = h, w
         self.height_num, self.width_num = h_num, w_num
         self.h_interval, self.w_interval = int(h/h_num), int(w/w_num)
-        pass
 
     def draw_boundary(self, img):
         for i in range(self.width_num - 1):
@@ -30,7 +29,11 @@ class AreaVisualizer:
     def draw_cnt_map(self, img, REGIONS):
         for idx, region in REGIONS.items():
             cv2.putText(img, str(region.exists), region.center, cv2.FONT_HERSHEY_SIMPLEX, sizes["word"],
-                        region.cnt_color(), thicks["word"])
+                        colors[region.cnt_color()], thicks["word"])
+
+    def draw_alarm_signal(self, img):
+        cv2.putText(img, "Somewhere abnormal!", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, thicks["alarm"],
+                    colors["red"], sizes["table"])
 
     def draw_warning_mask(self, img, REGIONS, alarm_ls):
         # print(alarm_ls)
