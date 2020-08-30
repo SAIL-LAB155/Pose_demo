@@ -1,20 +1,26 @@
 import torch
 import sys
-sys.path.append("../../")
 from .TCNsrc.model import TCN
 import numpy as np
 from config import config
+from config.model_cfg import TCN_structure
 import os
+try:
+    from config.config import pose_cls
+except:
+    from src.debug.config.cfg_multi_detections import pose_cls
+sys.path.append("../../")
+
 
 device = config.device
-TCN_params = config.TCN_structure
-kps_num = config.test_kps_num
+TCN_params = TCN_structure
+kps_num = config.pose_cls * 2
 cls = ["swim", "drown"]
 
 
 class TCNPredictor:
     def __init__(self, model_name, n_classes):
-        [channel_size, kernel_size, dilation] = TCN_params[structure_num]
+        [channel_size, kernel_size, dilation] = TCN_params[1]
         self.model = TCN(input_size=kps_num,
                          output_size=n_classes,
                          num_channels= channel_size,
@@ -35,10 +41,8 @@ class TCNPredictor:
     def predict(self, data):
         input = self.get_input_data(data)
         output = self.model(input)
-        #print('output:',output)
-        pred = output.data.max(1, keepdim=True)[1]
-        #print('pred:',pred)
-        return pred
+        # pred = output.data.max(1, keepdim=True)[1]
+        return output
 
 
 class TestWithtxt:

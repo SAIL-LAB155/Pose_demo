@@ -1,7 +1,10 @@
 import torch.nn.functional as F
 from torch import nn
 from .tcn import TemporalConvNet
-from config.config import TCN_single
+try:
+    from config.config import TCN_single
+except:
+    from src.debug.config.cfg_multi_detections import TCN_single
 
 
 class TCN(nn.Module):

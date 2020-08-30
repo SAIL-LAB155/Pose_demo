@@ -1,5 +1,7 @@
-from config.config import RNN_frame_length
-
+try:
+    from config.config import RNN_frame_length
+except:
+    from src.debug.config.cfg_multi_detections import RNN_frame_length
 
 class Keypoint:
     def __init__(self):
