@@ -72,7 +72,7 @@ class ImgProcessor:
             black_res = self.black_yolo.process(enhanced)
             if black_res is not None:
                 black_boxes, black_scores = self.black_yolo.cut_box_score(black_res)
-                enhanced = self.BBV.visualize(black_boxes, enhanced, black_scores)
+                self.BBV.visualize(black_boxes, enhanced, black_scores)
                 black_boxes, black_scores, black_res = \
                     filter_box(black_boxes, black_scores, black_res, black_box_threshold)
             black_results = [enhanced, black_boxes, black_scores]
@@ -82,7 +82,7 @@ class ImgProcessor:
             gray_res = self.gray_yolo.process(gray_img)
             if gray_res is not None:
                 gray_boxes, gray_scores = self.gray_yolo.cut_box_score(gray_res)
-                gray_img = self.BBV.visualize(gray_boxes, gray_img, gray_scores)
+                self.BBV.visualize(gray_boxes, gray_img, gray_scores)
                 gray_boxes, gray_scores, gray_res = \
                     filter_box(gray_boxes, gray_scores, gray_res, gray_box_threshold)
             gray_results = [gray_img, gray_boxes, gray_scores]
@@ -91,7 +91,6 @@ class ImgProcessor:
 
             self.id2bbox = self.object_tracker.track(merged_res)
             boxes = self.object_tracker.id_and_box(self.id2bbox)
-            self.IDV.plot_bbox_id(self.id2bbox, rd_box)
             self.IDV.plot_bbox_id(self.id2bbox, track_pred, color=("red", "purple"), with_bbox=True)
             self.IDV.plot_bbox_id(self.object_tracker.get_pred(), track_pred, color=("yellow", "orange"), id_pos="down",
                                   with_bbox=True)
@@ -115,10 +114,10 @@ class ImgProcessor:
                         self.kps, self.kps_score = self.object_tracker.match_kps(kps_id, kps, kps_score)
                         self.HP.update_kps(self.kps)
                         rgb_kps = self.KPV.vis_ske(rgb_kps, kps, kps_score)
-                        rgb_kps = self.IDV.plot_bbox_id(danger_id2box, rgb_kps, with_bbox=True)
-                        rgb_kps = self.IDV.plot_skeleton_id(self.kps, rgb_kps)
+                        self.IDV.plot_bbox_id(danger_id2box, rgb_kps, with_bbox=True)
+                        self.IDV.plot_skeleton_id(self.kps, rgb_kps)
                         black_kps = self.KPV.vis_ske_black(black_kps, kps, kps_score)
-                        black_kps = self.IDV.plot_skeleton_id(self.kps, black_kps)
+                        self.IDV.plot_skeleton_id(self.kps, black_kps)
 
                         for n, idx in enumerate(self.kps.keys()):
                             if self.HP.if_enough_kps(idx):

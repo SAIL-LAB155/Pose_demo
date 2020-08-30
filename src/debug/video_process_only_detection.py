@@ -45,14 +45,16 @@ class ImgProcessor:
         self.BE = BoxEnsemble()
 
     def process_img(self, frame, background):
-        black_boxes, black_scores, gray_boxes, gray_scores = empty_tensor, empty_tensor, empty_tensor, empty_tensor
+        rgb_kps, dip_img, track_pred, rd_box = \
+            copy.deepcopy(frame), copy.deepcopy(frame), copy.deepcopy(frame), copy.deepcopy(frame)
         img_black = cv2.imread("src/black.jpg")
         img_black = cv2.resize(img_black, config.frame_size)
-        img_cnt = copy.deepcopy(img_black)
-        rgb_kps = copy.deepcopy(frame)
+        iou_img, black_kps, img_size_ls, img_box_ratio, rd_cnt = copy.deepcopy(img_black), \
+            copy.deepcopy(img_black), copy.deepcopy(img_black), copy.deepcopy(img_black), copy.deepcopy(img_black)
 
+        black_boxes, black_scores, gray_boxes, gray_scores = empty_tensor, empty_tensor, empty_tensor, empty_tensor
         diff = cv2.absdiff(frame, background)
-        dip_img = copy.deepcopy(frame)
+
         dip_boxes = self.dip_detection.detect_rect(diff)
         dip_results = [dip_img, dip_boxes]
 
@@ -61,9 +63,9 @@ class ImgProcessor:
             enhance_kernel = np.array([[0, -1, 0], [0, 5, 0], [0, -1, 0]])
             enhanced = cv2.filter2D(diff, -1, enhance_kernel)
             black_res = self.black_yolo.process(enhanced)
-            if len(black_res) > 0:
+            if black_res is not None:
                 black_boxes, black_scores = self.black_yolo.cut_box_score(black_res)
-                enhanced = self.BBV.visualize(black_boxes, enhanced, black_scores)
+                self.BBV.visualize(black_boxes, enhanced, black_scores)
                 black_boxes, black_scores, black_res = \
                     filter_box(black_boxes, black_scores, black_res, black_box_threshold)
             black_results = [enhanced, black_boxes, black_scores]
@@ -71,41 +73,37 @@ class ImgProcessor:
             # gray pics process
             gray_img = gray3D(frame)
             gray_res = self.gray_yolo.process(gray_img)
-            if len(gray_res) > 0:
+            if gray_res is not None:
                 gray_boxes, gray_scores = self.gray_yolo.cut_box_score(gray_res)
-                gray_img = self.BBV.visualize(gray_boxes, gray_img, gray_scores)
+                self.BBV.visualize(gray_boxes, gray_img, gray_scores)
                 gray_boxes, gray_scores, gray_res = \
                     filter_box(gray_boxes, gray_scores, gray_res, gray_box_threshold)
-
             gray_results = [gray_img, gray_boxes, gray_scores]
 
             merged_res = self.BE.ensemble_box(black_res, gray_res)
-            merged_img = copy.deepcopy(rgb_kps)
 
-            if len(merged_res) > 0:
-                merged_boxes, merged_scores = self.gray_yolo.cut_box_score(merged_res)
-                self.BBV.visualize(merged_boxes, merged_img, merged_scores)
-                self.id2bbox = self.object_tracker.track(merged_res)
-                boxes = self.object_tracker.id_and_box(self.id2bbox)
-                self.IDV.plot_bbox_id(self.id2bbox, frame)
-                img_black = paste_box(rgb_kps, img_black, boxes)
-                self.HP.update(self.id2bbox)
-            else:
-                boxes = empty_tensor4
+            self.id2bbox = self.object_tracker.track(merged_res)
+            boxes = self.object_tracker.id_and_box(self.id2bbox)
+            self.IDV.plot_bbox_id(self.id2bbox, track_pred, color=("red", "purple"), with_bbox=True)
+            self.IDV.plot_bbox_id(self.object_tracker.get_pred(), track_pred, color=("yellow", "orange"), id_pos="down",
+                                  with_bbox=True)
 
-            # cv2.imshow("merged", merged_img)
-            rd_map = self.RP.process_box(boxes, frame)
+            self.object_tracker.plot_iou_map(iou_img)
+            img_box_ratio = paste_box(rgb_kps, img_box_ratio, boxes)
+            self.HP.update(self.id2bbox)
+
+            self.RP.process_box(boxes, rd_box, rd_cnt)
             warning_idx = self.RP.get_alarmed_box_id(self.id2bbox)
             danger_idx = self.HP.box_size_warning(warning_idx)
+            self.HP.vis_box_size(img_box_ratio, img_size_ls)
 
-            # danger_box = [v for k, v in self.id2bbox.items() if k in danger_idx]
-
-            box_map = self.HP.vis_box_size(img_black, img_cnt)
-            yolo_map = np.concatenate((enhanced, gray_img), axis=1)
-            yolo_cnt_map = np.concatenate((yolo_map, rd_map), axis=0)
-            res = np.concatenate((yolo_cnt_map, box_map), axis=1)
-
-            # cv2.imshow("black_box", img_black)
+            detection_map = np.concatenate((enhanced, gray_img), axis=1)
+            tracking_map = np.concatenate((track_pred, iou_img), axis=1)
+            row_1st_map = np.concatenate((detection_map, tracking_map), axis=1)
+            box_map = np.concatenate((img_box_ratio, img_size_ls), axis=1)
+            rd_map = np.concatenate((rd_cnt, rd_box), axis=1)
+            row_2nd_map = np.concatenate((rd_map, box_map), axis=1)
+            res = np.concatenate((row_1st_map, row_2nd_map), axis=0)
 
         return gray_results, black_results, dip_results, res
 
@@ -131,7 +129,7 @@ class RegionDetector(object):
 
                 gray_res, black_res, dip_res, res_map = IP.process_img(frame, background)
 
-                cv2.imshow("res", cv2.resize(res_map, (1440, 720)))
+                cv2.imshow("res", cv2.resize(res_map, (1560, 720)))
                 # out.write(res)
                 cnt += 1
                 cv2.waitKey(1)

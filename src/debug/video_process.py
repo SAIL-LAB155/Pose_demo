@@ -28,7 +28,7 @@ class HumanDetection:
         self.pose_estimator = PoseEstimator(pose_cfg=pose_cfg, pose_weight=pose_weight)
         self.BBV = BBoxVisualizer()
         self.KPV = KeyPointVisualizer()
-        self.IDV = IDVisualizer(with_bbox=False)
+        self.IDV = IDVisualizer()
         self.boxes = tensor([])
         self.boxes_scores = tensor([])
         self.img_black = np.array([])
@@ -52,14 +52,13 @@ class HumanDetection:
     def visualize(self):
         img_black = cv2.imread('src/black.jpg')
         if config.plot_bbox and self.boxes is not None:
-            self.frame = self.BBV.visualize(self.boxes, self.frame)
-            # cv2.imshow("cropped", (torch_to_im(inps[0]) * 255))
+            self.BBV.visualize(self.boxes, self.frame)
         if config.plot_kps and self.kps is not []:
             self.frame = self.KPV.vis_ske(self.frame, self.kps, self.kps_score)
             img_black = self.KPV.vis_ske_black(self.frame, self.kps, self.kps_score)
         if config.plot_id and self.id2bbox is not None:
-            self.frame = self.IDV.plot_bbox_id(self.id2bbox, self.frame)
-            self.frame = self.IDV.plot_skeleton_id(self.kps, self.frame)
+            self.IDV.plot_bbox_id(self.id2bbox, self.frame)
+            self.IDV.plot_skeleton_id(self.kps, self.frame)
         return self.frame, img_black
 
     def process_img(self, frame, gray=False):
