@@ -52,7 +52,7 @@ class ImgProcessor:
         self.kps_score = {}
 
     def process_img(self, frame, background):
-        rgb_kps, dip_img = copy.deepcopy(frame), copy.deepcopy(frame)
+        rgb_kps, dip_img, track_pred = copy.deepcopy(frame), copy.deepcopy(frame), copy.deepcopy(frame)
         img_black = cv2.imread("src/black.jpg")
         img_black = cv2.resize(img_black, config.frame_size)
         iou_img, black_kps, img_cnt = copy.deepcopy(img_black), copy.deepcopy(img_black), copy.deepcopy(img_black)

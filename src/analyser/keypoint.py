@@ -3,6 +3,7 @@ try:
 except:
     from src.debug.config.cfg_multi_detections import RNN_frame_length
 
+
 class Keypoint:
     def __init__(self):
         self.kps = []
