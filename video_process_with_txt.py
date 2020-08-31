@@ -23,7 +23,7 @@ class VideoProcessor:
         with open("/".join(video_path.split("/")[:-1]) + "/" + video_path.split("/")[-1][:-4] +
                   "_kps_score.txt", "r") as ksf:
             self.kps_score_txt = [line[:-1] for line in ksf.readlines()]
-        self.IDV = IDVisualizer(with_bbox=True)
+        self.IDV = IDVisualizer()
         self.KPV = KeyPointVisualizer()
 
     def process_video(self):
@@ -37,7 +37,7 @@ class VideoProcessor:
                 id2kps = str2kpsdict(self.kps_txt.pop(0))
                 id2kpsScore = str2kpsScoredict(self.kps_score_txt.pop(0))
                 if id2bbox is not None:
-                    frame = self.IDV.plot_bbox_id(id2bbox, frame)
+                    frame = self.IDV.plot_bbox_id(id2bbox, frame, with_bbox=True)
                 if id2kps is not None:
                     kps_tensor, score_tensor = self.KPV.kpsdic2tensor(id2kps, id2kpsScore)
                     frame = self.KPV.vis_ske(frame, kps_tensor, score_tensor)

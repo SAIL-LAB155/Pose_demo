@@ -9,9 +9,8 @@ from src.detector.yolo_detect import ObjectDetectionYolo
 from src.detector.visualize import BBoxVisualizer
 from src.tracker.track import ObjectTracker
 from src.tracker.visualize import IDVisualizer
-from src.utils.utils import process_kp
 from src.utils.img import torch_to_im, gray3D
-from src.detector.box_postprocess import crop_bbox
+from src.detector.box_postprocess import crop_bbox, eliminate_nan
 
 try:
     from src.debug.config.cfg import yolo_weight, yolo_cfg, video_path, pose_weight, pose_cfg
@@ -75,6 +74,7 @@ class HumanDetection:
 
             if box_res is not None:
                 self.id2bbox = self.object_tracker.track(box_res)
+                self.id2bbox = eliminate_nan(self.id2bbox)
                 boxes = self.object_tracker.id_and_box(self.id2bbox)
 
                 inps, pt1, pt2 = crop_bbox(frame, boxes)

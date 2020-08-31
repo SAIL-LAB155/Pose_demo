@@ -10,7 +10,7 @@ from src.detector.visualize import BBoxVisualizer
 from src.estimator.pose_estimator import PoseEstimator
 from src.estimator.visualize import KeyPointVisualizer
 from src.utils.img import gray3D
-from src.detector.box_postprocess import crop_bbox, filter_box, BoxEnsemble
+from src.detector.box_postprocess import crop_bbox, filter_box, BoxEnsemble, eliminate_nan
 from src.tracker.track import ObjectTracker
 from src.tracker.visualize import IDVisualizer
 from src.analyser.area import RegionProcessor
@@ -90,6 +90,7 @@ class ImgProcessor:
             merged_res = self.BE.ensemble_box(black_res, gray_res)
 
             self.id2bbox = self.object_tracker.track(merged_res)
+            self.id2bbox = eliminate_nan(self.id2bbox)
             boxes = self.object_tracker.id_and_box(self.id2bbox)
             self.IDV.plot_bbox_id(self.id2bbox, track_pred, color=("red", "purple"), with_bbox=True)
             self.IDV.plot_bbox_id(self.object_tracker.get_pred(), track_pred, color=("yellow", "orange"), id_pos="down",
@@ -177,4 +178,3 @@ class DrownDetector:
 
 if __name__ == '__main__':
     DrownDetector(video_path).process_video()
-

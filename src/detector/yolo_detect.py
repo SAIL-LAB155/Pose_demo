@@ -3,6 +3,7 @@ from config import config
 from src.yolo.preprocess import prep_frame
 from src.yolo.util import dynamic_write_results
 from src.yolo.darknet import Darknet
+import numpy as np
 from config.config import device, frame_size
 
 empty_tensor = torch.empty([0,7])

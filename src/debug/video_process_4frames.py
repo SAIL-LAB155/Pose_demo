@@ -9,7 +9,7 @@ from src.detector.visualize import BBoxVisualizer
 from src.tracker.track import ObjectTracker
 from src.tracker.visualize import IDVisualizer
 from src.utils.img import calibration
-from src.detector.box_postprocess import crop_bbox
+from src.detector.box_postprocess import crop_bbox, eliminate_nan
 
 try:
     from config.config import yolo_weight, yolo_cfg, video_1, video_2, video_3, video_4, pose_cfg, pose_weight
@@ -56,13 +56,13 @@ class ImgProcessor:
     def visualize(self):
         img_black = cv2.imread('video/black.jpg')
         if config.plot_bbox and self.boxes is not None:
-            self.frame = self.BBV.visualize(self.boxes, self.frame, self.boxes_scores)
+            self.BBV.visualize(self.boxes, self.frame, self.boxes_scores)
             # cv2.imshow("cropped", (torch_to_im(inps[0]) * 255))
         if config.plot_kps and self.kps is not []:
-            self.frame = self.KPV.vis_ske(self.frame, self.kps, self.kps_score)
-            img_black = self.KPV.vis_ske_black(self.frame, self.kps, self.kps_score)
+            self.KPV.vis_ske(self.frame, self.kps, self.kps_score)
+            self.KPV.vis_ske_black(img_black, self.kps, self.kps_score)
         if config.plot_id and self.id2bbox is not None:
-            self.frame = self.IDV.plot_bbox_id(self.id2bbox, self.frame)
+            self.IDV.plot_bbox_id(self.id2bbox, self.frame)
             # frame = self.IDV.plot_skeleton_id(id2ske, copy.deepcopy(img))
         return self.frame, img_black
 
@@ -76,11 +76,13 @@ class ImgProcessor:
 
             if box_res is not None:
                 self.id2bbox = tracker.track(box_res)
+                self.id2bbox = eliminate_nan(self.id2bbox)
                 boxes = tracker.id_and_box(self.id2bbox)
 
                 inps, pt1, pt2 = crop_bbox(fr, boxes)
-                kps, kps_score, kps_id = self.pose_estimator.process_img(inps, boxes, pt1, pt2)
-                self.kps, self.kps_score = tracker.match_kps(kps_id, kps, kps_score)
+                if inps is not None:
+                    kps, kps_score, kps_id = self.pose_estimator.process_img(inps, boxes, pt1, pt2)
+                    self.kps, self.kps_score = tracker.match_kps(kps_id, kps, kps_score)
 
         img, black_img = self.visualize()
         return img, black_img, self.kps, self.id2bbox, self.kps_score
@@ -95,7 +97,7 @@ class ImgProcessor:
 
 
 IP = ImgProcessor()
-frame_size = (1080, 720)
+frame_size = (720, 540)
 
 
 class VideoProcessor:
@@ -107,8 +109,11 @@ class VideoProcessor:
         self.show_img = show_img
 
     def process_frame(self, f1, f2, f3, f4):
-        frame1, frame2, frame3, frame4 = calibration(f1), calibration(f2), calibration(f3), calibration(f4)
-        res1, res2, res3, res4 = IP.process_img(frame1, frame2, frame3, frame4)
+        fr1, fr2, fr3, fr4 = cv2.resize(f1, frame_size), cv2.resize(f2, frame_size), cv2.resize(f3, frame_size), \
+                             cv2.resize(f4, frame_size),
+        fr1, fr2, fr3, fr4 = calibration(fr1), calibration(fr2), calibration(fr3), calibration(fr4)
+
+        res1, res2, res3, res4 = IP.process_img(fr1, fr2, fr3, fr4)
         img1, img2, img3, img4 = res1[0], res2[0], res3[0], res4[0]
 
         img_ver1 = np.concatenate((img1, img2), axis=0)

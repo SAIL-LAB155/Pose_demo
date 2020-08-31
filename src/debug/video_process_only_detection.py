@@ -8,7 +8,7 @@ from src.detector.image_process_detect import ImageProcessDetection
 # from src.detector.yolo_asff_detector import ObjectDetectionASFF
 from src.detector.visualize import BBoxVisualizer
 from src.utils.img import gray3D
-from src.detector.box_postprocess import crop_bbox, filter_box, BoxEnsemble
+from src.detector.box_postprocess import eliminate_nan, filter_box, BoxEnsemble
 from src.tracker.track import ObjectTracker
 from src.tracker.visualize import IDVisualizer
 from src.analyser.area import RegionProcessor
@@ -83,6 +83,7 @@ class ImgProcessor:
             merged_res = self.BE.ensemble_box(black_res, gray_res)
 
             self.id2bbox = self.object_tracker.track(merged_res)
+            self.id2bbox = eliminate_nan(self.id2bbox)
             boxes = self.object_tracker.id_and_box(self.id2bbox)
             self.IDV.plot_bbox_id(self.id2bbox, track_pred, color=("red", "purple"), with_bbox=True)
             self.IDV.plot_bbox_id(self.object_tracker.get_pred(), track_pred, color=("yellow", "orange"), id_pos="down",
@@ -94,7 +95,7 @@ class ImgProcessor:
 
             self.RP.process_box(boxes, rd_box, rd_cnt)
             warning_idx = self.RP.get_alarmed_box_id(self.id2bbox)
-            danger_idx = self.HP.box_size_warning(warning_idx)
+            # danger_idx = self.HP.box_size_warning(warning_idx)
             self.HP.vis_box_size(img_box_ratio, img_size_ls)
 
             detection_map = np.concatenate((enhanced, gray_img), axis=1)
