@@ -163,7 +163,7 @@ class DrownDetector:
                 frame = cv2.resize(frame, frame_size)
                 fgmask = self.fgbg.apply(frame)
                 background = self.fgbg.getBackgroundImage()
-                diff = cv2.absdiff(frame, background)
+
                 gray_res, black_res, dip_res, res_map = IP.process_img(frame, background)
                 if write_video:
                     self.out_video.write(res_map)

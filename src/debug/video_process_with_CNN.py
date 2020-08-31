@@ -93,7 +93,12 @@ class HumanDetection:
 
     def classify(self, src_img, id2bbox):
         for box in id2bbox.values():
-            img = cut_image_with_box(src_img, left=int(box[0]), top=int(box[1]), right=int(box[2]), bottom=int(box[3]))
+            x1, y1, x2, y2 = int(box[0]), int(box[1]), int(box[2]), int(box[3])
+            x1 = 0 if x1 < 0 else x1
+            y1 = 0 if y1 < 0 else y1
+            x2 = self.frame.shape[1] if x2 > self.frame.shape[1] else x2
+            y2 = self.frame.shape[0] if y2 > self.frame.shape[0] else y2
+            img = np.asarray(self.frame[y1:y2, x1:x2])
             out = self.CNN_model.predict(img)
             idx = out[0].tolist().index(max(out[0].tolist()))
             pred = CNN_class[idx]

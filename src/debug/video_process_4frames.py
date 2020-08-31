@@ -88,6 +88,7 @@ class ImgProcessor:
         return img, black_img, self.kps, self.id2bbox, self.kps_score
 
     def process_img(self, fr1, fr2, fr3, fr4):
+        fr1, fr2, fr3, fr4 = calibration(fr1), calibration(fr2), calibration(fr3), calibration(fr4)
         res1 = self.__process_single_img(fr1, self.object_tracker1)
         res2 = self.__process_single_img(fr2, self.object_tracker2)
         res3 = self.__process_single_img(fr3, self.object_tracker3)
@@ -111,7 +112,6 @@ class VideoProcessor:
     def process_frame(self, f1, f2, f3, f4):
         fr1, fr2, fr3, fr4 = cv2.resize(f1, frame_size), cv2.resize(f2, frame_size), cv2.resize(f3, frame_size), \
                              cv2.resize(f4, frame_size),
-        fr1, fr2, fr3, fr4 = calibration(fr1), calibration(fr2), calibration(fr3), calibration(fr4)
 
         res1, res2, res3, res4 = IP.process_img(fr1, fr2, fr3, fr4)
         img1, img2, img3, img4 = res1[0], res2[0], res3[0], res4[0]
