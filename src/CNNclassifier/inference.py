@@ -7,7 +7,10 @@ import numpy as np
 from torch import nn
 from src.utils.utils import image_normalize
 
-from config.config import CNN_backbone, CNN_class, CNN_weight
+try:
+    from config.config import CNN_backbone, CNN_class, CNN_weight
+except:
+    from src.debug.config.cfg_with_CNN import CNN_backbone, CNN_class, CNN_weight
 
 
 class CNNInference(object):

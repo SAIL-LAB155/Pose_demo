@@ -10,6 +10,7 @@ from .TCN.test_TCN import TCNPredictor
 
 import cv2
 import numpy as np
+from src.utils.plot import colors, sizes, thicks
 
 try:
     from config.config import RNN_backbone, RNN_class, RNN_weight
@@ -50,12 +51,13 @@ class RNNInference:
         return RNN_class[pred]
 
     def vis_RNN_res(self, n, idx, preds, img):
-        cv2.putText(img, "id{}".format(idx), (20 + 140*n, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (100, 100, 255), 2)
+        cv2.putText(img, "id{}".format(idx), (20 + 140*n, 40), cv2.FONT_HERSHEY_SIMPLEX, thicks["list"],
+                    colors["violet"], sizes["list"])
         for i, pred in enumerate(preds):
-            cv2.putText(img, "f{}: {}".format(i, pred), (20 + 140 * n, 80 + 40*i), cv2.FONT_HERSHEY_SIMPLEX, 0.8, self.vis_color(pred), 2)
+            cv2.putText(img, "f{}: {}".format(i, pred), (20 + 140 * n, 80 + 40*i), cv2.FONT_HERSHEY_SIMPLEX,
+                        thicks["list"], self.vis_color(pred), sizes["list"])
 
     def vis_color(self, pred):
         if "drown" in pred:
-            return 0, 0, 255
-        return 192, 192, 192
-
+            return colors["red"]
+        return colors["silver"]

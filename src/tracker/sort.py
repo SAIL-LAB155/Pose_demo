@@ -162,7 +162,7 @@ class Sort(object):
 
   def draw_iou_mat(self, interval=8):
     if len(self.iou_matrix) < 1:
-      return ["Not detected"]
+      return [["N/A"]]
     iou = self.iou_matrix.T
     matrix = [["t\d".rjust(interval, " ")]]
     dets_ls = [str(idx).rjust(interval, " ") for idx in range(len(iou[0]))]
@@ -258,7 +258,8 @@ class Sort(object):
             ret.append(np.concatenate((d,[trk.id], [trk.objclass])).reshape(1,-1)) # +1 as MOT benchmark requires positive
         i -= 1
         #remove dead tracklet
-        if trk.time_since_update > self.max_age:
+        if trk.time_since_update > self.max_age or \
+                (trk.age < self.min_hits * 0.5 and trk.time_since_update > 0.3 * self.max_age):
             self.trackers.pop(i)
 
     KalmanBoxTracker.curr_id = [trks.id for trks in self.trackers]

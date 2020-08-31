@@ -51,7 +51,7 @@ class ObjectTracker(object):
             for h_idx, h_item in enumerate(iou_matrix):
                 if h_idx == 0:
                     color = colors["purple"]
-                    cv2.line(img, (0, 25), (img.shape[1], 25), color, thicks["line"])
+                    cv2.line(img, (0, 35), (img.shape[1], 35), color, thicks["line"])
 
                 for w_idx, item in enumerate(h_item):
                     if w_idx == 0 or h_idx == 0:
@@ -62,6 +62,5 @@ class ObjectTracker(object):
                         color = colors["red"]
                     else:
                         color = colors["yellow"]
-                    cv2.putText(img, item, (-60+w_interval*w_idx, 20+h_interval*h_idx), cv2.FONT_HERSHEY_PLAIN,
+                    cv2.putText(img, item, (-65+w_interval*w_idx, 30+h_interval*h_idx), cv2.FONT_HERSHEY_PLAIN,
                                 sizes["table"], color, thicks["table"])
-        return img

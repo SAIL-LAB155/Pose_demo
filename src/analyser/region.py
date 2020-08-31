@@ -1,5 +1,4 @@
 
-
 disappear_max = 20
 exist_max = 150
 alarm_cnt = 100
@@ -52,5 +51,5 @@ class Region:
 
     def cnt_color(self):
         if self.exists > alarm_cnt:
-            return 0, 0, 255
-        return 87, 250, 255
+            return "red"
+        return "gold"
