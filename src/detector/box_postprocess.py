@@ -3,6 +3,7 @@ from ..utils.img import cropBox, im_to_torch
 from config import config
 import cv2
 from src.yolo.bbox import bbox_iou
+import numpy as np
 
 
 def crop_bbox(orig_img, boxes):
@@ -96,6 +97,14 @@ def nms(dets, conf=0.5):
         dets = dets[1:][ious < conf]
 
     return torch.cat(max_detections)
+
+
+def eliminate_nan(id2box):
+    res = {}
+    for k, v in id2box.items():
+        if True not in np.isnan(v.numpy()):
+            res[k] = v
+    return res
 
 
 class BoxEnsemble:

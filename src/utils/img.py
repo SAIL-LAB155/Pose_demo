@@ -1,13 +1,8 @@
 import numpy as np
 import cv2
 import torch
-import scipy.misc
-from torchvision import transforms
-import torch.nn.functional as F
 from scipy.ndimage import maximum_filter
 
-from PIL import Image
-from copy import deepcopy
 import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
@@ -515,14 +510,18 @@ def processPeaks(candidate_points, hm, pt1, pt2, inpH, inpW, resH, resW):
     return res_pts
 
 
-def calibration(img, height=1080, width=1960):
+def calibration(img):
+    height, width = img.shape[0], img.shape[1]
+    default_h, default_w = 1080, 1920
+    ratio_h, ratio_w = default_h/height, default_w/width
     mtx = np.array([[1579.0065371804494, 0.0, 1024.3801185727802], [0.0, 1697.5003831087758, 542.5693125986955],
                     [0.0, 0.0, 1.0]])
     dist = np.array([[-0.6002237880679471], [0.36856632181945537], [-0.0018543577826724245], [-0.021979596228714066]
                         , [-0.15631462404369234]])
     K = np.array \
-        ([[1065.9876632048952, 0.0, 970.0351475014528], [0.0, 1051.0552629200934, 533.2306815660671], [0.0, 0.0, 1.0]])
-    D = np.array([[0.09852134322204922], [0.0040876124771701385], [-0.14887184687293656], [0.07885494560173759]])
+        ([[1065.9876632048952, 0.0, 970.0351475014528], [0.0, 1051.0552629200934, 533.2306815660671], [0.0, 0.0, 1.0]])\
+        /ratio_h
+    D = np.array([[0.09852134322204922], [0.0040876124771701385], [-0.14887184687293656], [0.07885494560173759]])/ratio_w
     # width, height = 1960, 1080
     P = cv2.fisheye.estimateNewCameraMatrixForUndistortRectify(K, D, (width, height), None)
     mapx2, mapy2 = cv2.fisheye.initUndistortRectifyMap(K, D, None, P, (width, height), cv2.CV_32F)
