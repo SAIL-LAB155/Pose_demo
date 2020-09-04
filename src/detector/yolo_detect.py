@@ -3,7 +3,6 @@ from config import config
 from src.yolo.preprocess import prep_frame
 from src.yolo.util import dynamic_write_results
 from src.yolo.darknet import Darknet
-import numpy as np
 from config.config import device, frame_size
 
 empty_tensor = torch.empty([0,7])
@@ -57,7 +56,8 @@ class ObjectDetectionYolo(object):
 
             prediction = self.det_model(img)
             # NMS process
-            dets = dynamic_write_results(prediction, config.confidence,  config.num_classes, nms=True, nms_conf=config.nms_thresh)
+            dets = dynamic_write_results(prediction, config.confidence,  config.num_classes, nms=True,
+                                         nms_conf=config.nms_thresh)
 
             if isinstance(dets, int) or dets.shape[0] == 0:
                 return empty_tensor

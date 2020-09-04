@@ -96,15 +96,15 @@ class HumanDetection:
             x1, y1, x2, y2 = int(box[0]), int(box[1]), int(box[2]), int(box[3])
             x1 = 0 if x1 < 0 else x1
             y1 = 0 if y1 < 0 else y1
-            x2 = self.frame.shape[1] if x2 > self.frame.shape[1] else x2
-            y2 = self.frame.shape[0] if y2 > self.frame.shape[0] else y2
-            img = np.asarray(self.frame[y1:y2, x1:x2])
+            x2 = src_img.shape[1] if x2 > src_img.shape[1] else x2
+            y2 = src_img.shape[0] if y2 > src_img.shape[0] else y2
+            img = np.asarray(src_img[y1:y2, x1:x2])
             out = self.CNN_model.predict(img)
             idx = out[0].tolist().index(max(out[0].tolist()))
             pred = CNN_class[idx]
             text_location = (int((box[0]+box[2])/2)), int((box[1])+50)
-            cv2.putText(self.frame, pred, text_location, cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 1)
-        return self.frame
+            cv2.putText(src_img, pred, text_location, cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 1)
+        # return self.frame
 
 
 IP = HumanDetection()
