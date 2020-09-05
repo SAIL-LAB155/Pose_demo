@@ -48,9 +48,9 @@ class HumanDetection:
 
     def visualize(self):
         img_black = cv2.imread('src/black.jpg')
-        iou_img = copy.deepcopy(img_black)
-        # if config.plot_bbox and self.boxes is not None:
-            # self.frame = self.BBV.visualize(self.boxes, self.frame, self.boxes_scores)
+        # iou_img = copy.deepcopy(img_black)
+        if config.plot_bbox and self.boxes is not None:
+            self.BBV.visualize(self.boxes, self.frame, self.boxes_scores)
             # self.frame = self.BBV.visualize(self.boxes, self.frame)
             # cv2.imshow("cropped", (torch_to_im(inps[0]) * 255))
         if config.plot_kps and self.kps is not []:
@@ -58,12 +58,12 @@ class HumanDetection:
             self.KPV.vis_ske_black(self.frame, self.kps, self.kps_score)
         if config.plot_id and self.id2bbox is not None:
             self.IDV.plot_bbox_id(self.id2bbox, self.frame)
-            self.IDV.plot_bbox_id(self.object_tracker.get_pred(), self.frame, color=("yellow", "orange"),
-                                               id_pos="down")
+            # self.IDV.plot_bbox_id(self.object_tracker.get_pred(), self.frame, color=("yellow", "orange"),
+            #                                    id_pos="down")
             # frame = self.IDV.plot_skeleton_id(id2ske, copy.deepcopy(img))
-        self.object_tracker.plot_iou_map(iou_img)
+        # self.object_tracker.plot_iou_map(iou_img)
         # cv2.imshow("iou", cv2.resize(iou_map, (720, 540)))
-        self.frame = np.concatenate((self.frame, cv2.resize(iou_img, (720, 540))), axis=1)
+        # self.frame = np.concatenate((self.frame, cv2.resize(iou_img, (720, 540))), axis=1)
         return self.frame, img_black
 
     def process_img(self, frame, gray=False):
@@ -83,7 +83,8 @@ class HumanDetection:
                 boxes = self.object_tracker.id_and_box(self.id2bbox)
 
                 inps, pt1, pt2 = crop_bbox(frame, boxes)
-                kps, kps_score, kps_id = self.pose_estimator.process_img(inps, boxes, pt1, pt2)
-                self.kps, self.kps_score = self.object_tracker.match_kps(kps_id, kps, kps_score)
+                if inps is not None:
+                    kps, kps_score, kps_id = self.pose_estimator.process_img(inps, boxes, pt1, pt2)
+                    self.kps, self.kps_score = self.object_tracker.match_kps(kps_id, kps, kps_score)
 
         return self.kps, self.id2bbox, self.kps_score
