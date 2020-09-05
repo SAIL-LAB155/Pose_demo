@@ -30,15 +30,14 @@ class ObjectDetectionYolo(object):
         self.batchSize = batchSize
 
     def __preprocess(self, frame):
+        self.height, self.width = frame_size[1], frame_size[0]
         img = []
         orig_img = []
-        # im_name = []
         im_dim_list = []
         img_k, orig_img_k, im_dim_list_k = prep_frame(frame, int(config.input_size))
 
         img.append(img_k)
         orig_img.append(orig_img_k)
-        # im_name.append('0.jpg')
         im_dim_list.append(im_dim_list_k)
 
         with torch.no_grad():

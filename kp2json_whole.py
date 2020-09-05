@@ -8,13 +8,14 @@ HP = HumanDetection()
 
 class ImageDetection:
     def __init__(self, src_folder, dest_folder):
-        self.src_img_ls = [os.path.join(src_folder, img_name) for img_name in os.listdir(src_folder)]
+        self.src_img_ls = [os.path.join(src_folder, img_name).replace("\\", "/") for img_name in os.listdir(src_folder)]
         self.dest_img_ls = [os.path.join(dest_folder, img_name) for img_name in os.listdir(src_folder)]
         self.idx = 0
         self.keypoints_json = []
         self.bbox = []
         self.result = {}
         self.result_all = {}
+        self.person_id = 0
         self.result_all['images'] = []
         self.json = open(src_folder+".json", "w")
 
@@ -102,8 +103,8 @@ class ImageDetection:
                             "url": url})
 
     def writeJson(self, kps_dict, bbox_dict, kpScore_dict):
-        keypoints_json, bbox, people_cnt = [], [], 0
         for k in kps_dict.keys():
+            keypoints_json = []
             box, kps, kpScore = bbox_dict[k], kps_dict[k], kpScore_dict[k]
             if len(box) > 0 and len(kps) > 0:
                 for i in range(len(kps)):
@@ -113,14 +114,16 @@ class ImageDetection:
                         keypoints_json.append(2)
                     else:
                         keypoints_json.append(0)
-                for j in range(4):
-                    bbox.append(box[j].item())
-                self.annotations.append({"image_id": self.id_cnt,
-                                         "category_id": 0,
-                                         "bbox": box,
+                # for j in range(4):
+                #     bbox.append(box[j].item())
+                w, h = box[2] - box[0], box[3] - box[1]
+                box_tmp = [box[0].tolist(), box[1].tolist(), w.tolist(), h.tolist()]
+                self.annotations.append({"image_id": str(self.id_cnt),
+                                         "category_id": "0",
+                                         "bbox": box_tmp,
                                          "keypoints": keypoints_json,
-                                         "id": people_cnt})
-            people_cnt += 1
+                                         "id": str(self.person_id)})
+            self.person_id += 1
 
     def process(self):
         for self.idx, (src, dest) in enumerate(zip(self.src_img_ls, self.dest_img_ls)):
