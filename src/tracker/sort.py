@@ -142,7 +142,7 @@ class KalmanBoxTracker(object):
 
 
 class Sort(object):
-  def __init__(self, max_age=10, min_hits=8):
+  def __init__(self, max_age=1, min_hits=0):
     """
     Sets key parameters for SORT
     """
@@ -159,6 +159,7 @@ class Sort(object):
   def init_KF(self):
     KalmanBoxTracker.count = 0
     KalmanBoxTracker.curr_id = []
+    self.trackers = []
 
   def draw_iou_mat(self, interval=8):
     if len(self.iou_matrix) < 1:

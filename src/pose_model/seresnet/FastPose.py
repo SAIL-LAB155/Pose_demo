@@ -28,7 +28,7 @@ class FastPose(nn.Module):
         self.duc1 = DUC(512, 1024, upscale_factor=2)
         self.duc2 = DUC(256, 512, upscale_factor=2)
 
-        if "duc_se.pth" in config.pose_weight:
+        if "duc_se" in config.pose_weight:
             self.conv_out = nn.Conv2d(self.DIM, 33, kernel_size=3, stride=1, padding=1)
         else:
             self.conv_out = nn.Conv2d(
