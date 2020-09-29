@@ -36,6 +36,7 @@ pose_batch = 80
 
 
 frame_size = (720, 540)
+libtorch = "mobile_pose.pt"
 
 pose_backbone = "seresnet101"
 pose_cls = 17
