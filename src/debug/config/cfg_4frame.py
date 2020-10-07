@@ -1,7 +1,7 @@
-yolo_cfg = "model/ceiling/yolov3-1cls.cfg"
-yolo_weight = 'model/ceiling/0607_origin.weights'
+yolo_cfg = "../../../../Desktop/CeilingAnalysis/weights/yolo/2/yolov3-original-1cls-leaky.cfg"
+yolo_weight = '../../../../Desktop/CeilingAnalysis/weights/yolo/2/best.weights'
 
-pose_weight = "../../weights/sppe/duc_se.pth"
+pose_weight = "../../../../Desktop/CeilingAnalysis/weights/sppe/0915/duc_se_new.pkl"
 pose_cfg = None
 
 video_1 = "video/4frame_demo/0.mp4"

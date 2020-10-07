@@ -21,7 +21,7 @@ tensor = torch.FloatTensor
 
 
 class ImgProcessor:
-    def __init__(self, show_img=True):
+    def __init__(self, resize_size, show_img=True):
         self.object_detector = ObjectDetectionYolo(cfg=yolo_cfg, weight=yolo_weight)
         self.pose_estimator = PoseEstimator(pose_cfg=pose_cfg, pose_weight=pose_weight)
         self.object_tracker1 = ObjectTracker()
@@ -38,6 +38,7 @@ class ImgProcessor:
         self.kps = {}
         self.kps_score = {}
         self.show_img = show_img
+        self.resize_size = resize_size
 
     def init_sort(self):
         self.object_tracker1.init_tracker()
@@ -54,7 +55,7 @@ class ImgProcessor:
         self.kps_score = {}
 
     def visualize(self):
-        img_black = cv2.imread('video/black.jpg')
+        img_black = cv2.resize(cv2.imread('video/black.jpg'), self.resize_size)
         if config.plot_bbox and self.boxes is not None:
             self.BBV.visualize(self.boxes, self.frame, self.boxes_scores)
             # cv2.imshow("cropped", (torch_to_im(inps[0]) * 255))
@@ -97,8 +98,9 @@ class ImgProcessor:
         return res1, res2, res3, res4
 
 
-IP = ImgProcessor()
 frame_size = (720, 540)
+resize_ratio = 0.5
+show_size = (1080, 720)
 
 
 class VideoProcessor:
@@ -107,13 +109,18 @@ class VideoProcessor:
         self.cap2 = cv2.VideoCapture(vp2)
         self.cap3 = cv2.VideoCapture(vp3)
         self.cap4 = cv2.VideoCapture(vp4)
+
+        self.height, self.width = int(self.cap1.get(cv2.CAP_PROP_FRAME_HEIGHT)), int(
+            self.cap1.get(cv2.CAP_PROP_FRAME_WIDTH))
+        self.resize_size = (int(self.width * resize_ratio), int(self.height * resize_ratio))
         self.show_img = show_img
+        self.IP = ImgProcessor(self.resize_size)
 
     def process_frame(self, f1, f2, f3, f4):
-        fr1, fr2, fr3, fr4 = cv2.resize(f1, frame_size), cv2.resize(f2, frame_size), cv2.resize(f3, frame_size), \
-                             cv2.resize(f4, frame_size),
+        # fr1, fr2, fr3, fr4 = cv2.resize(f1, frame_size), cv2.resize(f2, frame_size), cv2.resize(f3, frame_size), \
+        #                      cv2.resize(f4, frame_size),
 
-        res1, res2, res3, res4 = IP.process_img(fr1, fr2, fr3, fr4)
+        res1, res2, res3, res4 = self.IP.process_img(f1, f2, f3, f4)
         img1, img2, img3, img4 = res1[0], res2[0], res3[0], res4[0]
 
         img_ver1 = np.concatenate((img1, img2), axis=0)
@@ -132,10 +139,10 @@ class VideoProcessor:
 
             if ret1:
                 img = self.process_frame(frame1, frame2, frame3, frame4)
-                img = cv2.resize(img, frame_size)
+                # img = cv2.resize(img, frame_size)
 
                 if self.show_img:
-                    cv2.imshow("res", img)
+                    cv2.imshow("res", cv2.resize(img, show_size))
                     cv2.waitKey(2)
 
             else:
