@@ -28,7 +28,7 @@ empty_tensor4 = torch.empty([0,4])
 
 
 class ImgProcessor:
-    def __init__(self, show_img=True):
+    def __init__(self, resize_size, show_img=True):
         self.black_yolo = ObjectDetectionYolo(cfg=black_yolo_cfg, weight=black_yolo_weights)
         self.gray_yolo = ObjectDetectionYolo(cfg=gray_yolo_cfg, weight=gray_yolo_weights)
         self.BBV = BBoxVisualizer()
@@ -40,19 +40,19 @@ class ImgProcessor:
         self.id2bbox = {}
         self.img_black = []
         self.show_img = show_img
-        self.RP = RegionProcessor(config.frame_size[0], config.frame_size[1], 10, 10)
-        self.HP = HumanProcessor(config.frame_size[0], config.frame_size[1])
+        self.RP = RegionProcessor(resize_size[0], resize_size[1], 10, 10)
+        self.HP = HumanProcessor(resize_size[0], resize_size[1])
         self.BE = BoxEnsemble()
+        self.resize_size = resize_size
 
     def process_img(self, frame, background):
         rgb_kps, dip_img, track_pred, rd_box = \
             copy.deepcopy(frame), copy.deepcopy(frame), copy.deepcopy(frame), copy.deepcopy(frame)
-        img_black = cv2.imread("src/black.jpg")
-        img_black = cv2.resize(img_black, config.frame_size)
+        img_black = cv2.resize(cv2.imread("src/black.jpg"), self.resize_size)
         iou_img, black_kps, img_size_ls, img_box_ratio, rd_cnt = copy.deepcopy(img_black), \
             copy.deepcopy(img_black), copy.deepcopy(img_black), copy.deepcopy(img_black), copy.deepcopy(img_black)
 
-        black_boxes, black_scores, gray_boxes, gray_scores = empty_tensor, empty_tensor, empty_tensor, empty_tensor
+        [black_boxes, black_scores, gray_boxes, gray_scores] = [empty_tensor] * 4
         diff = cv2.absdiff(frame, background)
 
         dip_boxes = self.dip_detection.detect_rect(diff)
@@ -109,8 +109,10 @@ class ImgProcessor:
         return gray_results, black_results, dip_results, res
 
 
-frame_size = config.frame_size
-IP = ImgProcessor()
+frame_size = (720, 540)
+resize_ratio = 0.5
+store_size = (frame_size[0]*4, frame_size[1]*2)
+show_size = (1560, 720)
 
 
 class RegionDetector(object):
@@ -118,19 +120,22 @@ class RegionDetector(object):
 
         self.cap = cv2.VideoCapture(path)
         self.fgbg = cv2.createBackgroundSubtractorMOG2(history=500, varThreshold=200, detectShadows=False)
+        self.height, self.width = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)), int(
+            self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        self.resize_size = (int(self.width * resize_ratio), int(self.height * resize_ratio))
+        self.IP = ImgProcessor(self.resize_size)
 
     def process(self):
         cnt = 0
         while True:
             ret, frame = self.cap.read()
             if ret:
-                frame = cv2.resize(frame, config.frame_size)
+                frame = cv2.resize(frame, self.resize_size)
                 fgmask = self.fgbg.apply(frame)
                 background = self.fgbg.getBackgroundImage()
+                gray_res, black_res, dip_res, res_map = self.IP.process_img(frame, background)
 
-                gray_res, black_res, dip_res, res_map = IP.process_img(frame, background)
-
-                cv2.imshow("res", cv2.resize(res_map, (1560, 720)))
+                cv2.imshow("res", cv2.resize(res_map, show_size))
                 # out.write(res)
                 cnt += 1
                 cv2.waitKey(1)

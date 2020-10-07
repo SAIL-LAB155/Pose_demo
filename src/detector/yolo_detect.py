@@ -9,7 +9,7 @@ empty_tensor = torch.empty([0,7])
 
 
 class ObjectDetectionYolo(object):
-    def __init__(self, cfg, weight, batchSize=1, img_height=frame_size[1], img_width=frame_size[0]):
+    def __init__(self, cfg, weight, batchSize=1):
         self.det_model = Darknet(cfg)
         # self.det_model.load_state_dict(torch.load('models/yolo/yolov3-spp.weights', map_location="cuda:0")['model'])
         self.det_model.load_weights(weight)
@@ -24,13 +24,13 @@ class ObjectDetectionYolo(object):
         # params = print_model_param_nums(self.det_model)
         # print("Detection: Inference time {}s, Params {}, FLOPs {}".format(inf_time, params, flops))
         self.det_model.eval()
-        self.height, self.width = img_height, img_width
+        # self.height, self.width = img_height, img_width
 
         self.im_dim_list = []
         self.batchSize = batchSize
 
     def __preprocess(self, frame):
-        self.height, self.width = frame_size[1], frame_size[0]
+        # self.height, self.width = frame_size[1], frame_size[0]
         img = []
         orig_img = []
         im_dim_list = []
@@ -84,8 +84,8 @@ class ObjectDetectionYolo(object):
             return empty_tensor, empty_tensor
 
         for j in range(results.shape[0]):
-            results[j, [0, 2]] = torch.clamp(results[j, [0, 2]], 0.0, self.width)
-            results[j, [1, 3]] = torch.clamp(results[j, [1, 3]], 0.0, self.height)
+            results[j, [0, 2]] = torch.clamp(results[j, [0, 2]], 0.0, self.im_dim_list[j, 0])
+            results[j, [1, 3]] = torch.clamp(results[j, [1, 3]], 0.0, self.im_dim_list[j, 1])
         boxes = results[:, 0:4]
         scores = results[:, 4:5]
 

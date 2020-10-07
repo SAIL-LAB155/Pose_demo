@@ -47,7 +47,7 @@ class HumanDetection:
         self.kps_score = {}
 
     def visualize(self):
-        img_black = cv2.imread('src/black.jpg')
+        img_black = cv2.resize(cv2.imread('src/black.jpg'), config.frame_size)
         # iou_img = copy.deepcopy(img_black)
         if config.plot_bbox and self.boxes is not None:
             self.BBV.visualize(self.boxes, self.frame, self.boxes_scores)
@@ -55,7 +55,7 @@ class HumanDetection:
             # cv2.imshow("cropped", (torch_to_im(inps[0]) * 255))
         if config.plot_kps and self.kps is not []:
             self.KPV.vis_ske(self.frame, self.kps, self.kps_score)
-            self.KPV.vis_ske_black(self.frame, self.kps, self.kps_score)
+            self.KPV.vis_ske_black(img_black, self.kps, self.kps_score)
         if config.plot_id and self.id2bbox is not None:
             self.IDV.plot_bbox_id(self.id2bbox, self.frame)
             # self.IDV.plot_bbox_id(self.object_tracker.get_pred(), self.frame, color=("yellow", "orange"),

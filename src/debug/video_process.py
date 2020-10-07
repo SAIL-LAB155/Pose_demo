@@ -98,10 +98,9 @@ class VideoProcessor:
             ret, frame = self.cap.read()
             cnt += 1
             if ret:
-                frame = cv2.resize(frame, frame_size)
                 kps, boxes, kps_score = IP.process_img(frame)
                 img, img_black = IP.visualize()
-                cv2.imshow("res", img)
+                cv2.imshow("res", cv2.resize(img, frame_size))
                 cv2.waitKey(2)
 
             else:
