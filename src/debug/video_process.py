@@ -21,7 +21,7 @@ tensor = torch.FloatTensor
 
 
 class HumanDetection:
-    def __init__(self, show_img=True):
+    def __init__(self, resize_size, show_img=True):
         self.object_detector = ObjectDetectionYolo(cfg=yolo_cfg, weight=yolo_weight)
         self.object_tracker = ObjectTracker()
         self.pose_estimator = PoseEstimator(pose_cfg=pose_cfg, pose_weight=pose_weight)
@@ -36,6 +36,7 @@ class HumanDetection:
         self.kps = {}
         self.kps_score = {}
         self.show_img = show_img
+        self.resize_size = resize_size
 
     def init_sort(self):
         self.object_tracker.init_tracker()
@@ -49,7 +50,7 @@ class HumanDetection:
         self.kps_score = {}
 
     def visualize(self):
-        img_black = cv2.imread('src/black.jpg')
+        img_black = cv2.resize(cv2.imread('video/black.jpg'), self.resize_size)
         if config.plot_bbox and self.boxes is not None:
             self.BBV.visualize(self.boxes, self.frame)
         if config.plot_kps and self.kps is not []:
@@ -84,13 +85,17 @@ class HumanDetection:
         return self.kps, self.id2bbox, self.kps_score
 
 
-IP = HumanDetection()
-frame_size = (720, 540)
+resize_ratio = 0.5
+show_size = (1080, 720)
 
 
 class VideoProcessor:
     def __init__(self, vp):
         self.cap = cv2.VideoCapture(vp)
+        self.height, self.width = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)), int(
+            self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        self.resize_size = (int(self.width * resize_ratio), int(self.height * resize_ratio))
+        self.IP = HumanDetection(self.resize_size)
 
     def process_video(self):
         cnt = 0
@@ -98,9 +103,9 @@ class VideoProcessor:
             ret, frame = self.cap.read()
             cnt += 1
             if ret:
-                kps, boxes, kps_score = IP.process_img(frame)
-                img, img_black = IP.visualize()
-                cv2.imshow("res", cv2.resize(img, frame_size))
+                kps, boxes, kps_score = self.IP.process_img(frame)
+                img, img_black = self.IP.visualize()
+                cv2.imshow("res", cv2.resize(img, show_size))
                 cv2.waitKey(2)
 
             else:
