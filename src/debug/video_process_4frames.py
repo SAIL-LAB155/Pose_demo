@@ -21,7 +21,7 @@ except:
 tensor = torch.FloatTensor
 
 
-class ImgProcessor:
+class ImgProcessor4Yolo:
     def __init__(self, resize_size, show_img=True):
         self.object_detector = ObjectDetectionYolo(cfg=yolo_cfg, weight=yolo_weight)
         self.pose_estimator = PoseEstimator(pose_cfg=pose_cfg, pose_weight=pose_weight)
@@ -98,7 +98,7 @@ class ImgProcessor:
         return res1, res2, res3, res4
 
 
-class ImgProcessor4Yolo:
+class ImgProcessor:
     def __init__(self, resize_size, show_img=True):
         self.object_detector = ObjectDetectionYolo(cfg=yolo_cfg, weight=yolo_weight)
         self.pose_estimator = PoseEstimator(pose_cfg=pose_cfg, pose_weight=pose_weight)
@@ -113,7 +113,7 @@ class ImgProcessor4Yolo:
         for trackers in self.object_trackers:
             trackers.init_tracker()
 
-    def visualize(self, boxes, box_scores, kps, kps_scores, img, id2box):
+    def visualize(self, img, boxes=None, box_scores=None, kps=None, kps_scores=None, id2box=None):
         img_black = cv2.resize(cv2.imread('video/black.jpg'), self.resize_size)
         if config.plot_bbox and boxes is not None:
             self.BBV.visualize(boxes, img, box_scores)
@@ -147,7 +147,7 @@ class ImgProcessor4Yolo:
                     kps, kps_score, kps_id = self.pose_estimator.process_img(inps, boxes, pt1, pt2)
                     kps, kps_score = tracker.match_kps(kps_id, kps, kps_score)
 
-            img, black_img = self.visualize(boxes, boxes_scores, kps, kps_score, frames[cam_idx], id2bbox)
+            img, black_img = self.visualize(frames[cam_idx], boxes, boxes_scores, kps, kps_score, id2bbox)
             results.append([img, black_img, kps, kps_score, id2bbox])
 
         return results[0], results[1], results[2], results[3]

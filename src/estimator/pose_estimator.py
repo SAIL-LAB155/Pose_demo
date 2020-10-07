@@ -28,7 +28,7 @@ class PoseEstimator(object):
         flops = print_model_param_flops(self.pose_model)
         params = print_model_param_nums(self.pose_model)
         if config.libtorch:
-            example = torch.rand(30,3,224,224)
+            example = torch.rand(2,3,224,224)
             traced_model = torch.jit.trace(self.pose_model, example)
             traced_model.save(config.libtorch)
         print("Pose estimation: Inference time {}s, Params {}, FLOPs {}".format(inf_time, params, flops))

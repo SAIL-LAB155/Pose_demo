@@ -261,9 +261,10 @@ class Sort(object):
         #remove dead tracklet
         if trk.time_since_update > self.max_age or \
                 (trk.age < self.min_hits * 0.5 and trk.time_since_update > 0.3 * self.max_age):
+            KalmanBoxTracker.curr_id.remove(self.trackers[i].id)
             self.trackers.pop(i)
 
-    KalmanBoxTracker.curr_id = [trks.id for trks in self.trackers]
+    # KalmanBoxTracker.curr_id = [trks.id for trks in self.trackers]
 
     if len(ret) > 0:
         return np.concatenate(ret)
