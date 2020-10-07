@@ -1,9 +1,9 @@
-from src.human_detection import ImgProcessor
+from src.human_detection import HumanDetection
 import cv2
 import os
 from config.config import img_folder
 
-IP = ImgProcessor()
+IP = HumanDetection()
 
 
 if __name__ == '__main__':
@@ -15,5 +15,8 @@ if __name__ == '__main__':
         cnt += 1
         print("Processing pic {}".format(cnt))
         frame = cv2.imread(os.path.join(src_folder, img_name))
-        kps, img, black_img, _, _ = IP.process_img(frame)
-        cv2.imwrite(os.path.join(dest_folder, img_name), img)
+        kps, _, _ = IP.process_img(frame)
+        img, black_img = IP.visualize()
+        cv2.imshow("squat", img)
+        cv2.waitKey(1)
+        cv2.imwrite(os.path.join(dest_folder, img_name), black_img)
