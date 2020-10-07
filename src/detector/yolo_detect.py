@@ -6,7 +6,7 @@ from src.yolo.darknet import Darknet
 from config.config import device, frame_size
 import numpy as np
 
-empty_tensor = torch.empty([0,7])
+empty_tensor = torch.empty([0,8])
 
 
 class ObjectDetectionYolo(object):
