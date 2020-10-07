@@ -4,6 +4,7 @@ from src.yolo.preprocess import prep_frame
 from src.yolo.util import dynamic_write_results
 from src.yolo.darknet import Darknet
 from config.config import device, frame_size
+import numpy as np
 
 empty_tensor = torch.empty([0,7])
 
@@ -28,17 +29,23 @@ class ObjectDetectionYolo(object):
 
         self.im_dim_list = []
         self.batchSize = batchSize
+        self.mul_img = False
 
     def __preprocess(self, frame):
-        # self.height, self.width = frame_size[1], frame_size[0]
         img = []
         orig_img = []
         im_dim_list = []
-        img_k, orig_img_k, im_dim_list_k = prep_frame(frame, int(config.input_size))
+        if len(frame.shape) == 3:
+            frame = np.expand_dims(frame, axis=0)
+            self.mul_img = False
+        else:
+            self.mul_img = True
 
-        img.append(img_k)
-        orig_img.append(orig_img_k)
-        im_dim_list.append(im_dim_list_k)
+        for k in range(frame.shape[0]):
+            img_k, orig_img_k, im_dim_list_k = prep_frame(frame[k], int(config.input_size))
+            img.append(img_k)
+            orig_img.append(orig_img_k)
+            im_dim_list.append(im_dim_list_k)
 
         with torch.no_grad():
             # Human Detection
@@ -70,14 +77,16 @@ class ObjectDetectionYolo(object):
             dets[:, [2, 4]] -= (self.det_inp_dim - scaling_factor * self.im_dim_list[:, 1].view(-1, 1)) / 2
 
             dets[:, 1:5] /= scaling_factor
-        return dets[:,1:]
+        return dets
 
     def process(self, frame):
         img, im_dim_list = self.__preprocess(frame)
         det_res = self.__detect(img, im_dim_list)
         # boxes, scores = self.cut_box_score(det_res)
         # return boxes, scores
-        return det_res
+        if self.mul_img:
+            return det_res
+        return det_res[:,1:]
 
     def cut_box_score(self, results):
         if len(results) == 0:
