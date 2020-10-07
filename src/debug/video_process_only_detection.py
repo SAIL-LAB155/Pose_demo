@@ -45,6 +45,12 @@ class ImgProcessor:
         self.BE = BoxEnsemble()
         self.resize_size = resize_size
 
+    def init(self):
+        self.RP = RegionProcessor(self.resize_size[0], self.resize_size[1], 10, 10)
+        self.HP = HumanProcessor(self.resize_size[0], self.resize_size[1])
+        self.object_tracker = ObjectTracker()
+        self.object_tracker.init_tracker()
+
     def process_img(self, frame, background):
         rgb_kps, dip_img, track_pred, rd_box = \
             copy.deepcopy(frame), copy.deepcopy(frame), copy.deepcopy(frame), copy.deepcopy(frame)

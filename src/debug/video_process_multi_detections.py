@@ -52,6 +52,12 @@ class ImgProcessor:
         self.resize_size = resize_size
         self.kps_score = {}
 
+    def init(self):
+        self.RP = RegionProcessor(self.resize_size[0], self.resize_size[1], 10, 10)
+        self.HP = HumanProcessor(self.resize_size[0], self.resize_size[1])
+        self.object_tracker = ObjectTracker()
+        self.object_tracker.init_tracker()
+
     def process_img(self, frame, background):
         rgb_kps, dip_img, track_pred, rd_box = \
             copy.deepcopy(frame), copy.deepcopy(frame), copy.deepcopy(frame), copy.deepcopy(frame)
@@ -149,8 +155,8 @@ write_video = True
 
 
 class DrownDetector:
-    def __init__(self, vp):
-        self.cap = cv2.VideoCapture(vp)
+    def __init__(self, path):
+        self.cap = cv2.VideoCapture(path)
         self.fgbg = cv2.createBackgroundSubtractorMOG2(history=500, varThreshold=200, detectShadows=False)
         self.height, self.width = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)), int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         if write_video:
@@ -176,6 +182,9 @@ class DrownDetector:
                 cv2.waitKey(1)
             else:
                 self.cap.release()
+                if write_video:
+                    self.out_video.release()
+                cv2.destroyAllWindows()
                 break
 
 
