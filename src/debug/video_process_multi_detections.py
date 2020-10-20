@@ -47,7 +47,7 @@ class ImgProcessor:
         self.show_img = show_img
         self.RP = RegionProcessor(resize_size[0], resize_size[1], 10, 10)
         self.HP = HumanProcessor(resize_size[0], resize_size[1])
-        self.BE = BoxEnsemble()
+        self.BE = BoxEnsemble(resize_size[0], resize_size[1])
         self.kps = {}
         self.resize_size = resize_size
         self.kps_score = {}

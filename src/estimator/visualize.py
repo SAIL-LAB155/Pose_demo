@@ -2,7 +2,7 @@ import torch
 import cv2
 from PIL import Image
 import numpy as np
-from config.config import pose_cls
+from config.config import pose_cls, pose_thresh
 from src.utils.plot import colors
 
 RED = colors["red"]
@@ -82,7 +82,7 @@ class KeyPointVisualizer(object):
 
             # Draw keypoints
             for n in range(kp_scores.shape[0]):
-                if kp_scores[n] <= 0.05:
+                if kp_scores[n] <= pose_thresh[n]:
                     continue
                 cor_x, cor_y = int(kp_preds[n, 0]), int(kp_preds[n, 1])
                 part_line[n] = (cor_x, cor_y)

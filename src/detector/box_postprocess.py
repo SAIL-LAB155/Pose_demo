@@ -108,7 +108,7 @@ def eliminate_nan(id2box):
 
 
 class BoxEnsemble:
-    def __init__(self, height=config.frame_size[1], width=config.frame_size[0]):
+    def __init__(self, height, width):
         self.pre_boxes = []
         self.max_box = 1
         self.black_max_thresh = height * width * 0.4
