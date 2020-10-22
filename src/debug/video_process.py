@@ -48,7 +48,7 @@ class HumanDetection:
         self.kps_score = {}
 
     def visualize(self):
-        img_black = cv2.resize(cv2.imread('video/black.jpg'), self.resize_size)
+        img_black = np.full((self.resize_size[1], self.resize_size[0], 3), 0)
         if config.plot_bbox and self.boxes is not None:
             self.BBV.visualize(self.boxes, self.frame)
         if config.plot_kps and self.kps is not []:
@@ -88,8 +88,8 @@ show_size = config.show_size
 
 
 class VideoProcessor:
-    def __init__(self, vp):
-        self.cap = cv2.VideoCapture(vp)
+    def __init__(self, video_path):
+        self.cap = cv2.VideoCapture(video_path)
         self.height, self.width = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)), int(
             self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         self.resize_size = (int(self.width * resize_ratio), int(self.height * resize_ratio))
@@ -101,6 +101,7 @@ class VideoProcessor:
             ret, frame = self.cap.read()
             cnt += 1
             if ret:
+                # frame = cv2.resize(frame, self.resize_size)
                 kps, boxes, kps_score = self.IP.process_img(frame)
                 img, img_black = self.IP.visualize()
                 cv2.imshow("res", cv2.resize(img, show_size))
