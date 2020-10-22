@@ -21,8 +21,8 @@ except:
 
 
 fourcc = cv2.VideoWriter_fourcc(*'XVID')
-empty_tensor = torch.empty([0,7])
-empty_tensor4 = torch.empty([0,4])
+empty_tensor = torch.empty([0, 7])
+empty_tensor4 = torch.empty([0, 4])
 
 
 class ImgProcessor:
@@ -113,10 +113,9 @@ class ImgProcessor:
         return gray_results, black_results, dip_results, res
 
 
-frame_size = (720, 540)
 resize_ratio = 0.5
-store_size = (frame_size[0]*4, frame_size[1]*2)
-show_size = (1560, 720)
+store_size = config.store_size
+show_size = config.show_size
 
 
 class RegionDetector(object):

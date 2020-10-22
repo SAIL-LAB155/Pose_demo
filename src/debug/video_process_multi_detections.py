@@ -148,7 +148,6 @@ class ImgProcessor:
         return gray_results, black_results, dip_results, res_map
 
 
-enhance_kernel = np.array([[0, -1, 0], [0, 5, 0], [0, -1, 0]])
 resize_ratio = config.resize_ratio
 store_size = config.store_size
 show_size = config.show_size
