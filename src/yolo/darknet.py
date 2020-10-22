@@ -6,7 +6,8 @@ import torch.nn.functional as F
 from torch.autograd import Variable
 import numpy as np
 import cv2
-from config.config import device
+# from config.config import device
+from src.opt import opt
 import matplotlib.pyplot as plt
 try:
     from .util import count_parameters as count
@@ -16,6 +17,10 @@ except ImportError:
     from yolo.util import count_parameters as count
     from yolo.util import convert2cpu as cpu
     from yolo.util import predict_transform
+
+
+device = opt.device
+
 
 class test_net(nn.Module):
     def __init__(self, num_layers, input_size):
