@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 import torch
 import numpy as np
-from config.config import pose_cls
+# from config.config import pose_cls
+from src.opt import opt
+pose_cls = opt.pose_cls
 
 delta1 = 1
 mu = 1.7

@@ -3,10 +3,9 @@ from config import config
 from src.yolo.preprocess import prep_frame
 from src.yolo.util import dynamic_write_results
 from src.yolo.darknet import Darknet
-from config.config import device, frame_size
 import numpy as np
 
-empty_tensor = torch.empty([0,8])
+empty_tensor = torch.empty([0, 8])
 
 
 class ObjectDetectionYolo(object):
@@ -18,7 +17,7 @@ class ObjectDetectionYolo(object):
         self.det_inp_dim = int(self.det_model.net_info['height'])
         assert self.det_inp_dim % 32 == 0
         assert self.det_inp_dim > 32
-        if device != "cpu":
+        if config.device != "cpu":
             self.det_model.cuda()
         # inf_time = get_inference_time(self.det_model, height=config.input_size, width=config.input_size)
         # flops = print_model_param_flops(self.det_model, input_width=config.input_size, input_height=config.input_size)
@@ -57,7 +56,7 @@ class ObjectDetectionYolo(object):
         self.im_dim_list = im_dim_list
         with torch.no_grad():
             # Human Detection
-            if device != "cpu":
+            if config.device != "cpu":
                 img = img.cuda()
 
             prediction = self.det_model(img)

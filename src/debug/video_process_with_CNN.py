@@ -13,19 +13,19 @@ from src.detector.box_postprocess import crop_bbox, eliminate_nan
 from src.CNNclassifier.inference import CNNInference
 
 try:
-    from src.debug.config.cfg_with_CNN import yolo_weight, yolo_cfg, video_path, pose_weight, pose_cfg, CNN_class
+    import src.debug.config.cfg_with_CNN as config
 except:
-    from config.config import yolo_weight, yolo_cfg, video_path, pose_weight, pose_cfg
-from config import config
+    import config.config as config
+
 
 tensor = torch.FloatTensor
 
 
 class HumanDetection:
     def __init__(self, show_img=True):
-        self.object_detector = ObjectDetectionYolo(cfg=yolo_cfg, weight=yolo_weight)
+        self.object_detector = ObjectDetectionYolo(cfg=config.yolo_cfg, weight=config.yolo_weight)
         self.object_tracker = ObjectTracker()
-        self.pose_estimator = PoseEstimator(pose_cfg=pose_cfg, pose_weight=pose_weight)
+        self.pose_estimator = PoseEstimator(pose_cfg=config.pose_cfg, pose_weight=config.pose_weight)
         self.BBV = BBoxVisualizer()
         self.KPV = KeyPointVisualizer()
         self.IDV = IDVisualizer()
@@ -88,7 +88,7 @@ class HumanDetection:
     def classify_whole(self, img):
         out = self.CNN_model.predict(img)
         idx = out[0].tolist().index(max(out[0].tolist()))
-        pred = CNN_class[idx]
+        pred = config.CNN_class[idx]
         print("The prediction is {}".format(pred))
 
     def classify(self, src_img, id2bbox):
@@ -101,7 +101,7 @@ class HumanDetection:
             img = np.asarray(src_img[y1:y2, x1:x2])
             out = self.CNN_model.predict(img)
             idx = out[0].tolist().index(max(out[0].tolist()))
-            pred = CNN_class[idx]
+            pred = config.CNN_class[idx]
             text_location = (int((box[0]+box[2])/2)), int((box[1])+50)
             cv2.putText(src_img, pred, text_location, cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 1)
         # return self.frame
@@ -124,10 +124,11 @@ class VideoProcessor:
                 frame = cv2.resize(frame, frame_size)
                 kps, boxes, kps_score = IP.process_img(frame)
                 img, img_black = IP.visualize()
-                IP.classify_whole(img_black)
-                cv2.imshow("res", img)
-                img_each = IP.classify(IP.frame, boxes)
-                cv2.imshow("each", img_each)
+                # if config
+                # IP.classify_whole(img_black)
+                # cv2.imshow("res", img)
+                # img_each = IP.classify(IP.frame, boxes)
+                # cv2.imshow("each", img_each)
                 cv2.waitKey(2)
             else:
                 self.cap.release()
@@ -135,4 +136,4 @@ class VideoProcessor:
 
 
 if __name__ == '__main__':
-    VideoProcessor(video_path).process_video()
+    VideoProcessor(config.video_path).process_video()

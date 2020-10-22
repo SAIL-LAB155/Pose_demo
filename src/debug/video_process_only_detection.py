@@ -2,7 +2,6 @@ import torch
 import numpy as np
 import cv2
 import copy
-from config import config
 from src.detector.yolo_detect import ObjectDetectionYolo
 from src.detector.image_process_detect import ImageProcessDetection
 # from src.detector.yolo_asff_detector import ObjectDetectionASFF
@@ -16,11 +15,10 @@ from src.analyser.humans import HumanProcessor
 from src.utils.utils import paste_box
 
 try:
-    from config.config import gray_yolo_cfg, gray_yolo_weights, black_yolo_cfg, black_yolo_weights, video_path, \
-        black_box_threshold, gray_box_threshold
+    import src.debug.config.cfg_only_detections as config
 except:
-    from src.debug.config.cfg_only_detections import gray_yolo_cfg, gray_yolo_weights, black_yolo_cfg, \
-        black_yolo_weights, video_path, black_box_threshold, gray_box_threshold
+    import config.config as config
+
 
 fourcc = cv2.VideoWriter_fourcc(*'XVID')
 empty_tensor = torch.empty([0,7])
@@ -29,8 +27,8 @@ empty_tensor4 = torch.empty([0,4])
 
 class ImgProcessor:
     def __init__(self, resize_size, show_img=True):
-        self.black_yolo = ObjectDetectionYolo(cfg=black_yolo_cfg, weight=black_yolo_weights)
-        self.gray_yolo = ObjectDetectionYolo(cfg=gray_yolo_cfg, weight=gray_yolo_weights)
+        self.black_yolo = ObjectDetectionYolo(cfg=config.black_yolo_cfg, weight=config.black_yolo_weights)
+        self.gray_yolo = ObjectDetectionYolo(cfg=config.gray_yolo_cfg, weight=config.gray_yolo_weights)
         self.BBV = BBoxVisualizer()
         self.object_tracker = ObjectTracker()
         self.dip_detection = ImageProcessDetection()
@@ -42,7 +40,7 @@ class ImgProcessor:
         self.show_img = show_img
         self.RP = RegionProcessor(resize_size[0], resize_size[1], 10, 10)
         self.HP = HumanProcessor(resize_size[0], resize_size[1])
-        self.BE = BoxEnsemble()
+        self.BE = BoxEnsemble(resize_size[0], resize_size[1])
         self.resize_size = resize_size
 
     def init(self):
@@ -73,7 +71,7 @@ class ImgProcessor:
                 black_boxes, black_scores = self.black_yolo.cut_box_score(black_res)
                 self.BBV.visualize(black_boxes, enhanced, black_scores)
                 black_boxes, black_scores, black_res = \
-                    filter_box(black_boxes, black_scores, black_res, black_box_threshold)
+                    filter_box(black_boxes, black_scores, black_res, config.black_box_threshold)
             black_results = [enhanced, black_boxes, black_scores]
 
             # gray pics process
@@ -83,7 +81,7 @@ class ImgProcessor:
                 gray_boxes, gray_scores = self.gray_yolo.cut_box_score(gray_res)
                 self.BBV.visualize(gray_boxes, gray_img, gray_scores)
                 gray_boxes, gray_scores, gray_res = \
-                    filter_box(gray_boxes, gray_scores, gray_res, gray_box_threshold)
+                    filter_box(gray_boxes, gray_scores, gray_res, config.gray_box_threshold)
             gray_results = [gray_img, gray_boxes, gray_scores]
 
             merged_res = self.BE.ensemble_box(black_res, gray_res)
@@ -148,5 +146,5 @@ class RegionDetector(object):
 
 
 if __name__ == '__main__':
-    RD = RegionDetector(video_path)
+    RD = RegionDetector(config.video_path)
     RD.process()

@@ -2,8 +2,14 @@ import torch
 import cv2
 from PIL import Image
 import numpy as np
-from config.config import pose_cls, pose_thresh
+# from config.config import pose_cls, pose_thresh
+from src.opt import opt
 from src.utils.plot import colors
+
+
+pose_cls = opt.pose_cls
+pose_thresh = opt.pose_thresh
+
 
 RED = colors["red"]
 GREEN = colors["green"]

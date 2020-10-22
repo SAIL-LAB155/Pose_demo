@@ -9,3 +9,10 @@ pose_weight = "../../weights/sppe/duc_se.pth"
 pose_cfg = None
 
 video_path = "video/withCNN/00.avi"
+
+classify_type = 0
+# 0 ---> raw image whole
+# 1 ---> black image whole
+# 2 ---> raw image cropped
+# 3 ---> black image cropped
+

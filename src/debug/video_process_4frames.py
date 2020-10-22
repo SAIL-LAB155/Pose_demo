@@ -1,6 +1,5 @@
 import torch
 import cv2
-from config import config
 import numpy as np
 from src.estimator.pose_estimator import PoseEstimator
 from src.estimator.visualize import KeyPointVisualizer
@@ -12,19 +11,20 @@ from src.utils.img import calibration
 from src.detector.box_postprocess import crop_bbox, eliminate_nan
 import time
 
-try:
-    from config.config import yolo_weight, yolo_cfg, video_1, video_2, video_3, video_4, pose_cfg, pose_weight
-except:
 
-    from src.debug.config.cfg_4frame import yolo_weight, yolo_cfg, video_1, video_2, video_3, video_4, pose_cfg, pose_weight
+try:
+    import src.debug.config.cfg_4frame as config
+except:
+    import config.config as config
+
 
 tensor = torch.FloatTensor
 
 
 class ImgProcessor4Yolo:
     def __init__(self, resize_size, show_img=True):
-        self.object_detector = ObjectDetectionYolo(cfg=yolo_cfg, weight=yolo_weight)
-        self.pose_estimator = PoseEstimator(pose_cfg=pose_cfg, pose_weight=pose_weight)
+        self.object_detector = ObjectDetectionYolo(cfg=config.yolo_cfg, weight=config.yolo_weight)
+        self.pose_estimator = PoseEstimator(pose_cfg=config.pose_cfg, pose_weight=config.pose_weight)
         self.object_tracker1 = ObjectTracker()
         self.object_tracker2 = ObjectTracker()
         self.object_tracker3 = ObjectTracker()
@@ -100,8 +100,8 @@ class ImgProcessor4Yolo:
 
 class ImgProcessor:
     def __init__(self, resize_size, show_img=True):
-        self.object_detector = ObjectDetectionYolo(cfg=yolo_cfg, weight=yolo_weight)
-        self.pose_estimator = PoseEstimator(pose_cfg=pose_cfg, pose_weight=pose_weight)
+        self.object_detector = ObjectDetectionYolo(cfg=config.yolo_cfg, weight=config.yolo_weight)
+        self.pose_estimator = PoseEstimator(pose_cfg=config.pose_cfg, pose_weight=config.pose_weight)
         self.object_trackers = [ObjectTracker() for k in range(4)]
         self.BBV = BBoxVisualizer()
         self.KPV = KeyPointVisualizer()
@@ -210,4 +210,4 @@ class VideoProcessor:
 
 
 if __name__ == '__main__':
-    VideoProcessor(video_1, video_2, video_3, video_4).process_video()
+    VideoProcessor(config.video_1, config.video_2, config.video_3, config.video_4).process_video()

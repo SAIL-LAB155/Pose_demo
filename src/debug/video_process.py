@@ -2,7 +2,6 @@ import torch
 import cv2
 import copy
 import numpy as np
-from config import config
 from src.estimator.pose_estimator import PoseEstimator
 from src.estimator.visualize import KeyPointVisualizer
 from src.detector.yolo_detect import ObjectDetectionYolo
@@ -13,18 +12,18 @@ from src.utils.img import torch_to_im, gray3D
 from src.detector.box_postprocess import crop_bbox, eliminate_nan
 
 try:
-    from src.debug.config.cfg import yolo_weight, yolo_cfg, video_path, pose_weight, pose_cfg
+    import src.debug.config.cfg as config
 except:
-    from config.config import yolo_weight, yolo_cfg, video_path, pose_weight, pose_cfg
+    import config.config as config
 
 tensor = torch.FloatTensor
 
 
 class HumanDetection:
     def __init__(self, resize_size, show_img=True):
-        self.object_detector = ObjectDetectionYolo(cfg=yolo_cfg, weight=yolo_weight)
+        self.object_detector = ObjectDetectionYolo(cfg=config.yolo_cfg, weight=config.yolo_weight)
         self.object_tracker = ObjectTracker()
-        self.pose_estimator = PoseEstimator(pose_cfg=pose_cfg, pose_weight=pose_weight)
+        self.pose_estimator = PoseEstimator(pose_cfg=config.pose_cfg, pose_weight=config.pose_weight)
         self.BBV = BBoxVisualizer()
         self.KPV = KeyPointVisualizer()
         self.IDV = IDVisualizer()
@@ -114,4 +113,4 @@ class VideoProcessor:
 
 
 if __name__ == '__main__':
-    VideoProcessor(video_path).process_video()
+    VideoProcessor(config.video_path).process_video()

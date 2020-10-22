@@ -5,8 +5,11 @@ from torch.autograd import Variable
 from .layers.SE_Resnet import SEResnet
 from ..duc.DUC import DUC
 from config.config import pose_cls, device
-from config import config
+# from config import config
+from src.opt import opt
 from config.model_cfg import seresnet_cfg
+
+pose_weight = opt.pose_weight
 
 
 class FastPose(nn.Module):
@@ -28,7 +31,7 @@ class FastPose(nn.Module):
         self.duc1 = DUC(512, 1024, upscale_factor=2)
         self.duc2 = DUC(256, 512, upscale_factor=2)
 
-        if "duc_se" in config.pose_weight:
+        if "duc_se" in pose_weight:
             self.conv_out = nn.Conv2d(self.DIM, 33, kernel_size=3, stride=1, padding=1)
         else:
             self.conv_out = nn.Conv2d(
