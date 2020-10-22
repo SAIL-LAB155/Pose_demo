@@ -1,9 +1,16 @@
 import torch
-from config import config
+# from config import config
 from src.yolo.preprocess import prep_frame
 from src.yolo.util import dynamic_write_results
 from src.yolo.darknet import Darknet
 import numpy as np
+from src.opt import opt
+
+input_size = opt.input_size
+device = opt.device
+confidence = opt.confidence
+num_classes = opt.num_classes
+nms_thresh = opt.nms_thresh
 
 empty_tensor = torch.empty([0, 8])
 
@@ -13,11 +20,11 @@ class ObjectDetectionYolo(object):
         self.det_model = Darknet(cfg)
         # self.det_model.load_state_dict(torch.load('models/yolo/yolov3-spp.weights', map_location="cuda:0")['model'])
         self.det_model.load_weights(weight)
-        self.det_model.net_info['height'] = config.input_size
+        self.det_model.net_info['height'] = input_size
         self.det_inp_dim = int(self.det_model.net_info['height'])
         assert self.det_inp_dim % 32 == 0
         assert self.det_inp_dim > 32
-        if config.device != "cpu":
+        if device != "cpu":
             self.det_model.cuda()
         # inf_time = get_inference_time(self.det_model, height=config.input_size, width=config.input_size)
         # flops = print_model_param_flops(self.det_model, input_width=config.input_size, input_height=config.input_size)
@@ -41,7 +48,7 @@ class ObjectDetectionYolo(object):
             self.mul_img = True
 
         for k in range(frame.shape[0]):
-            img_k, orig_img_k, im_dim_list_k = prep_frame(frame[k], int(config.input_size))
+            img_k, orig_img_k, im_dim_list_k = prep_frame(frame[k], int(input_size))
             img.append(img_k)
             orig_img.append(orig_img_k)
             im_dim_list.append(im_dim_list_k)
@@ -56,13 +63,12 @@ class ObjectDetectionYolo(object):
         self.im_dim_list = im_dim_list
         with torch.no_grad():
             # Human Detection
-            if config.device != "cpu":
+            if device != "cpu":
                 img = img.cuda()
 
             prediction = self.det_model(img)
             # NMS process
-            dets = dynamic_write_results(prediction, config.confidence,  config.num_classes, nms=True,
-                                         nms_conf=config.nms_thresh)
+            dets = dynamic_write_results(prediction, confidence,  num_classes, nms=True, nms_conf=nms_thresh)
 
             if isinstance(dets, int) or dets.shape[0] == 0:
                 return empty_tensor

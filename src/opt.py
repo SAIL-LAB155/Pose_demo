@@ -13,7 +13,12 @@ parser.add_argument('--input_size', default=416, type=int,
                     help='epoch of lr decay')
 
 
-"----------------------------- Pose options -----------------------------"
+"----------------------------- Image Process options ---------------------"
+parser.add_argument('--water_top', default=40, type=int,
+                    help='epoch of lr decay')
+
+
+"----------------------------- Pose options ------------------------------"
 parser.add_argument('--input_height', default=320, type=int,
                     help='epoch of lr decay')
 parser.add_argument('--input_width', default=256, type=int,
@@ -42,7 +47,7 @@ parser.add_argument('--pose_thresh', default=[], type=list,
                     help='epoch of lr decay')
 
 
-"----------------------------- RNN options -----------------------------"
+"----------------------------- RNN options ------------------------------"
 parser.add_argument('--RNN_backbone', default="", type=str,
                     help='epoch of lr decay')
 parser.add_argument('--TCN_single', default=False, type=bool,
@@ -53,7 +58,7 @@ parser.add_argument('--RNN_class', default=2, type=int,
                     help='epoch of lr decay')
 
 
-"----------------------------- CNN options -----------------------------"
+"----------------------------- CNN options ------------------------------"
 parser.add_argument('--CNN_class', default=2, type=int,
                     help='epoch of lr decay')
 parser.add_argument('--CNN_backbone', default="mobilenet", type=str,
@@ -62,12 +67,12 @@ parser.add_argument('--CNN_thresh', default=0.5, type=float,
                     help='epoch of lr decay')
 
 
-"----------------------------- Transfer options -------------------------"
+"----------------------------- Transfer options --------------------------"
 parser.add_argument('--libtorch', default="", type=str,
                     help='epoch of lr decay')
 
 
-"----------------------------- Visualization options --------------------"
+"----------------------------- Visualization options ---------------------"
 parser.add_argument('--plot_bbox', default=True, type=bool,
                     help='epoch of lr decay')
 parser.add_argument('--plot_kps', default=True, type=bool,
