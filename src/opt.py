@@ -69,8 +69,10 @@ parser.add_argument('--CNN_thresh', default=0.5, type=float,
                     help='epoch of lr decay')
 
 
-"----------------------------- Transfer options --------------------------"
+"----------------------------- Convert options ---------------------------"
 parser.add_argument('--libtorch', default="", type=str,
+                    help='epoch of lr decay')
+parser.add_argument('--onnx', default="", type=str,
                     help='epoch of lr decay')
 
 

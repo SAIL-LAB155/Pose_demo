@@ -31,8 +31,6 @@ class ObjectDetectionYolo(object):
         # params = print_model_param_nums(self.det_model)
         # print("Detection: Inference time {}s, Params {}, FLOPs {}".format(inf_time, params, flops))
         self.det_model.eval()
-        # self.height, self.width = img_height, img_width
-
         self.im_dim_list = []
         self.batchSize = batchSize
         self.mul_img = False

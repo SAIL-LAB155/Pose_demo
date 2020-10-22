@@ -24,8 +24,8 @@ from src.CNNclassifier.inference import CNNInference
 
 
 fourcc = cv2.VideoWriter_fourcc(*'XVID')
-empty_tensor = torch.empty([0,7])
-empty_tensor4 = torch.empty([0,4])
+empty_tensor = torch.empty([0, 7])
+empty_tensor4 = torch.empty([0, 4])
 
 
 class ImgProcessor:
