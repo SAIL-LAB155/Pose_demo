@@ -3,10 +3,11 @@ import cv2
 import numpy as np
 import torch
 from .box_postprocess import cropBox, im_to_torch
-try:
-    from config.config import water_top
-except:
-    from src.debug.config.cfg_only_detections import water_top
+from src.opt import opt
+
+water_top = opt.water_top
+input_width = opt.input_width
+input_height = opt.input_height
 
 
 class ImageProcessDetection:
@@ -65,7 +66,7 @@ class ImageProcessDetection:
                 min(imght - 1, bottomRight[1] + ht * scaleRate / 2), upLeft[1] + 5)
 
             try:
-                inps[i] = cropBox(tmp_img.clone(), upLeft, bottomRight, config.input_height, config.input_width)
+                inps[i] = cropBox(tmp_img.clone(), upLeft, bottomRight, input_height, input_width)
             except IndexError:
                 print(tmp_img.shape)
                 print(upLeft)

@@ -2,9 +2,13 @@
 import torch.nn as nn
 from ..duc.DUC import DUC
 from .shufflenet import shufflenet_v2_x1_0
-from config.config import pose_cls, DUCs
+# from config.config import pose_cls, DUCs
+from src.opt import opt
+from config.model_cfg import DUC_cfg, mobile_opt
 
-n_classes = pose_cls
+
+pose_cls = opt.pose_cls
+DUCs = DUC_cfg[opt.DUC_idx]
 
 
 def createModel(cfg=None):
@@ -22,7 +26,7 @@ class ShufflePose(nn.Module):
         #self.duc3 = DUC(128, 256, upscale_factor=2)
         #self.duc4 = DUC(256, 512, upscale_factor=2)
         self.conv_out = nn.Conv2d(
-            int(DUCs[1]/4), n_classes, kernel_size=3, stride=1, padding=1)
+            int(DUCs[1]/4), pose_cls, kernel_size=3, stride=1, padding=1)
 
     def forward(self, x):
         out = self.shuffle(x)

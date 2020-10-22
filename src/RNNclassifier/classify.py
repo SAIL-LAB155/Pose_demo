@@ -12,10 +12,11 @@ import cv2
 import numpy as np
 from src.utils.plot import colors, sizes, thicks
 
-try:
-    from config.config import RNN_backbone, RNN_class, RNN_weight
-except:
-    from src.debug.config.cfg_multi_detections import RNN_backbone, RNN_class, RNN_weight
+from src.opt import opt
+
+RNN_weight = opt.RNN_weight
+RNN_backbone = opt.RNN_backbone
+RNN_class = opt.RNN_class
 
 
 class RNNInference:

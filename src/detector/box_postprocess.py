@@ -1,9 +1,13 @@
 import torch
 from ..utils.img import cropBox, im_to_torch
-from config import config
+# from config import config
 import cv2
 from src.yolo.bbox import bbox_iou
 import numpy as np
+from src.opt import opt
+
+input_height = opt.input_height
+input_width = opt.input_width
 
 
 def crop_bbox(orig_img, boxes):
@@ -22,7 +26,7 @@ def crop_bbox(orig_img, boxes):
 
 def crop_from_dets(img, boxes):
 
-    inps = torch.zeros(boxes.size(0), 3, config.input_height, config.input_width)
+    inps = torch.zeros(boxes.size(0), 3, input_height, input_width)
     pt1 = torch.zeros(boxes.size(0), 2)
     pt2 = torch.zeros(boxes.size(0), 2)
 
@@ -49,7 +53,7 @@ def crop_from_dets(img, boxes):
             min(imght - 1, bottomRight[1] + ht * scaleRate / 2), upLeft[1] + 5)
 
         try:
-            inps[i] = cropBox(tmp_img.clone(), upLeft, bottomRight, config.input_height, config.input_width)
+            inps[i] = cropBox(tmp_img.clone(), upLeft, bottomRight, input_height, input_width)
         except IndexError:
             print(tmp_img.shape)
             print(upLeft)
@@ -108,7 +112,7 @@ def eliminate_nan(id2box):
 
 
 class BoxEnsemble:
-    def __init__(self, height=config.frame_size[1], width=config.frame_size[0]):
+    def __init__(self, height, width):
         self.pre_boxes = []
         self.max_box = 1
         self.black_max_thresh = height * width * 0.4

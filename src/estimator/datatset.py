@@ -1,5 +1,5 @@
 import torch.utils.data as data
-from .opt import opt
+from src.opt import opt
 
 
 class Mscoco(data.Dataset):
@@ -7,10 +7,10 @@ class Mscoco(data.Dataset):
                  scale_factor=(0.2, 0.3), rot_factor=40, label_type='Gaussian'):
         self.img_folder = '../data/coco/images'  # root image folders
         self.is_train = train  # training set or test set
-        self.inputResH = opt.inputResH
-        self.inputResW = opt.inputResW
-        self.outputResH = opt.outputResH
-        self.outputResW = opt.outputResW
+        self.inputResH = opt.input_height
+        self.inputResW = opt.input_width
+        self.outputResH = opt.output_height
+        self.outputResW = opt.output_width
         self.sigma = sigma
         self.scale_factor = scale_factor
         self.rot_factor = rot_factor

@@ -1,12 +1,22 @@
 import torch
-from config import config
+# from config import config
 from src.yolo.preprocess import prep_frame
 from src.yolo.util import dynamic_write_results
 from src.yolo.darknet import Darknet
-from config.config import device, frame_size
 import numpy as np
+from src.utils.benchmark import print_model_param_flops, print_model_param_nums, get_inference_time
+from src.opt import opt
 
-empty_tensor = torch.empty([0,7])
+input_size = opt.input_size
+device = opt.device
+confidence = opt.confidence
+num_classes = opt.num_classes
+nms_thresh = opt.nms_thresh
+
+onnx = opt.onnx
+libtorch = opt.libtorch
+
+empty_tensor = torch.empty([0, 8])
 
 
 class ObjectDetectionYolo(object):
@@ -14,19 +24,21 @@ class ObjectDetectionYolo(object):
         self.det_model = Darknet(cfg)
         # self.det_model.load_state_dict(torch.load('models/yolo/yolov3-spp.weights', map_location="cuda:0")['model'])
         self.det_model.load_weights(weight)
-        self.det_model.net_info['height'] = config.input_size
+        self.det_model.net_info['height'] = input_size
         self.det_inp_dim = int(self.det_model.net_info['height'])
         assert self.det_inp_dim % 32 == 0
         assert self.det_inp_dim > 32
         if device != "cpu":
             self.det_model.cuda()
-        # inf_time = get_inference_time(self.det_model, height=config.input_size, width=config.input_size)
-        # flops = print_model_param_flops(self.det_model, input_width=config.input_size, input_height=config.input_size)
-        # params = print_model_param_nums(self.det_model)
-        # print("Detection: Inference time {}s, Params {}, FLOPs {}".format(inf_time, params, flops))
+        inf_time = get_inference_time(self.det_model, height=input_size, width=input_size)
+        flops = print_model_param_flops(self.det_model, input_width=input_size, input_height=input_size)
+        params = print_model_param_nums(self.det_model)
+        print("Detection: Inference time {}s, Params {}, FLOPs {}".format(inf_time, params, flops))
+        if libtorch:
+            example = torch.rand(2, 3, 224, 224)
+            traced_model = torch.jit.trace(self.det_model, example)
+            traced_model.save("det_lib.pt")
         self.det_model.eval()
-        # self.height, self.width = img_height, img_width
-
         self.im_dim_list = []
         self.batchSize = batchSize
         self.mul_img = False
@@ -42,7 +54,7 @@ class ObjectDetectionYolo(object):
             self.mul_img = True
 
         for k in range(frame.shape[0]):
-            img_k, orig_img_k, im_dim_list_k = prep_frame(frame[k], int(config.input_size))
+            img_k, orig_img_k, im_dim_list_k = prep_frame(frame[k], int(input_size))
             img.append(img_k)
             orig_img.append(orig_img_k)
             im_dim_list.append(im_dim_list_k)
@@ -62,8 +74,7 @@ class ObjectDetectionYolo(object):
 
             prediction = self.det_model(img)
             # NMS process
-            dets = dynamic_write_results(prediction, config.confidence,  config.num_classes, nms=True,
-                                         nms_conf=config.nms_thresh)
+            dets = dynamic_write_results(prediction, confidence,  num_classes, nms=True, nms_conf=nms_thresh)
 
             if isinstance(dets, int) or dets.shape[0] == 0:
                 return empty_tensor
