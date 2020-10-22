@@ -1,4 +1,8 @@
 import torch
+try:
+    import src.debug.config.cfg_4frame as config
+except:
+    import config.config as config
 import cv2
 import numpy as np
 from src.estimator.pose_estimator import PoseEstimator
@@ -10,12 +14,6 @@ from src.tracker.visualize import IDVisualizer
 from src.utils.img import calibration
 from src.detector.box_postprocess import crop_bbox, eliminate_nan
 import time
-
-
-try:
-    import src.debug.config.cfg_4frame as config
-except:
-    import config.config as config
 
 
 tensor = torch.FloatTensor
@@ -154,8 +152,8 @@ class ImgProcessor:
 
 
 # frame_size = (720, 540)
-resize_ratio = 0.5
-show_size = (1080, 720)
+resize_ratio = config.resize_ratio
+show_size = config.show_size
 
 
 class VideoProcessor:
