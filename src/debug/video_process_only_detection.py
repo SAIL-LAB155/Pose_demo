@@ -1,4 +1,8 @@
 import torch
+try:
+    import src.debug.config.cfg_only_detections as config
+except:
+    import config.config as config
 import numpy as np
 import cv2
 import copy
@@ -14,10 +18,6 @@ from src.analyser.area import RegionProcessor
 from src.analyser.humans import HumanProcessor
 from src.utils.utils import paste_box
 
-try:
-    import src.debug.config.cfg_only_detections as config
-except:
-    import config.config as config
 
 
 fourcc = cv2.VideoWriter_fourcc(*'XVID')
