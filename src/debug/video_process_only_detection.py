@@ -51,7 +51,7 @@ class ImgProcessor:
     def process_img(self, frame, background):
         rgb_kps, dip_img, track_pred, rd_box = \
             copy.deepcopy(frame), copy.deepcopy(frame), copy.deepcopy(frame), copy.deepcopy(frame)
-        img_black = cv2.resize(cv2.imread("src/black.jpg"), self.resize_size)
+        img_black = np.full((self.resize_size[1], self.resize_size[0], 3), 0).astype(np.uint8)
         iou_img, black_kps, img_size_ls, img_box_ratio, rd_cnt = copy.deepcopy(img_black), \
             copy.deepcopy(img_black), copy.deepcopy(img_black), copy.deepcopy(img_black), copy.deepcopy(img_black)
 

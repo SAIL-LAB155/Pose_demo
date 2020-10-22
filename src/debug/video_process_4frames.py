@@ -12,7 +12,7 @@ from src.detector.visualize import BBoxVisualizer
 from src.tracker.track import ObjectTracker
 from src.tracker.visualize import IDVisualizer
 from src.utils.img import calibration
-from src.detector.box_postprocess import crop_bbox, eliminate_nan
+from src.detector.box_postprocess import crop_bbox, eliminate_nan, filter_box
 import time
 
 
@@ -54,7 +54,7 @@ class ImgProcessor4Yolo:
         self.kps_score = {}
 
     def visualize(self):
-        img_black = cv2.resize(cv2.imread('video/black.jpg'), self.resize_size)
+        img_black = np.full((self.resize_size[1], self.resize_size[0], 3), 0).astype(np.uint8)
         if config.plot_bbox and self.boxes is not None:
             self.BBV.visualize(self.boxes, self.frame, self.boxes_scores)
             # cv2.imshow("cropped", (torch_to_im(inps[0]) * 255))
@@ -112,7 +112,7 @@ class ImgProcessor:
             trackers.init_tracker()
 
     def visualize(self, img, boxes=None, box_scores=None, kps=None, kps_scores=None, id2box=None):
-        img_black = cv2.resize(cv2.imread('video/black.jpg'), self.resize_size)
+        img_black = np.full((self.resize_size[1], self.resize_size[0], 3), 0).astype(np.uint8)
         if config.plot_bbox and boxes is not None:
             self.BBV.visualize(boxes, img, box_scores)
             # cv2.imshow("cropped", (torch_to_im(inps[0]) * 255))
@@ -137,6 +137,7 @@ class ImgProcessor:
             box_res = all_boxes[box_idx][:,1:]
 
             boxes, boxes_scores = self.object_detector.cut_box_score(box_res)
+            boxes, boxes_scores, box_res = filter_box(boxes, boxes_scores, box_res, config.yolo_threshold)
             if box_res is not None:
                 id2bbox = eliminate_nan(tracker.track(box_res))
                 boxes = tracker.id_and_box(id2bbox)
@@ -151,7 +152,6 @@ class ImgProcessor:
         return results[0], results[1], results[2], results[3]
 
 
-# frame_size = (720, 540)
 resize_ratio = config.resize_ratio
 show_size = config.show_size
 

@@ -48,7 +48,7 @@ class HumanDetection:
         self.kps_score = {}
 
     def visualize(self):
-        img_black = np.full((self.resize_size[1], self.resize_size[0], 3), 0)
+        img_black = np.full((self.resize_size[1], self.resize_size[0], 3), 0).astype(np.uint8)
         if config.plot_bbox and self.boxes is not None:
             self.BBV.visualize(self.boxes, self.frame)
         if config.plot_kps and self.kps is not []:
