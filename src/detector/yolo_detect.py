@@ -4,6 +4,7 @@ from src.yolo.preprocess import prep_frame
 from src.yolo.util import dynamic_write_results
 from src.yolo.darknet import Darknet
 import numpy as np
+from src.utils.benchmark import print_model_param_flops, print_model_param_nums, get_inference_time
 from src.opt import opt
 
 input_size = opt.input_size
@@ -11,6 +12,9 @@ device = opt.device
 confidence = opt.confidence
 num_classes = opt.num_classes
 nms_thresh = opt.nms_thresh
+
+onnx = opt.onnx
+libtorch = opt.libtorch
 
 empty_tensor = torch.empty([0, 8])
 
@@ -26,10 +30,14 @@ class ObjectDetectionYolo(object):
         assert self.det_inp_dim > 32
         if device != "cpu":
             self.det_model.cuda()
-        # inf_time = get_inference_time(self.det_model, height=config.input_size, width=config.input_size)
-        # flops = print_model_param_flops(self.det_model, input_width=config.input_size, input_height=config.input_size)
-        # params = print_model_param_nums(self.det_model)
-        # print("Detection: Inference time {}s, Params {}, FLOPs {}".format(inf_time, params, flops))
+        inf_time = get_inference_time(self.det_model, height=input_size, width=input_size)
+        flops = print_model_param_flops(self.det_model, input_width=input_size, input_height=input_size)
+        params = print_model_param_nums(self.det_model)
+        print("Detection: Inference time {}s, Params {}, FLOPs {}".format(inf_time, params, flops))
+        if libtorch:
+            example = torch.rand(2, 3, 224, 224)
+            traced_model = torch.jit.trace(self.det_model, example)
+            traced_model.save("det_lib.pt")
         self.det_model.eval()
         self.im_dim_list = []
         self.batchSize = batchSize

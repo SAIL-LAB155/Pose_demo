@@ -14,6 +14,9 @@ CNN_class = opt.CNN_class
 CNN_backbone = opt.CNN_backbone
 CNN_weight = opt.CNN_weight
 
+onnx = opt.onnx
+libtorch = opt.libtorch
+
 
 class CNNInference(object):
     def __init__(self, class_nums=len(CNN_class), pre_train_name=CNN_backbone, model_path=CNN_weight):
@@ -23,6 +26,10 @@ class CNNInference(object):
         else:
             self.model = LeNet(class_nums)
         self.model.load_state_dict(torch.load(model_path, map_location=device))
+        if libtorch:
+            example = torch.rand(2, 3, 224, 224).cuda()
+            traced_model = torch.jit.trace(self.model, example)
+            traced_model.save("CNN_lib.pt")
 
     def predict_result(self, img):
         img_tensor_list = []

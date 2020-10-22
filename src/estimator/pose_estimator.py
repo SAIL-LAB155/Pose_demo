@@ -2,7 +2,7 @@ from .visualize import KeyPointVisualizer
 from .nms import pose_nms
 from .datatset import Mscoco
 from src.opt import opt
-from ..utils.model_info import *
+from ..utils.benchmark import *
 import torch
 from ..utils.eval import getPrediction
 
@@ -38,11 +38,11 @@ class PoseEstimator:
         inf_time = get_inference_time(self.pose_model, height=input_height, width=input_width)
         flops = print_model_param_flops(self.pose_model)
         params = print_model_param_nums(self.pose_model)
+        print("Pose estimation: Inference time {}s, Params {}, FLOPs {}".format(inf_time, params, flops))
         if libtorch:
             example = torch.rand(2, 3, 224, 224)
             traced_model = torch.jit.trace(self.pose_model, example)
-            traced_model.save(libtorch)
-        print("Pose estimation: Inference time {}s, Params {}, FLOPs {}".format(inf_time, params, flops))
+            traced_model.save("pose_lib.pt")
         self.batch_size = pose_batch
 
     def process_img(self, inps, boxes, pt1, pt2):
