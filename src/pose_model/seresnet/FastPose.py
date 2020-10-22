@@ -72,7 +72,7 @@ class InferenNet_fast(nn.Module):
 
     def forward(self, x):
         out = self.pyranet(x)
-        if "duc" in config.pose_weight:
+        if "duc" in pose_weight:
             out = out.narrow(1, 0, 17)
 
         return out
@@ -81,7 +81,7 @@ class InferenNet_fast(nn.Module):
 def test():
     net = createModel()
     y = net(torch.randn(1,3,64,64))
-    print(net, file=open("FastPose.txt","w"))
+    print(net, file=open("FastPose.txt", "w"))
     print(y.size())
 
 

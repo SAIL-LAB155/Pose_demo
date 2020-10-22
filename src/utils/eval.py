@@ -1,4 +1,3 @@
-from src.estimator.opt import opt
 from .img import transformBoxInvert, transformBoxInvert_batch, findPeak, processPeaks
 import torch
 # from config.config import pose_cls
@@ -135,7 +134,7 @@ def getPrediction(hms, pt1, pt2, inpH, inpW, resH, resW):
         for j in range(preds.size(1)):
             hm = hms[i][j]
             pX, pY = int(round(float(preds[i][j][0]))), int(round(float(preds[i][j][1])))
-            if 0 < pX < opt.outputResW - 1 and 0 < pY < opt.outputResH - 1:
+            if 0 < pX < opt.output_width - 1 and 0 < pY < opt.output_height - 1:
                 diff = torch.Tensor(
                     (hm[pY][pX + 1] - hm[pY][pX - 1], hm[pY + 1][pX] - hm[pY - 1][pX]))
                 preds[i][j] += diff.sign() * 0.25

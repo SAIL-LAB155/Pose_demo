@@ -1,4 +1,8 @@
 import torch
+try:
+    import src.debug.config.cfg as config
+except:
+    import config.config as config
 import cv2
 import copy
 import numpy as np
@@ -10,11 +14,6 @@ from src.tracker.track import ObjectTracker
 from src.tracker.visualize import IDVisualizer
 from src.utils.img import torch_to_im, gray3D
 from src.detector.box_postprocess import crop_bbox, eliminate_nan
-
-try:
-    import src.debug.config.cfg as config
-except:
-    import config.config as config
 
 tensor = torch.FloatTensor
 
