@@ -19,7 +19,6 @@ from src.analyser.humans import HumanProcessor
 from src.utils.utils import paste_box
 
 
-
 fourcc = cv2.VideoWriter_fourcc(*'XVID')
 empty_tensor = torch.empty([0, 7])
 empty_tensor4 = torch.empty([0, 4])
@@ -113,7 +112,7 @@ class ImgProcessor:
         return gray_results, black_results, dip_results, res
 
 
-resize_ratio = 0.5
+resize_ratio = config.resize_ratio
 store_size = config.store_size
 show_size = config.show_size
 
