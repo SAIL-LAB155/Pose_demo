@@ -12,7 +12,7 @@ from src.detector.yolo_detect import ObjectDetectionYolo
 from src.detector.visualize import BBoxVisualizer
 from src.tracker.track import ObjectTracker
 from src.tracker.visualize import IDVisualizer
-from src.utils.img import torch_to_im, gray3D
+from src.utils.img import gray3D
 from src.detector.box_postprocess import crop_bbox, eliminate_nan
 
 tensor = torch.FloatTensor
@@ -83,8 +83,8 @@ class HumanDetection:
         return self.kps, self.id2bbox, self.kps_score
 
 
-resize_ratio = 0.5
-show_size = (1080, 720)
+resize_ratio = config.resize_ratio
+show_size = config.show_size
 
 
 class VideoProcessor:

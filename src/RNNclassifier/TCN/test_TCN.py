@@ -2,19 +2,15 @@ import torch
 import sys
 from .TCNsrc.model import TCN
 import numpy as np
-from config import config
 from config.model_cfg import TCN_structure
 import os
-try:
-    from config.config import pose_cls
-except:
-    from src.debug.config.cfg_multi_detections import pose_cls
+
 sys.path.append("../../")
+from src.opt import opt
 
-
-device = config.device
+device = opt.device
 TCN_params = TCN_structure
-kps_num = config.pose_cls * 2
+kps_num = opt.pose_cls * 2
 cls = ["swim", "drown"]
 
 

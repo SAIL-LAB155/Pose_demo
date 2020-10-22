@@ -59,9 +59,11 @@ parser.add_argument('--RNN_class', default=2, type=int,
 
 
 "----------------------------- CNN options ------------------------------"
-parser.add_argument('--CNN_class', default=2, type=int,
+parser.add_argument('--CNN_class', default=[], type=list,
                     help='epoch of lr decay')
 parser.add_argument('--CNN_backbone', default="mobilenet", type=str,
+                    help='epoch of lr decay')
+parser.add_argument('--CNN_weight', default="", type=str,
                     help='epoch of lr decay')
 parser.add_argument('--CNN_thresh', default=0.5, type=float,
                     help='epoch of lr decay')
