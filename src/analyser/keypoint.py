@@ -1,7 +1,5 @@
-try:
-    from config.config import RNN_frame_length
-except:
-    from src.debug.config.cfg_multi_detections import RNN_frame_length
+from src.opt import opt
+RNN_frame_length = opt.RNN_frame_length
 
 
 class Keypoint:

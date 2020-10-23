@@ -7,7 +7,8 @@ import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
 
-from config.config import pose_cls
+from src.opt import opt
+pose_cls = opt.pose_cls
 
 
 def im_to_torch(img):
