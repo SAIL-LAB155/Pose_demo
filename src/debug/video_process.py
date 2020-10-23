@@ -28,7 +28,6 @@ class HumanDetection:
         self.IDV = IDVisualizer()
         self.boxes = tensor([])
         self.boxes_scores = tensor([])
-        self.img_black = np.array([])
         self.frame = np.array([])
         self.id2bbox = {}
         self.kps = {}

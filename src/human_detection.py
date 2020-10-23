@@ -76,7 +76,8 @@ class HumanDetection:
                 boxes = self.object_tracker.id_and_box(self.id2bbox)
 
                 inps, pt1, pt2 = crop_bbox(frame, boxes)
-                kps, kps_score, kps_id = self.pose_estimator.process_img(inps, boxes, pt1, pt2)
-                self.kps, self.kps_score = self.object_tracker.match_kps(kps_id, kps, kps_score)
+                if inps is not None:
+                    kps, kps_score, kps_id = self.pose_estimator.process_img(inps, boxes, pt1, pt2)
+                    self.kps, self.kps_score = self.object_tracker.match_kps(kps_id, kps, kps_score)
 
         return self.kps, self.id2bbox, self.kps_score

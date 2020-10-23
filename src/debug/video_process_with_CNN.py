@@ -1,4 +1,8 @@
 import torch
+try:
+    import src.debug.config.cfg_with_CNN as config
+except:
+    import config.config as config
 import cv2
 import copy
 import numpy as np
@@ -8,21 +12,15 @@ from src.detector.yolo_detect import ObjectDetectionYolo
 from src.detector.visualize import BBoxVisualizer
 from src.tracker.track import ObjectTracker
 from src.tracker.visualize import IDVisualizer
-from src.utils.img import torch_to_im, gray3D, cut_image_with_box
+from src.utils.img import gray3D
 from src.detector.box_postprocess import crop_bbox, eliminate_nan
 from src.CNNclassifier.inference import CNNInference
-
-try:
-    import src.debug.config.cfg_with_CNN as config
-except:
-    import config.config as config
-
 
 tensor = torch.FloatTensor
 
 
 class HumanDetection:
-    def __init__(self, show_img=True):
+    def __init__(self, resize_size, show_img=True):
         self.object_detector = ObjectDetectionYolo(cfg=config.yolo_cfg, weight=config.yolo_weight)
         self.object_tracker = ObjectTracker()
         self.pose_estimator = PoseEstimator(pose_cfg=config.pose_cfg, pose_weight=config.pose_weight)
@@ -31,13 +29,13 @@ class HumanDetection:
         self.IDV = IDVisualizer()
         self.boxes = tensor([])
         self.boxes_scores = tensor([])
-        self.img_black = np.array([])
         self.frame = np.array([])
         self.id2bbox = {}
+        self.CNN_model = CNNInference()
         self.kps = {}
         self.kps_score = {}
         self.show_img = show_img
-        self.CNN_model = CNNInference()
+        self.resize_size = resize_size
 
     def init_sort(self):
         self.object_tracker.init_tracker()
@@ -51,7 +49,7 @@ class HumanDetection:
         self.kps_score = {}
 
     def visualize(self):
-        img_black = cv2.imread('src/black.jpg')
+        img_black = np.full((self.resize_size[1], self.resize_size[0], 3), 0).astype(np.uint8)
         if config.plot_bbox and self.boxes is not None:
             self.BBV.visualize(self.boxes, self.frame)
         if config.plot_kps and self.kps is not []:
@@ -80,40 +78,47 @@ class HumanDetection:
                 boxes = self.object_tracker.id_and_box(self.id2bbox)
 
                 inps, pt1, pt2 = crop_bbox(frame, boxes)
-                kps, kps_score, kps_id = self.pose_estimator.process_img(inps, boxes, pt1, pt2)
-                self.kps, self.kps_score = self.object_tracker.match_kps(kps_id, kps, kps_score)
+                if inps is not None:
+                    kps, kps_score, kps_id = self.pose_estimator.process_img(inps, boxes, pt1, pt2)
+                    self.kps, self.kps_score = self.object_tracker.match_kps(kps_id, kps, kps_score)
 
         return self.kps, self.id2bbox, self.kps_score
 
     def classify_whole(self, img):
-        out = self.CNN_model.predict(img)
-        idx = out[0].tolist().index(max(out[0].tolist()))
-        pred = config.CNN_class[idx]
+        pred = self.CNN_model.predict_class(img)
         print("The prediction is {}".format(pred))
+        return pred
 
-    def classify(self, src_img, id2bbox):
-        for box in id2bbox.values():
+    def classify(self, img):
+        pred_res = {}
+        for box in self.id2bbox.values():
             x1, y1, x2, y2 = int(box[0]), int(box[1]), int(box[2]), int(box[3])
             x1 = 0 if x1 < 0 else x1
             y1 = 0 if y1 < 0 else y1
-            x2 = src_img.shape[1] if x2 > src_img.shape[1] else x2
-            y2 = src_img.shape[0] if y2 > src_img.shape[0] else y2
-            img = np.asarray(src_img[y1:y2, x1:x2])
-            out = self.CNN_model.predict(img)
-            idx = out[0].tolist().index(max(out[0].tolist()))
-            pred = config.CNN_class[idx]
+            x2 = img.shape[1] if x2 > img.shape[1] else x2
+            y2 = img.shape[0] if y2 > img.shape[0] else y2
+            im = np.asarray(img[y1:y2, x1:x2])
+
+            pred = self.CNN_model.predict_class(im)
+            print(pred)
             text_location = (int((box[0]+box[2])/2)), int((box[1])+50)
-            cv2.putText(src_img, pred, text_location, cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 1)
-        # return self.frame
+            pred_res[text_location] = pred
+            # cv2.putText(fr, pred, text_location, cv2.FONT_HERSHEY_SIMPLEX, 1, (100, 100, 255), 2)
+        return pred_res
 
 
-IP = HumanDetection()
-frame_size = (720, 540)
+resize_ratio = config.resize_ratio
+show_size = config.show_size
+classify_type = config.classify_type
 
 
 class VideoProcessor:
-    def __init__(self, vp):
-        self.cap = cv2.VideoCapture(vp)
+    def __init__(self, video_path):
+        self.cap = cv2.VideoCapture(video_path)
+        self.height, self.width = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)), int(
+            self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        self.resize_size = (int(self.width * resize_ratio), int(self.height * resize_ratio))
+        self.IP = HumanDetection(self.resize_size)
 
     def process_video(self):
         cnt = 0
@@ -121,15 +126,24 @@ class VideoProcessor:
             ret, frame = self.cap.read()
             cnt += 1
             if ret:
-                frame = cv2.resize(frame, frame_size)
-                kps, boxes, kps_score = IP.process_img(frame)
-                img, img_black = IP.visualize()
-                # if config
-                # IP.classify_whole(img_black)
-                # cv2.imshow("res", img)
-                # img_each = IP.classify(IP.frame, boxes)
-                # cv2.imshow("each", img_each)
+                frame = cv2.resize(frame, self.resize_size)
+                frame2 = copy.deepcopy(frame)
+                kps, boxes, kps_score = self.IP.process_img(frame)
+                img, img_black = self.IP.visualize()
+                if classify_type == 1:
+                    result = self.IP.classify_whole(img_black)
+                elif classify_type == 2:
+                    result = self.IP.classify_whole(frame2)
+                elif classify_type == 3:
+                    result = self.IP.classify(img_black)
+                elif classify_type == 4:
+                    result = self.IP.classify(frame2)
+                else:
+                    raise ValueError("Not a right classification type!")
+
+                cv2.imshow("res", cv2.resize(img, show_size))
                 cv2.waitKey(2)
+
             else:
                 self.cap.release()
                 break
