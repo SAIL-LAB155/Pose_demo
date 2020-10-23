@@ -215,5 +215,6 @@ class RegionDetectorThread:
 
 
 if __name__ == '__main__':
-    RD = RegionDetector(config.video_path)
-    RD.process()
+    # RD = RegionDetector(config.video_path)
+    # RD.process()
+    RegionDetectorThread(config.video_path).update()
