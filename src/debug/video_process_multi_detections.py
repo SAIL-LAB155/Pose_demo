@@ -195,8 +195,8 @@ from queue import Queue
 #https://github.com/Kjue/python-opencv-gpu-video
 
 
-class DrownDetectorThread(object):
-    def __init__(self, path,queueSize=3000):
+class DrownDetectorThread:
+    def __init__(self, path, queueSize=3000):
         self.path = path
         # self.video = UMatFileVideoStream(self.path, 128).start()
         # self.rgb = cv2.UMat(self.height, self.width, cv2.CV_8UC3)
