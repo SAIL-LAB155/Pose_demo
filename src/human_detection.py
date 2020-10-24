@@ -35,7 +35,7 @@ class HumanDetection:
         self.show_img = show_img
         self.resize_size = resize_size
 
-    def init_sort(self):
+    def init(self):
         self.object_tracker.init_tracker()
 
     def clear_res(self):
