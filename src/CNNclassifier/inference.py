@@ -62,7 +62,7 @@ class CNNInference(object):
 
     def classify(self, pred_img, id2bbox):
         pred_res = {}
-        for idx, box in id2bbox.items():
+        for i, box in id2bbox.items():
             x1, y1, x2, y2 = int(box[0]), int(box[1]), int(box[2]), int(box[3])
             x1 = 0 if x1 < 0 else x1
             y1 = 0 if y1 < 0 else y1
@@ -75,7 +75,7 @@ class CNNInference(object):
             prediction = self.CNN_class[idx]
 
             text_location = (int((box[0]+box[2])/2)), int((box[1])+50)
-            pred_res[text_location] = (prediction, idx, pred_array)
+            pred_res[text_location] = (prediction, i, pred_array)
         return pred_res
 
     def classify_whole(self, pred_img, show_img):
@@ -94,7 +94,6 @@ class CNNInference(object):
             text = self.array2str(score)
             cv2.putText(frame, "id{}: {}".format(idx, text), (30, 30 + 40*i), cv2.FONT_HERSHEY_SIMPLEX, sizes["word"],
                         colors["yellow"], thicks["word"])
-
 
     @staticmethod
     def array2str(array):

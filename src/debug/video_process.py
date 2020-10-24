@@ -97,11 +97,12 @@ class VideoProcessor:
 
     def process_video(self):
         cnt = 0
+        self.IP.init()
         while True:
             ret, frame = self.cap.read()
             cnt += 1
             if ret:
-                # frame = cv2.resize(frame, self.resize_size)
+                frame = cv2.resize(frame, self.resize_size)
                 kps, boxes, kps_score = self.IP.process_img(frame)
                 img, img_black = self.IP.visualize()
                 cv2.imshow("res", cv2.resize(img, show_size))

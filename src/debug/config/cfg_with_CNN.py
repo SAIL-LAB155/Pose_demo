@@ -13,7 +13,7 @@ gray = True if "GRAY" in yolo_weight or "gray" in yolo_weight else False
 
 pose_weight = "../../weights/sppe/duc_se.pth"
 
-video_path = "video/underwater/vlc-record-2020-07-03-11h28m47s-1.avi-.mp4"
+video_path = "video/underwater/0619_115.mp4"
 
 classify_type = 4
 # 1 ---> black image whole
