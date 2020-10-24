@@ -4,7 +4,7 @@ from PIL import Image
 import numpy as np
 # from config.config import pose_cls, pose_thresh
 from src.opt import opt
-from src.utils.plot import colors
+from src.utils.plot import colors, sizes, thicks
 
 
 pose_cls = opt.pose_cls
@@ -57,6 +57,10 @@ coco_line_color = [(0, 215, 255), (0, 255, 204), (0, 134, 255), (0, 255, 50),
 
 mpii_p_color = [PURPLE, BLUE, BLUE, RED, RED, BLUE, BLUE, RED, RED, PURPLE, PURPLE, PURPLE, RED, RED, BLUE, BLUE]
 mpii_line_color = [PURPLE, BLUE, BLUE, RED, RED, BLUE, BLUE, RED, RED, PURPLE, PURPLE, RED, RED, BLUE, BLUE]
+
+body_parts = ["Nose", "Left eye", "Right eys", "Left ear", "Right ear", "Left shoulder", "Right shoulder", "Left elbow",
+              "Right elbow", "Left wrist", "Right wrist", "Left hip", "Right hip", "Left knee", "Right knee",
+              "Left ankle", "Right ankle"]
 
 
 class KeyPointVisualizer(object):
@@ -124,5 +128,32 @@ class KeyPointVisualizer(object):
 
     def scoredict2tensor(self, d):
         pass
+
+
+class KpsScoreVisualizer:
+    def __init__(self):
+        if opt.pose_cls == 17:
+            self.selected_kps = [0,5,6,7,8,9,10,11,12,13,14,15,16]
+        else:
+            self.selected_kps = list(range(17))
+        self.parts_name = [body_parts[i] for i in self.selected_kps]
+
+    def draw_map(self, img, id2kpScore):
+        if len(id2kpScore) == 0:
+            return
+        cv2.line(img, (0, 40), (img.shape[1], 40), colors["green"], thicks["line"])
+        cv2.line(img, (290, 0), (290, img.shape[0]), colors["green"], thicks["line"])
+        for i, key in enumerate(id2kpScore):
+            cv2.putText(img, "id{}".format(key), (300 + i*150, 30), cv2.FONT_HERSHEY_PLAIN, sizes["table"],
+                        colors["green"], thicks["table"])
+        for p_idx, p_name in enumerate(self.parts_name):
+            cv2.putText(img, p_name, (30, 75 + p_idx*35), cv2.FONT_HERSHEY_PLAIN, sizes["table"],
+                        colors["green"], thicks["table"])
+        for id_i, (idx, scores) in enumerate(id2kpScore.items()):
+            parts = scores.squeeze()[self.selected_kps].tolist()
+            for part_i, s in enumerate(parts):
+                cv2.putText(img, str(round(s, 3)), (300 + id_i*150, 75 + part_i*35), cv2.FONT_HERSHEY_PLAIN,
+                            sizes["table"], colors["red"], thicks["table"])
+
 
 
