@@ -60,23 +60,32 @@ class CNNInference(object):
         outputs_tensor = m_softmax(outputs_tensor).to("cpu")
         return np.asarray(outputs_tensor)
 
-    def classify(self, fr, id2bbox):
+    def classify(self, pred_img, id2bbox):
         pred_res = {}
-        for idx, box in id2bbox.items():
+        for i, box in id2bbox.items():
             x1, y1, x2, y2 = int(box[0]), int(box[1]), int(box[2]), int(box[3])
             x1 = 0 if x1 < 0 else x1
             y1 = 0 if y1 < 0 else y1
-            x2 = fr.shape[1] if x2 > fr.shape[1] else x2
-            y2 = fr.shape[0] if y2 > fr.shape[0] else y2
-            img = np.asarray(fr[y1:y2, x1:x2])
+            x2 = pred_img.shape[1] if x2 > pred_img.shape[1] else x2
+            y2 = pred_img.shape[0] if y2 > pred_img.shape[0] else y2
+            img = np.asarray(pred_img[y1:y2, x1:x2])
 
             pred_array = self.predict_result(img)
             idx = pred_array[0].tolist().index(max(pred_array[0].tolist()))
             prediction = self.CNN_class[idx]
 
             text_location = (int((box[0]+box[2])/2)), int((box[1])+50)
-            pred_res[text_location] = (prediction, idx, pred_array)
+            pred_res[text_location] = (prediction, i, pred_array)
         return pred_res
+
+    def classify_whole(self, pred_img, show_img):
+        pred_array = self.predict_result(pred_img)
+        idx = pred_array[0].tolist().index(max(pred_array[0].tolist()))
+        prediction = self.CNN_class[idx]
+        cv2.putText(show_img, prediction, (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, colors["red"], 2)
+        text = self.array2str(pred_array)
+        cv2.putText(show_img, text, (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, colors["yellow"], 2)
+        return prediction
 
     def visualize(self, frame, predictions):
         for i, (location, (pred, idx, score)) in enumerate(predictions.items()):
@@ -92,4 +101,4 @@ class CNNInference(object):
         for item in array[1:]:
             base += ","
             base += str(np.round(item, 4))
-        return base[:-1]
+        return base
