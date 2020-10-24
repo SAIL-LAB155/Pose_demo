@@ -144,7 +144,7 @@ class KpsScoreVisualizer:
         cv2.line(img, (0, 40), (img.shape[1], 40), colors["green"], thicks["line"])
         cv2.line(img, (290, 0), (290, img.shape[0]), colors["green"], thicks["line"])
         for i, key in enumerate(id2kpScore):
-            cv2.putText(img, "id:{}".format(key), (300 + i*150, 30), cv2.FONT_HERSHEY_PLAIN, sizes["table"],
+            cv2.putText(img, "id{}".format(key), (300 + i*150, 30), cv2.FONT_HERSHEY_PLAIN, sizes["table"],
                         colors["green"], thicks["table"])
         for p_idx, p_name in enumerate(self.parts_name):
             cv2.putText(img, p_name, (30, 75 + p_idx*35), cv2.FONT_HERSHEY_PLAIN, sizes["table"],

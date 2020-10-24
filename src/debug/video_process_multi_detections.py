@@ -114,6 +114,7 @@ class ImgProcessor:
 
             if danger_idx:
                 danger_id2box = {k: v for k, v in self.id2bbox.items() if k in danger_idx}
+                self.BBV.visualize(danger_id2box, CNN_img)
                 CNN_result = self.CNN_model.classify(CNN_img, danger_id2box)
                 self.CNN_model.visualize(CNN_img, CNN_result)
 
@@ -143,9 +144,7 @@ class ImgProcessor:
             box_map = np.concatenate((img_box_ratio, img_size_ls), axis=1)
             rd_map = np.concatenate((rd_cnt, rd_box), axis=1)
             row_2nd_map = np.concatenate((rd_map, box_map), axis=1)
-            kps_map = np.concatenate((rgb_kps, kpsScore_map, black_kps), axis=1)
-            # cache_map = np.concatenate((CNN_img, img_black), axis=1)
-            row_3rd_map = np.concatenate((CNN_img, kps_map), axis=1)
+            row_3rd_map = np.concatenate((CNN_img, kpsScore_map, rgb_kps, black_kps), axis=1)
             res_map = np.concatenate((row_1st_map, row_2nd_map, row_3rd_map), axis=0)
 
         return gray_results, black_results, dip_results, res_map
