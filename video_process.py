@@ -1,9 +1,9 @@
 #-*- coding: utf-8 -*-
 from src.human_detection import HumanDetection
 try:
-    import src.debug.cohgnfig.cfg as config
-except:
     import config.config as config
+except:
+    import src.debug.config.cfg as config
 import cv2
 
 from utils.utils import boxdict2str, kpsdict2str, kpsScoredict2str
@@ -81,8 +81,6 @@ class VideoProcessor:
                     img = frame
                     # cv2.putText(img, "cnt{}".format(cnt), (100, 200), cv2.FONT_HERSHEY_PLAIN, 5, (0, 255, 255), 5)
 
-                cv2.imshow("res", cv2.resize(img, (1080, 720)))
-                cv2.waitKey(50)
                 if config.write_video:
                     self.out.write(img)
             else:
