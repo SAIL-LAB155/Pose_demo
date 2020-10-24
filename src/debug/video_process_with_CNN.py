@@ -85,32 +85,19 @@ class HumanDetection:
         return self.kps, self.id2bbox, self.kps_score
 
     def classify_whole(self, pred_img, show_img):
-        pred = self.CNN_model.predict_class(pred_img)
-        # print("The prediction is {}".format(pred))
-        cv2.putText(show_img, pred, (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (100, 100, 255), 2)
+        pred = self.CNN_model.classify_whole(pred_img, show_img)
         return pred
 
-    def classify(self, pred_img, show_img):
-        pred_res = {}
-        for box in self.id2bbox.values():
-            x1, y1, x2, y2 = int(box[0]), int(box[1]), int(box[2]), int(box[3])
-            x1 = 0 if x1 < 0 else x1
-            y1 = 0 if y1 < 0 else y1
-            x2 = pred_img.shape[1] if x2 > pred_img.shape[1] else x2
-            y2 = pred_img.shape[0] if y2 > pred_img.shape[0] else y2
-            im = np.asarray(pred_img[y1:y2, x1:x2])
-
-            pred = self.CNN_model.predict_class(im)
-            print(pred)
-            text_location = (int((box[0]+box[2])/2)), int((box[1])+50)
-            pred_res[text_location] = pred
-            cv2.putText(show_img, pred, text_location, cv2.FONT_HERSHEY_SIMPLEX, 1, (100, 100, 255), 2)
-        return pred_res
+    def classify(self, pred_img, show_img, id2bbox):
+        preds = self.CNN_model.classify(pred_img, id2bbox)
+        self.CNN_model.visualize(show_img, preds)
+        return preds
 
 
 resize_ratio = config.resize_ratio
 show_size = config.show_size
 classify_type = config.classify_type
+gray = config.gray
 
 
 class VideoProcessor:
@@ -129,16 +116,16 @@ class VideoProcessor:
             if ret:
                 frame = cv2.resize(frame, self.resize_size)
                 frame2 = copy.deepcopy(frame)
-                kps, boxes, kps_score = self.IP.process_img(frame)
+                kps, boxes, kps_score = self.IP.process_img(frame, gray=gray)
                 img, img_black = self.IP.visualize()
                 if classify_type == 1:
                     result = self.IP.classify_whole(img_black, img)
                 elif classify_type == 2:
                     result = self.IP.classify_whole(frame2, img)
                 elif classify_type == 3:
-                    result = self.IP.classify(img_black, img)
+                    result = self.IP.classify(img_black, img, boxes)
                 elif classify_type == 4:
-                    result = self.IP.classify(frame2, img)
+                    result = self.IP.classify(frame2, img, boxes)
                 else:
                     raise ValueError("Not a right classification type!")
 

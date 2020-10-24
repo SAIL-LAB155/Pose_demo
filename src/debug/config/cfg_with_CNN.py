@@ -6,15 +6,16 @@ import os
 
 CNN_weight = "model/CNN/underwater/1/1_mobilenet_9_decay1.pth"
 
-yolo_cfg = "../../config/yolo_cfg/yolov3-spp.cfg"
-yolo_weight = "../../weights/yolo/yolov3-spp.weights"
+yolo_cfg = "model/yolo/gray/1010/yolov3-spp-1cls-leaky.cfg"
+yolo_weight = "model/yolo/gray/1010/best.weights"
 yolo_threshold = 0.8
+gray = True if "GRAY" in yolo_weight or "gray" in yolo_weight else False
 
 pose_weight = "../../weights/sppe/duc_se.pth"
 
-video_path = "video/withCNN/00.avi"
+video_path = "video/underwater/vlc-record-2020-07-03-11h28m47s-1.avi-.mp4"
 
-classify_type = 1
+classify_type = 4
 # 1 ---> black image whole
 # 2 ---> raw image whole
 # 3 ---> black image cropped
