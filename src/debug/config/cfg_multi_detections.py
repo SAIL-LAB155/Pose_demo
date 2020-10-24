@@ -4,7 +4,7 @@ import os
 
 "-------------------Outer configuration-----------------------"
 
-video_path = "video/underwater/vlc-record-2020-07-03-11h28m47s-1.avi-.mp4"
+video_path = "video/underwater/0507_mul_01.mp4"
 
 gray_yolo_cfg = "model/yolo/gray/1010/yolov3-spp-1cls-leaky.cfg"
 gray_yolo_weights = "model/yolo/gray/1010/best.weights"
@@ -22,12 +22,12 @@ CNN_weight = "model/CNN/underwater/1/1_mobilenet_9_decay1.pth"
 
 RNN_weight = "model/RNN/TCN_struct1_2020-07-08-20-02-32.pth"
 
-write_video = False
+write_video = True
 write_box = False
 write_kps = False
 
 resize_ratio = 0.5
-show_size = (1440, 840)
+show_size = (1280, 640)
 store_size = (3840, 2160)
 
 

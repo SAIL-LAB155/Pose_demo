@@ -11,7 +11,7 @@ from src.detector.image_process_detect import ImageProcessDetection
 # from src.detector.yolo_asff_detector import ObjectDetectionASFF
 from src.detector.visualize import BBoxVisualizer
 from src.estimator.pose_estimator import PoseEstimator
-from src.estimator.visualize import KeyPointVisualizer
+from src.estimator.visualize import KeyPointVisualizer, KpsScoreVisualizer
 from src.utils.img import gray3D
 from src.detector.box_postprocess import crop_bbox, filter_box, BoxEnsemble, eliminate_nan
 from src.tracker.track import ObjectTracker
@@ -40,6 +40,7 @@ class ImgProcessor:
         self.KPV = KeyPointVisualizer()
         self.BBV = BBoxVisualizer()
         self.IDV = IDVisualizer()
+        self.KSV = KpsScoreVisualizer()
         self.img = []
         self.id2bbox = {}
         self.img_black = []
@@ -61,6 +62,7 @@ class ImgProcessor:
         rgb_kps, dip_img, track_pred, rd_box, CNN_img = \
             copy.deepcopy(frame), copy.deepcopy(frame), copy.deepcopy(frame), copy.deepcopy(frame), copy.deepcopy(frame)
         img_black = np.full((self.resize_size[1], self.resize_size[0], 3), 0).astype(np.uint8)
+        kpsScore_map = np.full((self.resize_size[1], self.resize_size[0], 3), 40).astype(np.uint8)
         iou_img, black_kps, img_size_ls, img_box_ratio, rd_cnt = copy.deepcopy(img_black), \
             copy.deepcopy(img_black), copy.deepcopy(img_black), copy.deepcopy(img_black), copy.deepcopy(img_black)
 
@@ -121,6 +123,7 @@ class ImgProcessor:
                     kps, kps_score, kps_id = self.pose_estimator.process_img(inps, danger_box, pt1, pt2)
                     if self.kps is not []:
                         self.kps, self.kps_score = self.object_tracker.match_kps(kps_id, kps, kps_score)
+                        self.KSV.draw_map(kpsScore_map, self.kps_score)
                         self.HP.update_kps(self.kps)
                         self.KPV.vis_ske(rgb_kps, kps, kps_score)
                         self.IDV.plot_bbox_id(danger_id2box, rgb_kps, with_bbox=True)
@@ -140,9 +143,9 @@ class ImgProcessor:
             box_map = np.concatenate((img_box_ratio, img_size_ls), axis=1)
             rd_map = np.concatenate((rd_cnt, rd_box), axis=1)
             row_2nd_map = np.concatenate((rd_map, box_map), axis=1)
-            kps_map = np.concatenate((black_kps, rgb_kps), axis=1)
+            kps_map = np.concatenate((rgb_kps, kpsScore_map, black_kps), axis=1)
             # cache_map = np.concatenate((CNN_img, img_black), axis=1)
-            row_3rd_map = np.concatenate((CNN_img, kps_map, img_black), axis=1)
+            row_3rd_map = np.concatenate((CNN_img, kps_map), axis=1)
             res_map = np.concatenate((row_1st_map, row_2nd_map, row_3rd_map), axis=0)
 
         return gray_results, black_results, dip_results, res_map
@@ -161,7 +164,7 @@ class DrownDetector:
         self.height, self.width = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)), \
                                   int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         if write_video:
-            self.out_video = cv2.VideoWriter("output.mp4", cv2.VideoWriter_fourcc(*'XVID'), 15, store_size)
+            self.out_video = cv2.VideoWriter("output.avi", cv2.VideoWriter_fourcc(*'XVID'), 15, store_size)
         self.resize_size = (int(self.width * resize_ratio), int(self.height * resize_ratio))
         self.IP = ImgProcessor(self.resize_size)
 
@@ -262,5 +265,5 @@ class DrownDetectorThread:
 
 
 if __name__ == '__main__':
-    # DrownDetector(config.video_path).process_video()
-    DrownDetectorThread(config.video_path).update()
+    DrownDetector(config.video_path).process_video()
+    # DrownDetectorThread(config.video_path).update()
