@@ -6,19 +6,19 @@ import os
 
 CNN_weight = "model/CNN/underwater/1/1_mobilenet_9_decay1.pth"
 
-yolo_cfg = "model/yolo/ceiling/2/yolov3-original-1cls-leaky.cfg"
-yolo_weight = "model/yolo/ceiling/2/best.weights"
-yolo_threshold = 0.687
+yolo_cfg = "../../config/yolo_cfg/yolov3-spp.cfg"
+yolo_weight = "../../weights/yolo/yolov3-spp.weights"
+yolo_threshold = 0.8
 
 pose_weight = "../../weights/sppe/duc_se.pth"
 
 video_path = "video/withCNN/00.avi"
 
-classify_type = 0
-# 0 ---> raw image whole
+classify_type = 1
 # 1 ---> black image whole
-# 2 ---> raw image cropped
+# 2 ---> raw image whole
 # 3 ---> black image cropped
+# 4 ---> raw image cropped
 
 water_top = 40
 
@@ -27,7 +27,7 @@ write_box = False
 write_kps = False
 
 resize_ratio = 0.5
-show_size = (1440, 840)
+show_size = (1080, 720)
 store_size = (720, 540)
 
 
@@ -60,8 +60,8 @@ track_idx = "all"    # If all idx, track_idx = "all"
 track_plot_id = ["all"]   # If all idx, track_plot_id = ["all"]
 assert track_idx == "all" or isinstance(track_idx, int)
 
-CNN_class = ["drown", "floating", "standing"]
-CNN_backbone = "mobilenet"
+CNN_class = ["Backswing", "FollowThrough", "Standing"]
+CNN_backbone = "shufflenet"
 CNN_thresh = 0.95
 
 plot_bbox = True
