@@ -135,7 +135,7 @@ class KpsScoreVisualizer:
         if opt.pose_cls == 17:
             self.selected_kps = [0,5,6,7,8,9,10,11,12,13,14,15,16]
         else:
-            self.selected_kps = list(range(17))
+            self.selected_kps = list(range(13))
         self.parts_name = [body_parts[i] for i in self.selected_kps]
 
     def draw_map(self, img, id2kpScore):

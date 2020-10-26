@@ -44,6 +44,7 @@ class VideoProcessor:
             ret, frame = self.cap.read()
             cnt += 1
             if ret:
+                frame = cv2.resize(frame, resize_ratio)
                 kps, boxes, kps_score = self.IP.process_img(frame)
                 img, img_black = self.IP.visualize()
                 cv2.imshow("res", cv2.resize(img, show_size))
@@ -81,8 +82,8 @@ class VideoProcessor:
                     img = frame
                     # cv2.putText(img, "cnt{}".format(cnt), (100, 200), cv2.FONT_HERSHEY_PLAIN, 5, (0, 255, 255), 5)
 
-                cv2.imshow("res", cv2.resize(img, (1080, 720)))
-                cv2.waitKey(50)
+                cv2.imshow("res", cv2.resize(img, show_size))
+                cv2.waitKey(1)
                 if config.write_video:
                     self.out.write(img)
             else:
