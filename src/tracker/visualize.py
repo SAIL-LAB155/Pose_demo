@@ -8,7 +8,7 @@ class IDVisualizer(object):
         pass
         # self.with_bbox = with_bbox
 
-    def plot_bbox_id(self, id2bbox, img, color=("blue", "red"), id_pos="up",with_bbox=False):
+    def plot_bbox_id(self, id2bbox, img, color=("gold", "red"), id_pos="up",with_bbox=False):
         for idx, box in id2bbox.items():
 
             [x1, y1, x2, y2] = box

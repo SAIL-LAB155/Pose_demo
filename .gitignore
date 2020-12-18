@@ -36,3 +36,6 @@ src/debug/tmp
 img
 app_class
 video_process_with_txt_jump.py
+*.avi
+*.onnx
+*.mp4

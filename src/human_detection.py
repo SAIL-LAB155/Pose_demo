@@ -18,7 +18,7 @@ tensor = torch.FloatTensor
 
 
 class HumanDetection:
-    def __init__(self, resize_size, show_img=True):
+    def __init__(self, resize_size=(0, 0), show_img=True):
         self.object_detector = ObjectDetectionYolo(cfg=config.yolo_cfg, weight=config.yolo_weight)
         self.object_tracker = ObjectTracker()
         self.pose_estimator = PoseEstimator(pose_cfg=config.pose_cfg, pose_weight=config.pose_weight)
@@ -55,12 +55,13 @@ class HumanDetection:
             self.KPV.vis_ske_black(img_black, self.kps, self.kps_score)
         if config.plot_id and self.id2bbox is not None:
             self.IDV.plot_bbox_id(self.id2bbox, self.frame)
-            self.IDV.plot_skeleton_id(self.kps, self.frame)
+            # self.IDV.plot_skeleton_id(self.kps, self.frame)
         return self.frame, img_black
 
     def process_img(self, frame, gray=False):
         self.clear_res()
         self.frame = frame
+        self.resize_size = (frame.shape[0], frame.shape[1])
 
         with torch.no_grad():
             if gray:

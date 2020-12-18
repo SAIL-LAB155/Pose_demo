@@ -1,7 +1,7 @@
 #-*- coding: utf-8 -*-
 from src.human_detection import HumanDetection
 try:
-    import src.debug.cohgnfig.cfg as config
+    import src.debug.conssfig.cfg as config
 except:
     import config.config as config
 import cv2
@@ -44,7 +44,7 @@ class VideoProcessor:
             ret, frame = self.cap.read()
             cnt += 1
             if ret:
-                frame = cv2.resize(frame, resize_ratio)
+                frame = cv2.resize(frame, self.resize_size)
                 kps, boxes, kps_score = self.IP.process_img(frame)
                 img, img_black = self.IP.visualize()
                 cv2.imshow("res", cv2.resize(img, show_size))
@@ -85,7 +85,7 @@ class VideoProcessor:
                 cv2.imshow("res", cv2.resize(img, show_size))
                 cv2.waitKey(1)
                 if config.write_video:
-                    self.out.write(img)
+                    self.out.write(cv2.resize(img, store_size))
             else:
                 self.cap.release()
                 if config.write_video:
