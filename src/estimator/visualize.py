@@ -96,13 +96,13 @@ class KeyPointVisualizer(object):
                     continue
                 cor_x, cor_y = int(kp_preds[n, 0]), int(kp_preds[n, 1])
                 part_line[n] = (cor_x, cor_y)
-                cv2.circle(img, (cor_x, cor_y), 4, self.p_color[n], -1)
+                cv2.circle(img, (cor_x, cor_y), 2, self.p_color[n], -1)
             # Draw limbs
             for i, (start_p, end_p) in enumerate(self.l_pair):
                 if start_p in part_line and end_p in part_line:
                     start_xy = part_line[start_p]
                     end_xy = part_line[end_p]
-                    cv2.line(img, start_xy, end_xy, self.line_color[i], 8)
+                    cv2.line(img, start_xy, end_xy, self.line_color[i], 3)
 
     def vis_ske(self, img, humans, scores):
         if isinstance(humans, dict):
@@ -135,7 +135,7 @@ class KpsScoreVisualizer:
         if opt.pose_cls == 17:
             self.selected_kps = [0,5,6,7,8,9,10,11,12,13,14,15,16]
         else:
-            self.selected_kps = list(range(17))
+            self.selected_kps = list(range(13))
         self.parts_name = [body_parts[i] for i in self.selected_kps]
 
     def draw_map(self, img, id2kpScore):
