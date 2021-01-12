@@ -3,7 +3,7 @@ from src.human_detection import HumanDetection
 try:
     import src.debug.conssfig.cfg as config
 except:
-    import src.debug.config.cfg as config
+    from config import config as config
 import cv2
 
 from utils.utils import boxdict2str, kpsdict2str, kpsScoredict2str

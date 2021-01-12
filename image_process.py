@@ -1,7 +1,7 @@
 from src.human_detection import HumanDetection
 import cv2
 import os
-from config.config import img_folder, show_size
+from config.config import img_folder
 
 IP = HumanDetection()
 
@@ -18,6 +18,6 @@ if __name__ == '__main__':
         kps, _, _ = IP.process_img(frame)
         img, black_img = IP.visualize()
         IP.init()
-        cv2.imshow("yoga", cv2.resize(img, show_size))
+        cv2.imshow("yoga", cv2.resize(img, (416,416)))
         cv2.waitKey(1)
         cv2.imwrite(os.path.join(dest_folder, img_name), img)
