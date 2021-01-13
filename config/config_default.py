@@ -4,12 +4,12 @@ import os
 
 "-------------------Outer configuration-----------------------"
 
-yolo_cfg = "src/debug/model/yolo/ceiling/2/yolov3-original-1cls-leaky.cfg"
-yolo_weight = "src/debug/model/yolo/ceiling/2/best.weights"
+yolo_cfg = "config/yolo_cfg/yolov3.cfg"
+yolo_weight = "weights/yolo/yolov3.weights"
 video_path = "video/video_sample/video4_Trim.mp4"
-img_folder = "img/squat"
+img_folder = "img/yoga_demo_whole"
 
-pose_weight = "weights/sppe/duc_se.pth"
+pose_weight = "weights/sppe/yoga_mobile_1/1_best_acc.pkl"
 
 write_video = False
 write_box = False
@@ -39,7 +39,7 @@ output_width = 64
 fast_inference = True
 pose_batch = 80
 
-
+onnx = True
 libtorch = False
 
 pose_cfg = None
@@ -101,6 +101,7 @@ opt.nms_thresh = nms_thresh
 opt.input_size = input_size
 
 opt.libtorch = libtorch
+opt.onnx = onnx
 
 opt.plot_bbox = plot_bbox
 opt.plot_kps = plot_kps

@@ -19,5 +19,5 @@ if __name__ == '__main__':
         img, black_img = IP.visualize()
         IP.init()
         cv2.imshow("yoga", cv2.resize(img, (416,416)))
-        cv2.waitKey(1)
+        cv2.waitKey(0)
         cv2.imwrite(os.path.join(dest_folder, img_name), img)
