@@ -68,6 +68,7 @@ class ImageDetection:
         self.licenses = []
         self.images = []
         self.annotations = []
+        self.file_name = []
         self.id_cnt = 0
         self.result_all["categories"] = self.categories
         self.result_all["licenses"] = self.licenses
@@ -91,13 +92,13 @@ class ImageDetection:
         self.id_cnt += 1
 
     def writeImageJson(self, image):
-        file_name = str(self.src_img_ls[self.idx]).split("/")[-1]
+        self.file_name = str(self.src_img_ls[self.idx]).split("/")[-1]
         width, height = image.shape[1], image.shape[0]
-        url = "http://localhost:8007/" + file_name
+        url = "http://localhost:8007/" + self.file_name
         # # annotation data
 
         self.images.append({"id": self.id_cnt,
-                            "file_name": file_name,
+                            "file_name": self.file_name,
                             "width": width,
                             "height": height,
                             "url": url})
@@ -105,6 +106,7 @@ class ImageDetection:
     def writeJson(self, kps_dict, bbox_dict, kpScore_dict):
         for k in kps_dict.keys():
             keypoints_json = []
+            self.person_id = k
             box, kps, kpScore = bbox_dict[k], kps_dict[k], kpScore_dict[k]
             if len(box) > 0 and len(kps) > 0:
                 for i in range(len(kps)):
@@ -118,12 +120,12 @@ class ImageDetection:
                 #     bbox.append(box[j].item())
                 w, h = box[2] - box[0], box[3] - box[1]
                 box_tmp = [box[0].tolist(), box[1].tolist(), w.tolist(), h.tolist()]
-                self.annotations.append({"image_id": str(self.id_cnt),
+                self.annotations.append({"image_id": str(self.file_name),
                                          "category_id": "0",
                                          "bbox": box_tmp,
                                          "keypoints": keypoints_json,
-                                         "id": str(self.person_id)})
-            self.person_id += 1
+                                         "bbox_id": str(self.person_id)})
+            # self.person_id += 1
 
     def process(self):
         for self.idx, (src, dest) in enumerate(zip(self.src_img_ls, self.dest_img_ls)):
